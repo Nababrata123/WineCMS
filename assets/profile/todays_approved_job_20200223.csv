@@ -1,0 +1,11 @@
+id,user_id,tasting_date,start_time,end_time,store_id,admin_note,taster_id,agency_taster_id,taster_rate,taster_note,wine_id,wine_confirm_status,question_id,confirm_status,status,job_status,accept_status,job_state,job_start_time,pause_time,resume_time,finish_time,working_hour,latitude,longitude,created_on,updated_on,is_deleted,request_job_approval_status,ready_for_billing,is_archived,overtime,late,has_invoice
+1822,2569,2020-02-22,17:00:00,20:00:00,1676,,2553,2662,25,,"222,133,142,158,531,885,146,149",2,,0,completed,3,1,2,17:15:00,00:00:00,00:00:00,17:48:00,00:33:00,40.6896,-73.7216,"2020-02-22 15:31:36","2020-02-23 01:43:23",0,approved,1,0,0,1,0
+1824,324,2020-02-22,20:00:00,23:00:00,3688,,2637,2643,0,,"531,133,158",2,,0,completed,3,1,2,19:45:00,00:00:00,00:00:00,23:01:00,03:16:00,40.8234,-73.9528,"2020-02-22 16:04:20","2020-02-23 04:07:20",0,approved,1,0,0,0,0
+1828,320,2020-02-22,20:00:00,23:00:00,777,"Jeunesse cab, Honor tequila Blanco, Bartenura Moscato, Lvov",2637,2667,0,"Jeunesse cab, Honor tequila Blanco, Bartenura Moscato, Lvov","158,146,133",2,,0,completed,3,1,2,19:53:00,00:00:00,00:00:00,23:04:00,03:11:00,40.8478,-73.9003,"2020-02-22 16:17:21","2020-02-23 04:10:22",0,approved,1,0,0,0,0
+1834,316,2020-02-22,16:00:00,19:00:00,1312,"Joyvin Red, Baron Herzog Chardonnay, Jeunesse Black Muscat and Lvov vodka",2551,2668,35,"Joyvin Red, Baron Herzog Chardonnay, Jeunesse Black Muscat and Lvov vodka","225,792,147,158",2,,0,completed,3,1,2,15:48:00,00:00:00,00:00:00,19:02:00,03:14:00,40.7126,-73.5724,"2020-02-22 16:56:07","2020-02-23 00:03:25",0,approved,1,0,0,0,0
+1838,318,2020-02-22,19:00:00,21:00:00,1131,"Los generales silver tequila 
+200.00 is 20.00 tip.
+Hand out shots",2551,2665,35,"Los generales silver tequila 
+200.00 is 20.00 tip.
+Hand out shots",126,2,,0,completed,3,1,2,18:35:00,00:00:00,00:00:00,21:02:00,02:27:00,40.6509,-74.0042,"2020-02-22 17:03:33","2020-02-23 02:05:52",0,approved,1,0,0,0,0
+1841,316,2020-02-22,17:00:00,20:00:00,140,"Rashi Black, Lineage Cabernet, Morad Passionfruit and Rusya vodka",2551,2670,35,"Rashi Black, Lineage Cabernet, Morad Passionfruit and Rusya vodka",",166,393",2,,0,completed,3,1,2,17:12:00,00:00:00,00:00:00,20:08:00,02:56:00,40.6687,-73.6088,"2020-02-22 17:19:16","2020-02-23 01:57:47",0,approved,1,0,0,1,0

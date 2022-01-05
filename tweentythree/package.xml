@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.9.3" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+    http://pear.php.net/dtd/tasks-1.0.xsd
+    http://pear.php.net/dtd/package-2.0
+    http://pear.php.net/dtd/package-2.0.xsd">
+ <name>HTTP_OAuth</name>
+ <channel>pear.php.net</channel>
+ <summary>PEAR implementation of the OAuth 1.0a specification</summary>
+ <description>Allows the use of the consumer and provider angles of the OAuth 1.0a specification</description>
+ <lead>
+  <name>Jeff Hodsdon</name>
+  <user>jeffhodsdon</user>
+  <email>jeffhodsdon@gmail.com</email>
+  <active>yes</active>
+ </lead>
+ <lead>
+  <name>Bill Shupp</name>
+  <user>shupp</user>
+  <email>shupp@php.net</email>
+  <active>yes</active>
+ </lead>
+ <date>2011-07-16</date>
+ <time>10:40:20</time>
+ <version>
+  <release>0.2.3</release>
+  <api>0.2.0</api>
+ </version>
+ <stability>
+  <release>alpha</release>
+  <api>alpha</api>
+ </stability>
+ <license uri="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
+ <notes>
+* Fixed GH issue #10.  don&apos;t use reset() to get the first array value
+* Disabled E_DEPRECTED error logging when creating packages
+ </notes>
+ <contents>
+  <dir baseinstalldir="/" name="/">
+   <dir name="examples">
+    <file name="access_token.php" role="doc" />
+    <file name="authorize_url.php" role="doc" />
+    <file name="cli.php" role="doc" />
+    <file name="config.php" role="doc" />
+    <file name="digg.gif" role="doc" />
+    <file name="examples-config.php" role="doc" />
+    <file name="google.gif" role="doc" />
+    <file name="index.php" role="doc" />
+    <file name="jquery.cookie.js" role="doc" />
+    <file name="jquery.fade.js" role="doc" />
+    <file name="jquery.js" role="doc" />
+    <file name="myspace.jpg" role="doc" />
+    <file name="oauth_request.php" role="doc" />
+    <file name="request_token.php" role="doc" />
+    <file name="store.php" role="doc" />
+    <file name="styles.css" role="doc" />
+    <file name="twitter.gif" role="doc" />
+    <file name="yahoo.gif" role="doc" />
+   </dir> <!-- /examples -->
+   <dir name="HTTP">
+    <dir name="OAuth">
+     <dir name="Consumer">
+      <dir name="Exception">
+       <file name="InvalidResponse.php" role="php" />
+      </dir> <!-- /HTTP/OAuth/Consumer/Exception -->
+      <file name="Request.php" role="php" />
+      <file name="Response.php" role="php" />
+     </dir> <!-- /HTTP/OAuth/Consumer -->
+     <dir name="Exception">
+      <file name="NotImplemented.php" role="php" />
+     </dir> <!-- /HTTP/OAuth/Exception -->
+     <dir name="Provider">
+      <dir name="Exception">
+       <file name="InvalidRequest.php" role="php" />
+      </dir> <!-- /HTTP/OAuth/Provider/Exception -->
+      <file name="Exception.php" role="php" />
+      <file name="Request.php" role="php" />
+      <file name="Response.php" role="php" />
+     </dir> <!-- /HTTP/OAuth/Provider -->
+     <dir name="Signature">
+      <dir name="HMAC">
+       <file name="SHA1.php" role="php" />
+      </dir> <!-- /HTTP/OAuth/Signature/HMAC -->
+      <dir name="RSA">
+       <file name="SHA1.php" role="php" />
+      </dir> <!-- /HTTP/OAuth/Signature/RSA -->
+      <file name="Common.php" role="php" />
+      <file name="PLAINTEXT.php" role="php" />
+     </dir> <!-- /HTTP/OAuth/Signature -->
+     <dir name="Store">
+      <dir name="Consumer">
+       <file name="CacheLite.php" role="php" />
+       <file name="Interface.php" role="php" />
+      </dir> <!-- /HTTP/OAuth/Store/Consumer -->
+      <file name="Data.php" role="php" />
+     </dir> <!-- /HTTP/OAuth/Store -->
+     <file name="Consumer.php" role="php" />
+     <file name="Exception.php" role="php" />
+     <file name="Message.php" role="php" />
+     <file name="Signature.php" role="php" />
+    </dir> <!-- /HTTP/OAuth -->
+    <file name="OAuth.php" role="php" />
+   </dir> <!-- /HTTP -->
+   <dir name="tests">
+    <dir name="HTTP">
+     <dir name="OAuth">
+      <dir name="Consumer">
+       <dir name="Exception">
+        <file name="InvalidResponseTest.php" role="test" />
+       </dir> <!-- /tests/HTTP/OAuth/Consumer/Exception -->
+       <file name="RequestTest.php" role="test" />
+       <file name="ResponseTest.php" role="test" />
+      </dir> <!-- /tests/HTTP/OAuth/Consumer -->
+      <dir name="Provider">
+       <file name="RequestTest.php" role="test" />
+       <file name="ResponseTest.php" role="test" />
+      </dir> <!-- /tests/HTTP/OAuth/Provider -->
+      <dir name="Signature">
+       <dir name="HMAC">
+        <file name="SHA1Test.php" role="test" />
+       </dir> <!-- /tests/HTTP/OAuth/Signature/HMAC -->
+       <dir name="RSA">
+        <file name="SHA1Test.php" role="test" />
+       </dir> <!-- /tests/HTTP/OAuth/Signature/RSA -->
+       <file name="CommonMock.php" role="test" />
+       <file name="CommonTest.php" role="test" />
+       <file name="NoClass.php" role="test" />
+       <file name="NoParent.php" role="test" />
+       <file name="PLAINTEXTTest.php" role="test" />
+      </dir> <!-- /tests/HTTP/OAuth/Signature -->
+      <dir name="Store">
+       <dir name="Consumer">
+        <file name="CacheLiteTest.php" role="test" />
+       </dir> <!-- /tests/HTTP/OAuth/Store/Consumer -->
+      </dir> <!-- /tests/HTTP/OAuth/Store -->
+      <file name="ConsumerTest.php" role="test" />
+      <file name="MessageMock.php" role="test" />
+      <file name="MessageTest.php" role="test" />
+      <file name="SignatureTest.php" role="test" />
+     </dir> <!-- /tests/HTTP/OAuth -->
+     <file name="OAuthTest.php" role="test" />
+    </dir> <!-- /tests/HTTP -->
+    <file name="AllTests.php" role="test" />
+   </dir> <!-- /tests -->
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.1.2</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0</min>
+   </pearinstaller>
+   <package>
+    <name>PEAR</name>
+    <channel>pear.php.net</channel>
+    <min>1.4.0</min>
+   </package>
+   <package>
+    <name>HTTP_Request2</name>
+    <channel>pear.php.net</channel>
+    <min>0.5.1</min>
+   </package>
+   <extension>
+    <name>date</name>
+   </extension>
+   <extension>
+    <name>SPL</name>
+   </extension>
+   <extension>
+    <name>hash</name>
+   </extension>
+  </required>
+  <optional>
+   <package>
+    <name>Log</name>
+    <channel>pear.php.net</channel>
+   </package>
+   <package>
+    <name>Cache_Lite</name>
+    <channel>pear.php.net</channel>
+   </package>
+   <extension>
+    <name>pecl_http</name>
+    <min>1.6.0</min>
+   </extension>
+  </optional>
+ </dependencies>
+ <phprelease />
+ <changelog>
+  <release>
+   <version>
+    <release>0.1.0</release>
+    <api>0.1.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2009-09-02</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+Initial release.
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.1</release>
+    <api>0.1.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2009-09-08</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+Initial release.
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.2</release>
+    <api>0.1.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2009-09-14</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Fixed double encoding issue for consumer POST requests
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.3</release>
+    <api>0.1.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2009-09-24</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Added cloning for request objects in HTTP_OAuth_Consumer
+* Added support for accepting HTTP_Request2 objects directly into HTTP_OAuth_Consumer
+* Corrected check for Content-Type in HTTP_OAuth_Provider
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.4</release>
+    <api>0.1.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2009-10-12</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Fixed support for accepting HTTP_Request2 objects directly into HTTP_OAuth_Consumer
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.5</release>
+    <api>0.1.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2009-11-19</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Fixed #16800 Issue with HTTP_OAuth_Provider_Request::getRequestUri()
+* Fixed #16782 Issue with HTTP_OAuth_Consumer::sendRequest() not including GET parameters
+* Added unit tests for bugs.
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.6</release>
+    <api>0.1.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2009-11-30</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Fixed issue where oauth parameters were in the url&apos;s query string
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.7</release>
+    <api>0.1.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-01-28</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Added check in HTTP_OAuth_Provider_Request::isValidSignature() to check if signature method exists in request
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.8</release>
+    <api>0.1.1</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-02-16</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+Getting headers in HTTP_OAuth_Provider_Request is now case insensitive.
+Made HTTP_OAuth_Consumer::getSecrets() public.
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.9</release>
+    <api>0.1.1</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-04-24</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Added HTTP_OAuth_Consumer::getLastResponse()
+* Fixed #17018 - Incorrect method names in comment examples
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.10</release>
+    <api>0.1.1</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-04-24</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+Updated digg example
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.11</release>
+    <api>0.1.1</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-05-25</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Fixed bug where the query string was getting into the url in the base signature string
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.12</release>
+    <api>0.1.1</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-05-25</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Fixed #17336.  Paramters will be sorted when getting them from a message
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.13</release>
+    <api>0.1.1</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-05-25</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Including query string variables in signatures for consumer requests.
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.14</release>
+    <api>0.1.1</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-05-25</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Including query string variables in incoming requests to providers
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.15</release>
+    <api>0.1.1</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-06-22</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Fixed urldecoding issue in provider code
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.16</release>
+    <api>0.1.1</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-06-24</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Fixed url encoding issue.  &quot;+&quot; should be &quot;%20&quot;
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.17</release>
+    <api>0.1.1</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-06-30</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Fixed another bug with &apos;+&apos; to &apos;%20&apos;. This time HTTP_Request2&apos;s usage of http_build_query() makes spaces into &apos;+&apos; not &apos;%20&apos;
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.18</release>
+    <api>0.1.1</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-07-20</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD Style</license>
+   <notes>
+* Removed the automatic adding of a Content-Type header for consumer requests
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.2.0</release>
+    <api>0.2.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-12-28</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
+   <notes>
+* Added storage interface for consumers, including Cache_Lite driver
+* Fixed #17701 (Strict Standards Notice)
+* Fixed #17653 (HTTP_OAuth_Consumer_Request converts + to %20)
+* Fixed #17567 (Changes to support OAuth Session 1.0 Draft 1)
+* Added additional error constants and maps in HTTP_OAuth_Provider_Response
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.2.1</release>
+    <api>0.2.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-12-29</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
+   <notes>
+* Fixed #18161.  Removed incorrect code coverage directory inclusion from package.xml
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.2.2</release>
+    <api>0.2.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2010-12-29</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
+   <notes>
+* Fixed #18162.  Added optional Cache_Lite dependency for new storage support
+   </notes>
+  </release>
+  <release>
+   <version>
+    <release>0.2.3</release>
+    <api>0.2.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2011-07-16</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">New BSD License</license>
+   <notes>
+* Fixed GH issue #10.  don&apos;t use reset() to get the first array value
+* Disabled E_DEPRECTED error logging when creating packages
+   </notes>
+  </release>
+ </changelog>
+</package>

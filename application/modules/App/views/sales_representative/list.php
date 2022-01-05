@@ -1,0 +1,378 @@
+<div class="subnav">
+	<div class="container-fluid">
+    	<h1><span class="glyphicon glyphicon-user"></span> Sales Representative Management</h1>
+
+        <div id="sub-menu" class="pull-right">
+        	<ul class="nav nav-pills">
+        		<li class="active"><a href="<?php echo base_url('App/sales_representative');?>"><span class="glyphicon glyphicon-user"></span> Sales Representative</a></li>
+    			<li><a href="<?php echo base_url('App/sales_representative/add');?>"><span class="glyphicon glyphicon-plus-sign"></span>Add Sales Representative</a></li>
+    		</ul>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid main">
+	<ol class="breadcrumb">
+		<li><a href="<?php echo base_url('dashboard');?>">Dashboard</a></li>
+		<li class="active">Sales Representative Management</li>
+	</ol>
+
+	<?php
+		if($this->session->flashdata('message_type')) {
+			if($this->session->flashdata('message')) {
+
+				echo '<div class="alert alert-'.$this->session->flashdata('message_type').' alert-dismissable">';
+				echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+				echo $this->session->flashdata('message');
+				echo '</div>';
+			}
+		}
+	?>
+	<?php
+		echo validation_errors();
+
+		$attributes = array('class' => 'form-inline search-form', 'id' => 'customer-search-form', 'role' => 'form');
+		echo form_open(base_url('App/sales_representative/search_submit'), $attributes);
+	?>
+
+	<!--<fieldset>
+		<legend><span class="glyphicon glyphicon-filter"></span> Filters</legend>
+		<div class="row">
+			<div class="col-md-10">-->
+            
+				<!--<div class="form-group">
+					<label for="inputType">Search By </label>
+					<select name="field" id="inputField" class="form-control" onChange="updateSearchFields(this.value, '', '');"  >
+						<option value="" selected>Select a field</option>
+						<option value="name" <?php if ($filter['field'] == 'name') { echo "selected";}?>>Name</option>
+						<option value="email" <?php if ($filter['field'] == 'email') { echo "selected";}?>>Email</option>
+						
+						<option value="status" <?php if ($filter['field'] == 'status') { echo "selected";}?>>Status</option>
+					</select>
+				</div>
+
+				<div class="form-group" id="inputOperatorWrapper">
+					<select name="operator" id="inputOperator" class="form-control" >
+						<option value="" selected>Select an operator</option>
+						
+						<option value="contains" <?php if ($filter['ope'] == 'contains') { echo "selected";}?>>Contains</option>
+						<option value="equals" <?php if ($filter['ope'] == 'equals') { echo "selected";}?>>Equals</option>
+						<option value="notequal" <?php if ($filter['ope'] == 'notequal') { echo "selected";}?>>Doesn't Equal</option>
+					</select>
+				</div>
+
+				<div class="form-group" id="inputSearchWrapper">
+					<input type="text" class="form-control" id="inputSearch" name="q" placeholder="Search here" value="<?php if (isset($filter['q']) && $filter['q'] <> "~") {echo $filter['q'];}?>" >
+				</div>
+
+				
+
+				
+
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span> Search</button>&nbsp;
+					<button type="button" class="btn btn-default" onclick="window.location='<?php echo base_url('App/sales_representative');?>'"><span class="glyphicon glyphicon-refresh"></span> Reset</button>
+				</div>-->
+                <!--<div class="form-group">
+					<label for="inputType">Search By </label>
+					<select name="field" id="ajax_search_field" class="form-control" >
+						<option value="" selected>Select a field</option>
+						<option value="name" >Name</option>
+						<option value="email">Email</option>
+						<option value="status">Status</option>
+					</select>
+				</div>
+
+				
+
+				<div class="form-group" id="inputSearchWrapper">
+					<input type="text" class="form-control" id="inputSearch" name="q" placeholder="Search here"  >
+				</div>
+
+				
+			</div>-->
+            <!--<div class="col-md-2">
+              
+        <select name="view" id="view" style="min-height:31px; margin:2px 0 0 0; float:right;">
+            <option value="10" <?php echo (isset($filter['view']) && ($filter['view'] == '10') ? 'selected' : ''); ?>>10</option>
+            <option value="20" <?php echo (isset($filter['view']) && ($filter['view'] == '20') ? 'selected' : ''); ?>>20</option>
+            <option value="50" <?php echo (isset($filter['view']) && ($filter['view'] == '50') ? 'selected' : ''); ?>>50</option>
+            <option value="100" <?php echo (isset($filter['view']) && ($filter['view'] == '100') ? 'selected' : ''); ?>>100</option>
+            <option value="500" <?php echo (isset($filter['view']) && ($filter['view'] == '500') ? 'selected' : ''); ?>>500</option>
+        </select>
+       
+             
+            </div>
+		</div>
+		<div class="row">
+			<div class="col-md-6">&nbsp;</div>
+		</div>
+	</fieldset>-->
+	<?php echo form_close();?>
+
+    
+	<?php
+		echo validation_errors();
+
+		$attributes = array('class' => 'form-inline status-form', 'id' => 'user-status-form');
+		echo form_open(base_url('App/sales_representative/update_status'), $attributes);
+
+	?>
+
+	<a href="<?php echo base_url('App/sales_representative/refresh');?>"  class="btn btn-info">
+      <span class="glyphicon glyphicon-refresh"></span> 
+    </a>
+	<div class="table-responsive">
+		
+	        
+	   
+		<!-- Table -->
+	    <table class="table table-striped table-responsive" width="100%" id="user-table">
+	    	<thead>
+	    		<tr>
+	          		<th><input type="checkbox" id="checkall"></th>
+					<th>Id</th>
+	          		<th>Name</th>
+	          		<th>Email</th>
+	          		<th>Last Login</th>
+	          		<th>Status</th>
+	          		<th>View details</th>
+					<th>Action</th>
+	          	</tr>
+	        </thead>
+	        <tbody id="show_data">
+	            <?php if (count($users) == 0) { ?>
+	            <tr>
+	            	<td colspan="100%">Sorry!! No Records found.</td>
+	            </tr>
+	            <?php } ?>
+	            <?php foreach($users as $item) { ?>
+	            <tr>
+	            	<td><input type="checkbox" name="item_id[<?php echo $item->id;?>]" class="checkbox-item" value="Y"></td>
+					<td><?php echo $item->id;?></td>
+	            	<td><?php echo $item->last_name . " " .  $item->first_name;?> <?php echo ($item->id == $this->session->userdata('id'))?'<span class="text-primary">(you)</span>':'';?></td>
+	            	<td><?php echo $item->email;?></td>
+	            	
+					<td><?php echo ($item->last_login)?datetime_display($item->last_login):'--'?></td>
+	            	<td>
+	            	<?php
+	            		if ($item->status == "active") {
+	            			echo '<span class="label label-success">Active</span>';
+	            		} else {
+	            			echo '<span class="label label-warning">In-active</span>';
+	            		}
+	            	?>
+	            	</td>
+	            	<td>
+	            		<a class="btn btn-info btn-xs" href="javascript:void(0)" title="View" onclick="open_modal(<?php echo $item->id;?>)">
+	            			<span class="glyphicon glyphicon-eye-open"></span> View
+	            		</a>
+	            	</td>
+	            	<td>
+						<a class="btn btn-info btn-xs" href="<?php echo base_url('App/sales_representative/reset_pass/'.$item->id);?>" onclick="return confirm('Do you really want to reset the password for this user?');" title="Reset Password">
+	            			<span class="glyphicon glyphicon-lock"></span> Reset Password
+	            		</a>
+	            		<a class="btn btn-primary btn-xs" href="<?php echo base_url('App/sales_representative/edit/'.$item->id);?>" title="Edit">
+	            			<span class="glyphicon glyphicon-edit"></span> Edit
+	            		</a>
+	            		<!--<a class="btn btn-danger btn-xs <?php echo ($item->id == $this->session->userdata('id'))?'disabled':'';?>" href="<?php echo base_url('App/sales_representative/delete/'.$item->id);?>" onclick="return confirm('Are you sure you want to delete this user account?');" title="Delete">
+	            			<span class="glyphicon glyphicon-trash"></span> Delete
+	            		</a>-->
+                        <a class="btn btn-danger btn-xs delete_button <?php echo ($item->id == $this->session->userdata('id'))?'disabled':'';?>" href="javascript:void(0)"  title="Delete" data-id="<?php echo $item->id;?>">
+	            			<span class="glyphicon glyphicon-trash"></span> Delete
+	            		</a>
+	            	</td>
+	            </tr>
+	            <?php } ?>
+	        </tbody>
+	        <!--<tfoot>
+				<tr>
+                	<td colspan="8">
+						With selected
+						<button type="submit" name="operation" value="active" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-ok-circle"></span> Activate</button>
+						<button type="submit" name="operation" value="inactive" class="btn btn-sm btn-warning"><span class="glyphicon glyphicon-ban-circle"></span> Deactivate</button>
+						<button type="submit" name="operation" value="delete" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete the user account(s)?')"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+					</td>
+				</tr>
+			</tfoot>-->
+	    </table>
+        <table>
+            <tr>
+                	<td colspan="8">
+						With selected
+						<button type="submit" name="operation" value="active" class="btn btn-sm btn-success"><span class="glyphicon glyphicon-ok-circle"></span> Activate</button>
+						<button type="submit" name="operation" value="inactive" class="btn btn-sm btn-warning"><span class="glyphicon glyphicon-ban-circle"></span> Deactivate</button>
+						<button type="submit" name="operation" value="delete" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete the user account(s)?')"><span class="glyphicon glyphicon-trash"></span> Delete</button>
+					</td>
+				</tr>
+        </table>
+	</div>
+	<?php echo form_close();?>
+
+	<?php //echo $this->pagination->create_links(); ?>
+</div>
+
+<!-- Modal -->
+<div class="modal fade bs-example-modal-lg" id="userDetailsModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-body">
+				<!-- Remote data loads here -->
+				<span class="glyphicon glyphicon-hourglass"></span> Loading please wait ...
+			</div>
+		</div>
+	</div>
+</div>
+<!-- Approve job Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog" id="div_result"></div>
+</div>
+<!-- Delete modal-->
+<div id="myDeleteModal" class="modal fade" role="dialog">
+  <div class="modal-dialog" id="div_result_delete">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header bg-info">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Delete user</h4>
+      </div>
+      <form>
+      
+      <div class="modal-footer">
+        
+        
+          <button  class="btn btn-warning" id="permanent_delete">Permanent delete</button>
+        
+          <button   class="btn btn-primary" id="delete">Delete</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+      </div>
+      </form>
+    </div>
+  
+  </div>
+</div>
+<!-- END MODAL-->
+<script>
+	<?php if (isset($filter) && $filter['field'] <> "") {?>
+		updateSearchFields('<?php echo $filter['field'];?>', '<?php echo $filter['ope'];?>', '<?php echo $filter['q'];?>');
+	<?php }?>
+</script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css"/>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	
+	
+	//var from_begining=$("#from_begining").val();
+	var from_begining='<?php echo $this->session->userdata("from_begining")?>';
+	//alert(from_begining);
+    if(from_begining=='yes')
+    {
+    	
+    	$('#user-table').DataTable({
+       		"lengthMenu": [10, 20, 50, 100, 500],
+       		"iDisplayLength": 10,
+       		"stateSave": false,
+			"bSort" : false
+   		});
+    }
+    else
+    {
+    	
+    	$('#user-table').DataTable({
+       		"lengthMenu": [10, 20, 50, 100, 500],
+       		"iDisplayLength": 10,
+       		"stateSave": true,
+			"bSort" : false
+   		});
+    }
+    /*$('#user-table').DataTable({
+       		"lengthMenu": [10, 20, 50, 100, 500],
+       		"iDisplayLength": 10,
+       		"stateSave": true,
+   		});*/
+
+});
+
+</script>
+<script type="text/javascript">
+	function open_modal(user_id)
+	{
+		$.ajax({
+		   type:'POST',
+		   url:"<?php echo base_url(); ?>App/sales_representative/view_user_details/",
+		   data: {user_id:user_id},
+		   success:function(data){
+		    $("#div_result").html(data);
+		    
+		    $('#myModal').modal('show');
+		   }
+		}); 
+	}
+    $(".delete_button").click(function(){
+       var id=$(this).data('id');
+       //alert(id);
+        $('#permanent_delete').data('id', id);
+        $('#delete').data('id', id);
+       $('#myDeleteModal').modal('show');
+    });
+    
+    $('#permanent_delete').click(function(e){
+            e.preventDefault();
+           var del_id= $('#permanent_delete').data('id');
+             var c = confirm('Data will be deleted from the database and not be recovered.Are you sure you want to delete this record?');
+            
+            if(c==true) {
+                window.location.href = "<?php echo base_url('App/Sales_representative/delete/'); ?>"+del_id;
+            }
+
+	});
+
+    $('#delete').click(function(e){
+        e.preventDefault();
+       var m_del_id= $('#delete').data('id');
+
+       window.location.href = "<?php echo base_url('App/Sales_representative/temp_delete/'); ?>"+m_del_id;
+
+    });
+    // View page record by limit
+	$('#view').on('change', function() {
+		var view = $(this).val();
+		window.location.href = base_url+"App/Sales_representative/index/view/"+view;
+	});
+    
+    $('#inputSearch').on('keyup',function(){
+        var field=$("#ajax_search_field").val();
+        
+        if(field!='')
+        {
+            var search_key=$(this).val();
+            $.ajax({
+               type:'POST',
+               url:"<?php echo base_url(); ?>App/Sales_representative/get_search_result/",
+               data: {search_key:search_key,field:field},
+               success:function(data){
+                   
+                $("#show_data").html(data);
+
+                
+               }
+            });
+        }
+        else
+        {
+            alert('Please select a field');
+        }
+        
+    });
+    
+</script>
+<style>
+	
+	.table.dataTable thead .sorting, 
+table.dataTable thead .sorting_asc, 
+table.dataTable thead .sorting_desc {
+    background : none;
+}
+</style>
+

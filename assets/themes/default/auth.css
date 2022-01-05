@@ -1,0 +1,21 @@
+body {
+  padding:10% 0; background-color: #ccc;
+}
+.mainbox {
+  max-width: 500px;
+}
+.mainbox .panel-default {
+  border-color: #555;
+}
+.mainbox .panel-heading {
+  background-color: #555; border-color: #333; color: #f5f5f5;
+}
+.mainbox .panel-body {
+  padding-top:30px
+}
+.mainbox .form-group {
+  margin-bottom: 25px;
+}
+.mainbox .form-footer {
+  border-top: 1px solid #bcbcbc; padding-top:15px; font-size:85%
+}

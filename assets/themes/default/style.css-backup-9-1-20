@@ -1,0 +1,136 @@
+body {
+    margin-top: 0;
+}
+
+.videotitle{ height:40px; overflow: hidden; }
+.modal-body{ height:100%; overflow: hidden; }
+@media (min-width: 768px) {
+	body {
+		margin-top: 0;
+	}
+}
+h1 {
+	font-size:24px;
+}
+.main {
+  	padding: 2%;
+  	min-height: 37em;
+}
+@media (max-width: 768px) {
+  .main {
+    padding-right: 4%;
+    padding-left: 4%;
+  }
+}
+.main .page-header {
+  	margin-top: 0;
+}
+@media only screen and (min-width: 320px) and (max-width: 767px) {
+	.main .page-header {
+	  	margin-top: 4%;
+	}
+}
+a.navbar-brand {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 350px;
+}
+.subnav {
+    background-color: #eeeeee;
+    background-image: -moz-linear-gradient(center top , #e8e8e8 0%, #d8d8d8 100%);
+    background-repeat: repeat-x;
+    border-bottom: 1px solid #c5c5c5;
+    border-radius: 0;
+    border-top: 1px solid #163355;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    z-index: 5;
+    height: 45px;
+    margin-top: 50px;
+}
+.subnav h1 {
+	font-size:22px;
+    line-height:45px;
+    width: 60%;
+    float:left;
+    padding:0;
+    margin:0;
+    overflow:none;
+}
+.subnav .nav {
+    margin:2px 0 0 0;
+}
+@media (max-width: 480px) {
+    .subnav {
+        margin-top: 100px;
+    }
+	.subnav h1 {
+		width: 100%;
+		float:none;
+	}
+	.subnav .nav {
+	    margin:-47px 0 0 0;
+	}
+}
+@media only screen and (min-width: 320px) and (max-width: 767px) {
+    
+	.main .page-header {
+	  	margin-top: 4%;
+	}
+}
+
+.subnav .nav .active a {
+    background-color: #ddd;
+    border-left: 0 none;
+    border-radius: 0;
+    border-right-color: #c5c5c5;
+    box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1) inset;
+}
+.subnav .nav > li > a:hover, .subnav .nav .active a, .subnav .nav a:hover, .subnav .nav .active a {
+    background: transparent none repeat scroll 0 0;
+    color: #333;
+}
+.subnav .nav > li > a:hover, .subnav .nav .active a, .subnav .nav a:hover, .subnav .nav .active a {
+    background: transparent none repeat scroll 0 0;
+    color: #333;
+}
+.subnav .nav > li > a {
+    border-left: 1px solid #e8e8e8;
+    border-radius: 0;
+    border-right: 1px solid #c3c3c3;
+    color: #777;
+    font-size: 13px;
+    margin: 0.1px;
+    padding-bottom: 11px;
+    padding-top: 11px;
+}
+footer{
+    margin-right:30px;
+}
+.table-nonfluid {
+   width: auto !important;
+}
+.huge {
+    font-size: 40px;
+    line-height: normal;
+}
+.main h1 {
+    border-bottom: 1px solid #ccc;
+    margin: 0 0 15px 0;
+    padding: 0 0 10px;
+}
+.well .heading {
+	font-weight: bold;
+	border-bottom: solid 1px #ddd;
+	padding-bottom: 7px;
+	margin-bottom: 7px;
+}
+.well .heading-reverse {
+	font-weight: bold;
+	border-top: solid 1px #ddd;
+	padding-top: 7px;
+	margin-top: 7px;
+}
+
+#wines label{ max-width:91%;}

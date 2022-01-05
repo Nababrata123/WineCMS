@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+body.phit{
+	background: url(../../../assets/images/bg-ol.jpg) no-repeat 0 0;
+	background-size: cover;
+	height:100%;
+	padding:20px 0;
+	font-family: 'Open Sans', sans-serif;
+	font-size:18px;
+}
+
+::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+  color: #fff;
+}
+::-moz-placeholder { /* Firefox 19+ */
+  color: #fff;
+}
+:-ms-input-placeholder { /* IE 10+ */
+  color: #fff;
+}
+:-moz-placeholder { /* Firefox 18- */
+  color: #fff;
+}
+
+.logo{
+	margin:0 auto;
+	text-align:center;
+}
+
+.heading{
+	font-size:26px;
+	line-height:42px;
+	color:#fff;
+	text-align:center;
+	margin: 15px 0 10px;
+
+}
+
+.sub-heading{
+	font-size:24px;
+	line-height:30px;
+	color:#f8cf51;
+	text-align:center;
+	margin: 25px 0;
+
+}
+.small-heading{
+	font-size:16px;
+	line-height:22px;
+	color:#fff;
+	text-align:center;
+	margin:0 0 20px;
+
+}
+.phit .panel-heading{
+	background-image:none;
+}
+
+.phit .panel-title{
+	font-size:18px;
+	line-height:22px;
+	color:#fff;
+	padding:0 0 5px;
+}
+
+.phit input.form-control{
+	font-family: 'Open Sans', sans-serif;
+	background:#bab8b8;
+	color:#fff;
+	border-radius:0;
+	-moz-box-shadow:    inset 0 0 10px #000000;
+   -webkit-box-shadow: inset 0 0 10px #000000;
+   box-shadow:         inset 0 0 10px #000000;
+   text-align:center;
+   border:1px solid #bab8b8;
+   height:42px;
+   font-size:18px;
+   margin:4px 0;
+}
+
+.phit label{
+	color:#fff;
+}
+
+.phit input[type="button"].btn-block, .phit input[type="submit"].btn-block{
+	font-family: 'Open Sans', sans-serif;
+	font-size:30px;
+	line-height:50px;
+	background:url(../../../assets/images/btn-bg.gif) no-repeat 50% 0;
+	background-cover:cover;
+	width:56%;
+	margin:10px auto;
+	border-radius:0;
+	border:0;
+	text-align:center;
+	background-size:100% 100% !important;
+}
+
+.phit input[type="button"].buy, .phit input[type="submit"].buy{ width:29%;}
+
+.phit .btn-default, .phit .btn-primary, .phit .btn-success, .phit .btn-info, .phit .btn-warning, .phit .btn-danger{ box-shadow:0 !important; text-shadow:0 !important;}
+
+.add{ margin:1% auto 0; text-align:center;}
+.add img{ width:40%; height:auto;}
+.phit-text{ text-align:center; font-size:16px; line-height:24px; font-weight:bold; color:#fff !important; padding:0 0 30px;}
+@media( max-width: 560px){
+	.logo img{ width:60%; height:auto;}
+	.sub-heading{ font-size:20px;}
+	.phit input[type="button"].buy, .phit input[type="submit"].buy{ width:34%;}
+}
+@media( max-width: 488px){
+	.phit input[type="button"].buy, .phit input[type="submit"].buy{ font-size:28px; width:78%;}
+	.phit input[type="button"].btn-block, .phit input[type="submit"].btn-block{ width:80%; line-height:30px;}
+	.add img{ width:100%;}
+	.heading{ font-size:21px; line-height:35px;}

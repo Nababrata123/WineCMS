@@ -1,0 +1,166 @@
+<div class="container">
+	<div class="col-md-offset-2 col-md-8 col-sm-12">
+		<div class="page-header">
+			<h1>
+				Join PHIT
+				<p><small>The best way to design, build, and ship software.</small></p>
+			</h1>
+		</div>
+
+		<!-- Steps section -->
+		<div class="row">
+			<div class="col-md-4">
+				<div class="well text-muted">
+					<span class="glyphicon glyphicon-lock"></span>
+					<strong>Step 1:</strong> <br />Enter login details
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="well">
+					<span class="glyphicon glyphicon-user"></span>
+					<strong>Step 2:</strong> <br />Enter personal info 
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="well text-muted">
+				<span class="glyphicon glyphicon-gift"></span>
+					<strong>Step 3:</strong> <br />Choose your plan 
+				</div>
+			</div>
+		</div>
+		<!-- /Steps section -->
+
+		<?php
+            //form validation
+			echo validation_errors();
+
+			if($this->session->flashdata('message_type')) {
+				if($this->session->flashdata('message')) {
+
+				    echo '<div class="alert alert-'.$this->session->flashdata('message_type').' alert-dismissable">';
+				    echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+				    echo $this->session->flashdata('message');
+				    echo '</div>';
+				}
+			}
+		?>
+					
+		<!-- Form section -->
+		<div class="row">
+			<div class="col-md-8">
+				<h2>Enter personal info </h2>
+
+				<form id="signupform" class="" role="form" data-toggle="validator" method="post" action="<?php echo base_url('signup_step2'); ?>">
+					<div class="form-group">
+						<label for="inputFname">First name</label>
+						<input type="text" class="form-control" name="first_name" id="inputFname" placeholder="Enter first name" required>
+						<div class="help-block with-errors"></div>
+					</div>
+
+					<div class="form-group">
+						<label for="inputLname">Last name</label>
+						<input type="text" class="form-control" name="last_name" id="inputLname" placeholder="Enter last name" required>
+						<div class="help-block with-errors"></div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-6 col-sm-12">
+							<div class="form-group">
+								<label for="inputDOB">Date of birth</label>
+								<div class="input-group">
+									<input type="text" class="form-control calender-control" name="dob" id="inputDOB" placeholder="Enter date of birth" required>
+									<span class="input-group-addon glyphicon glyphicon-calendar"></span>
+    							</div>
+								<div class="help-block with-errors"></div>
+							</div>
+						</div>
+						<div class="col-md-6 col-sm-12">
+							<div class="form-group">
+								<label for="inputGender">Gender</label>
+								<div class="">
+									<label class="radio-inline">
+										<input type="radio" name="gender" id="inlineRadio1" value="M" checked> Male
+									</label>
+									<label class="radio-inline">
+										<input type="radio" name="gender" id="inlineRadio2" value="F"> Female
+									</label>
+								</div>
+								<div class="help-block with-errors"></div>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-md-6 col-sm-12">
+							<div class="form-group">
+								<label for="inputHeight">Height</label>
+								<div class="input-group">
+									<input type="text" class="form-control" name="height" id="inputHeight" placeholder="Enter height" required>
+									<span class="input-group-addon">in cm</span>
+								</div>
+								<div class="help-block with-errors"></div>
+							</div>
+						</div>
+						<div class="col-md-6 col-sm-12">
+							<div class="form-group">
+								<label for="inputWeight">Weight</label>
+								<div class="input-group">
+									<input type="text" class="form-control" name="weight" id="inputWeight" placeholder="Enter weight" required>
+									<span class="input-group-addon">in kg</span>
+								</div>
+								<div class="help-block with-errors"></div>
+							</div>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="inputCity">City</label>
+						<input type="text" class="form-control" name="city" id="inputCity" placeholder="Enter city" required>
+						<div class="help-block with-errors"></div>
+					</div>
+
+					<div class="form-group">
+						<label for="inputCountry">Country</label>
+						<select class="form-control countries" name="country" id="inputCountry" required>
+							<option value="" selected>Select Country</option>
+						</select>
+						<div class="help-block with-errors"></div>
+					</div>
+
+					<div class="form-group">
+						<label for="inputState">State</label>
+						<select class="form-control states" name="state" id="inputState" required>
+							<option value="" selected>Select State</option>
+						</select>
+						<div class="help-block with-errors"></div>
+					</div>
+
+					<button type="submit" class="btn btn-success">Create an account</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /container -->
+<script>
+jQuery(document).ready(function() {
+	var loc = new locationInfo();
+    loc.getCountries();
+    $(".countries").on("change", function(ev) {
+        var countryId = $(this).val()
+        if (countryId != '') {
+            loc.getStates(countryId);
+        } else {
+            $(".states option:gt(0)").remove();
+        }
+    });
+    /*$(".states").on("change", function(ev) {
+        var stateId = $(this).val()
+        if (stateId != '') {
+            loc.getCities(stateId);
+        } else {
+            $(".cities option:gt(0)").remove();
+        }
+	});*/
+});
+</script>

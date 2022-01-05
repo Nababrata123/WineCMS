@@ -1,0 +1,2 @@
+id,user_id,tasting_date,start_time,end_time,store_id,admin_note,taster_id,agency_taster_id,taster_note,wine_id,wine_confirm_status,question_id,confirm_status,status,job_status,accept_status,job_state,job_start_time,pause_time,resume_time,finish_time,working_hour,latitude,longitude,created_on,updated_on,is_deleted,request_job_approval_status,ready_for_billing,is_archived
+1002,154,2019-06-14,12:02:00,13:02:00,16,"Good day.",35,0,"Good luck.",26,2,22,0,approved,3,1,0,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-06-14 05:38:50","2019-06-14 05:45:47",0,pending,0,0

@@ -1,0 +1,196 @@
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+body{
+	height:100%;
+	padding:30px 0;
+	font-family: 'Open Sans', sans-serif;
+}
+
+.tabs-left, .tabs-right {
+	border-bottom: none;
+	padding-top: 2px;
+}
+.tabs-left {
+	border-right: 1px solid #ddd;
+}
+.tabs-right {
+	border-left: 1px solid #ddd;
+}
+.tabs-left>li, .tabs-right>li {
+	float: none;
+	margin-bottom: 2px;
+}
+.tabs-left>li {
+	margin-right: -1px;
+}
+.tabs-right>li {
+	margin-left: -1px;
+}
+.tabs-left>li.active>a,
+.tabs-left>li.active>a:hover,
+.tabs-left>li.active>a:focus {
+	border-bottom-color: #ddd;
+	border-right-color: transparent;
+}
+  
+.tabs-right>li.active>a,
+.tabs-right>li.active>a:hover,
+.tabs-right>li.active>a:focus {
+	border-bottom: 1px solid #ddd;
+	border-left-color: transparent;
+}
+.tabs-left>li>a {
+	border-radius: 4px 0 0 4px;
+	margin-right: 0;
+	display:block;
+}
+.tabs-right>li>a {
+	border-radius: 0 4px 4px 0;
+	margin-right: 0;
+}
+
+.payment-heading {
+	padding-bottom:10px; 
+	border-bottom:solid 1px #ddd;
+}
+.panel-footer {
+  background-color: #F2F9FF;
+  font-size: 120%;
+}
+.order-list-item {
+	border-bottom: dashed 1px #ddd;
+	padding: 10px;
+}
+.order-list-item .lead {
+	font-size: 120%;
+}
+.order-list-item .lead span {
+	font-size: 70%;
+}
+
+/***/
+
+/* Profile container */
+.profile {
+	margin: 30px 0;
+  }
+  
+  /* Profile sidebar */
+  .profile-sidebar {
+	padding: 20px 0 10px 0;
+	background: #fff;
+  }
+  
+  .profile-userpic img {
+	float: none;
+	margin: 0 auto;
+	width: 50%;
+	height: 50%;
+	-webkit-border-radius: 50% !important;
+	-moz-border-radius: 50% !important;
+	border-radius: 50% !important;
+  }
+  
+  .profile-usertitle {
+	text-align: center;
+	margin-top: 20px;
+  }
+  
+  .profile-usertitle-name {
+	color: #5a7391;
+	font-size: 16px;
+	font-weight: 600;
+	margin-bottom: 7px;
+  }
+  
+  .profile-usertitle-job {
+	text-transform: uppercase;
+	color: #5b9bd1;
+	font-size: 12px;
+	font-weight: 600;
+	margin-bottom: 15px;
+  }
+  
+  .profile-userbuttons {
+	text-align: center;
+	margin-top: 10px;
+  }
+  
+  .profile-userbuttons .btn {
+	text-transform: uppercase;
+	font-size: 11px;
+	font-weight: 600;
+	padding: 6px 15px;
+	margin-right: 5px;
+  }
+  
+  .profile-userbuttons .btn:last-child {
+	margin-right: 0px;
+  }
+	  
+  .profile-usermenu {
+	margin-top: 30px;
+  }
+  
+  .profile-usermenu ul li {
+	border-bottom: 1px solid #f0f4f7;
+  }
+  
+  .profile-usermenu ul li:last-child {
+	border-bottom: none;
+  }
+  
+  .profile-usermenu ul li a {
+	color: #93a3b5;
+	font-size: 14px;
+	font-weight: 400;
+  }
+  
+  .profile-usermenu ul li a i {
+	margin-right: 8px;
+	font-size: 14px;
+  }
+  
+  .profile-usermenu ul li a:hover {
+	background-color: #fafcfd;
+	color: #5b9bd1;
+  }
+  
+  .profile-usermenu ul li.active {
+	border-bottom: none;
+  }
+  
+  .profile-usermenu ul li.active a {
+	color: #5b9bd1;
+	background-color: #f6f9fb;
+	border-left: 2px solid #5b9bd1;
+	margin-left: -2px;
+  }
+  
+/* Profile Content */
+.profile-content {
+	/*padding: 20px;*/
+	min-height: 460px;
+}
+.profile-content > .page-header {
+	padding: 0px;
+	margin: 0px;
+}
+.profile-content > .page-header h1 {
+	font-size: 180%;
+	text-transform: uppercase;
+}
+.profile-content > .page-header h1 p {
+	text-transform: none;
+}
+.well .heading {
+	font-weight: bold;
+	border-bottom: solid 1px #ddd;
+	padding-bottom: 7px;
+	margin-bottom: 7px;
+}
+.well .heading-reverse {
+	font-weight: bold;
+	border-top: solid 1px #ddd;
+	padding-top: 7px;
+	margin-top: 7px;
+}

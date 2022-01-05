@@ -1,0 +1,4 @@
+id,user_id,tasting_date,start_time,end_time,store_id,admin_note,taster_id,agency_taster_id,taster_note,wine_id,wine_confirm_status,question_id,confirm_status,status,job_status,accept_status,job_state,job_start_time,pause_time,resume_time,finish_time,working_hour,latitude,longitude,created_on,updated_on,is_deleted,request_job_approval_status,ready_for_billing,is_archived,overtime,late
+1405,154,2019-09-11,09:18:00,09:19:00,35,,35,0,,2,2,,0,approved,3,1,0,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-09-11 05:49:24","2019-09-11 05:56:45",0,pending,0,0,0,0
+1406,154,2019-09-11,09:20:00,09:21:00,16,,2522,0,,2,2,,0,approved,3,1,0,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-09-11 06:00:25","2019-09-11 06:02:04",0,pending,0,0,0,0
+1407,154,2019-09-11,23:00:00,23:30:00,35,,2519,0,,2,2,,0,approved,3,1,0,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-09-11 06:27:20","2019-09-11 10:26:46",0,pending,0,0,0,0

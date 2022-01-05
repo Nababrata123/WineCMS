@@ -1,0 +1,114 @@
+<div class="container">
+	<div class="col-md-offset-2 col-md-8 col-sm-12">
+		<div class="page-header">
+			<h1>
+				Join PHIT
+				<p><small>The best way to design, build, and ship software.</small></p>
+			</h1>
+		</div>
+
+		<!-- Steps section -->
+		<div class="row">
+			<div class="col-md-4">
+				<div class="well text-muted">
+					<span class="glyphicon glyphicon-lock"></span>
+					<strong>Step 1:</strong> <br />Enter login details
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="well text-muted">
+					<span class="glyphicon glyphicon-user"></span>
+					<strong>Step 2:</strong> <br />Enter personal info 
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="well">
+				<span class="glyphicon glyphicon-gift"></span>
+					<strong>Step 3:</strong> <br />Choose your plan 
+				</div>
+			</div>
+		</div>
+		<!-- /Steps section -->
+
+		<?php
+            //form validation
+			echo validation_errors();
+
+			if($this->session->flashdata('message_type')) {
+				if($this->session->flashdata('message')) {
+
+				    echo '<div class="alert alert-'.$this->session->flashdata('message_type').' alert-dismissable">';
+				    echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+				    echo $this->session->flashdata('message');
+				    echo '</div>';
+				}
+			}
+		?>
+					
+		<!-- Form section -->
+		<div class="row">
+			<div class="col-md-8">
+				<h2>Choose your plan </h2>
+
+				<form id="signupform" class="" role="form" data-toggle="validator" method="post" action="<?php echo base_url('signup_step3'); ?>">
+					<div class="form-group">
+						<label for="inputCode">Referal code</label>
+						<input type="text" class="form-control" name="code" id="inputCode" maxlength="10" placeholder="Enter code" data-minlength="10" onkeyup="updateFields()" >
+						<div class="help-block">Please enter the supplied referral code or choose monthly subscription below.</div>
+						<div class="help-block with-errors"></div>
+					</div>
+
+					<div class="form-group">
+						<label for="inputCode">or Monthly subscription</label>
+						<div class="checkbox">
+							<label>
+								<input type="checkbox" id="inputSub" name="subscription" value="9.00" onclick="updateFields()">
+								$9.00 monthly
+							</label>
+						</div>				
+						<div class="help-block with-errors"></div>
+					</div>
+					<button type="submit" class="btn btn-success">Create an account</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /container -->
+<script>
+	jQuery(document).ready(function() {
+
+	});
+
+	function updateFields() {
+		var code = jQuery("#inputCode").val();
+		var sub = jQuery("#inputSub").prop("checked");
+
+		if (code != "") {
+			jQuery("#inputSub").prop("checked", false);
+			//jQuery("#inputSub").prop("disabled", true);
+
+			jQuery("#inputCode").prop("required", true);
+			jQuery("#inputSub").prop("required", false);
+		} else {
+			//jQuery("#inputSub").prop("disabled", false);
+
+			jQuery("#inputCode").prop("required", false);
+			jQuery("#inputSub").prop("required", true);
+		}
+
+		if (sub) {
+			jQuery("#inputCode").val("");
+			//jQuery("#inputCode").prop("disabled", true);
+
+			jQuery("#inputSub").prop("required", true);
+			jQuery("#inputCode").prop("required", false);
+		} else {
+			//jQuery("#inputCode").prop("disabled", false);
+
+			jQuery("#inputSub").prop("required", false);
+			jQuery("#inputCode").prop("required", true);
+		}
+		jQuery("#signupform").validator('update');
+	}
+</script>

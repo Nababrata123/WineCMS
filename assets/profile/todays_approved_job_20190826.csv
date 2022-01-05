@@ -1,0 +1,33 @@
+id,user_id,tasting_date,start_time,end_time,store_id,admin_note,taster_id,agency_taster_id,taster_note,wine_id,wine_confirm_status,question_id,confirm_status,status,job_status,accept_status,job_state,job_start_time,pause_time,resume_time,finish_time,working_hour,latitude,longitude,created_on,updated_on,is_deleted,request_job_approval_status,ready_for_billing,is_archived,overtime,late
+1307,154,2019-08-30,16:20:00,16:30:00,4781,,35,0,"&quot;Follow steps below to generate the issue:
+1. Start a job which has multiple wine for tasting.
+2.  Goto manage wine.
+3. Confirm availability some of wines by scanning bar code and confrim unavailable some of them.
+4. Press next .
+
+When the user press next button the wine cofirmation alert pops up. One of wine&#039;s availability button automatically got &quot;&quot;CONFIRM&quot;&quot; &amp; &quot;&quot;AVAILABLE&quot;&quot;
+ .There is no possible way to both of options got RED.
+&quot;
+&quot;Follow steps below to generate the issue:
+1. Start a job which has multiple wine for tasting.
+2.  Goto manage wine.
+3. Confirm availability some of wines by scanning bar code and confrim unavailable some of them.
+4. Press next .
+
+When the user press next button the wine cofirmation alert pops up. One of wine&#039;s availability button automatically got &quot;&quot;CONFIRM&quot;&quot; &amp; &quot;&quot;AVAILABLE&quot;&quot;
+ .There is no possible way to both of options got RED.
+&quot;
+&quot;Follow steps below to generate the issue:
+1. Start a job which has multiple wine for tasting.
+2.  Goto manage wine.
+3. Confirm availability some of wines by scanning bar code and confrim unavailable some of them.
+4. Press next .
+
+When the user press next button the wine cofirmation alert pops up. One of wine&#039;s availability button automatically got &quot;&quot;CONFIRM&quot;&quot; &amp; &quot;&quot;AVAILABLE&quot;&quot;
+ .There is no possible way to both of options got RED.
+&quot;",2,2,,0,approved,3,1,0,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-08-20 12:34:23","2019-08-26 05:46:11",0,pending,0,0,0,0
+1345,154,2019-08-26,16:48:00,16:50:00,5060,,2504,0,,1,2,,0,approved,3,1,0,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-08-26 11:18:41","2019-08-26 11:46:17",0,pending,0,0,0,0
+1346,154,2019-08-26,17:00:00,17:01:00,5062,,2504,0,,2,2,,0,approved,3,1,0,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-08-26 11:19:57","2019-08-26 11:46:31",0,pending,0,0,0,0
+1348,157,2019-08-26,17:06:00,17:07:00,5061,,2504,0,,2,2,,0,approved,3,1,0,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-08-26 11:22:29","2019-08-26 11:45:57",0,pending,0,0,0,0
+1349,154,2019-08-26,17:57:00,17:59:00,16,,35,0,,2,2,22,0,completed,4,1,2,18:41:00,00:00:00,00:00:00,18:43:00,00:02:00,22.6091,88.4142,"2019-08-26 12:28:23","2019-08-26 13:23:21",0,pending,1,0,0,1
+1350,154,2019-08-26,18:00:00,18:01:00,24,,35,0,,1,2,,0,approved,3,1,0,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-08-26 12:29:02","2019-08-26 12:43:55",0,pending,0,0,0,0

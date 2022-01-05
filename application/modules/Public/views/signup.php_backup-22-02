@@ -1,0 +1,100 @@
+<div class="container">
+	<div class="col-md-offset-2 col-md-8 col-sm-12">
+		<div class="page-header">
+			<h1>
+				Join PHIT
+				<p><small>The best way to design, build, and ship software.</small></p>
+			</h1>
+		</div>
+
+		<!-- Steps section -->
+		<div class="row">
+			<div class="col-md-4">
+				<div class="well">
+					<span class="glyphicon glyphicon-lock"></span>
+					<strong>Step 1:</strong> <br />Enter login details
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="well text-muted">
+					<span class="glyphicon glyphicon-user"></span>
+					<strong>Step 2:</strong> <br />Enter personal info 
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="well text-muted">
+				<span class="glyphicon glyphicon-gift"></span>
+					<strong>Step 3:</strong> <br />Choose your plan 
+				</div>
+			</div>
+		</div>
+		<!-- /Steps section -->
+
+		<?php
+            //form validation
+			echo validation_errors();
+
+			if($this->session->flashdata('message_type')) {
+				if($this->session->flashdata('message')) {
+
+				    echo '<div class="alert alert-'.$this->session->flashdata('message_type').' alert-dismissable">';
+				    echo '<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>';
+				    echo $this->session->flashdata('message');
+				    echo '</div>';
+				}
+			}
+		?>
+					
+		<!-- Form section -->
+		<div class="row">
+			<div class="col-md-8">
+				<h2>Enter login details </h2>
+
+				<form id="signupform" class="" role="form" data-toggle="validator" method="post" action="<?php echo base_url('signup'); ?>">
+					<div class="form-group">
+						<label for="inputEmail">Email address</label>
+						<input type="email" class="form-control" name="email" id="inputEmail" placeholder="Enter email address" data-remote="<?php echo base_url('home/check_email');?>" required>
+						<div class="help-block with-errors"></div>
+						<div class="help-block">This will be used at the time of login.</div>
+					</div>
+					<div class="form-group">
+						<label for="inputPassword">Password</label>
+						<input type="password" class="form-control" name="password" id="inputPassword" placeholder="Enter password" required>
+						<div class="help-block with-errors"></div>
+						<div class="help-block">Use at least one lowercase letter, one numeral, and seven characters.</div>
+					</div>
+					<div class="form-group">
+						<label for="inputConfirmPassword">Confirm Password</label>
+						<input type="password" class="form-control" name="conf_password" id="inputConfirmPassword" data-match="#inputPassword" data-match-error="Whoops, password don't match." placeholder="Please confirm password" required>
+						<div class="help-block with-errors"></div>
+						<div class="help-block">This should be same as password.</div>
+					</div>
+					<button type="submit" class="btn btn-success">Create an account</button>
+				</form>
+			</div>
+			<div class="col-md-4">
+				<h2></h2>
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<strong>Register now for <kbd>FREE</kbd></strong>
+						<ul style="padding: 10px 0 0 15px;">
+							<li>Lorem ipsum dolor sit amet.</li>
+							<li>In dapibus orci a risus tincidunt viverra.</li>
+							<li>Quisque pulvinar libero sit amet nunc varius.</li>
+							<li>Cras viverra leo quis ipsum consequat.</li>
+							<li>Sed eu eros eu justo condimentum tempor ac eu leo.</li>
+						</ul>
+					</div>
+				</div>
+
+				<div class="panel panel-default">
+					<div class="panel-body">
+						Already have an account? <br/><br/>
+						<a href="<?php echo base_url('login');?>" class="btn btn-info btn-sm btn-block">Login Here</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /container -->

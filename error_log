@@ -1,0 +1,4 @@
+[28-Aug-2018 18:09:34 Asia/Kolkata] PHP Fatal error:  Call to a member function update() on null in /home/wyktsmhg/public_html/wine.managed.center/application/modules/App/controllers/Tester.php on line 358
+[03-Sep-2018 01:12:46 Asia/Kolkata] PHP Fatal error:  Call to undefined function categoryTree() in /home/wyktsmhg/public_html/wine.managed.center/application/modules/App/views/category/add.php on line 41
+[03-Sep-2018 01:13:10 Asia/Kolkata] PHP Fatal error:  Call to undefined function categoryTree() in /home/wyktsmhg/public_html/wine.managed.center/application/modules/App/views/category/add.php on line 41
+[03-Sep-2018 01:13:37 Asia/Kolkata] PHP Fatal error:  Call to undefined function categoryTree() in /home/wyktsmhg/public_html/wine.managed.center/application/modules/App/views/category/add.php on line 41

@@ -1,0 +1,2 @@
+id,user_id,tasting_date,start_time,end_time,store_id,admin_note,taster_id,agency_taster_id,taster_note,wine_id,wine_confirm_status,question_id,confirm_status,status,job_status,accept_status,job_state,job_start_time,pause_time,resume_time,finish_time,working_hour,latitude,longitude,created_on,updated_on,is_deleted,request_job_approval_status,ready_for_billing,is_archived,overtime,late
+1393,154,2019-09-09,12:35:00,15:35:00,4781,,2477,0,,11,2,,0,approved,3,1,0,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-09-09 07:04:53","2019-09-09 09:22:04",0,pending,0,0,0,0

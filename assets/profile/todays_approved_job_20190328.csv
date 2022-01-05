@@ -1,0 +1,6 @@
+id,user_id,tasting_date,start_time,end_time,store_id,admin_note,taster_id,agency_taster_id,taster_note,wine_id,wine_confirm_status,question_id,confirm_status,status,job_status,accept_status,job_state,job_start_time,pause_time,resume_time,finish_time,working_hour,latitude,longitude,created_on,updated_on,is_deleted,request_job_approval_status,ready_for_billing
+823,36,2019-03-28,11:00:00,12:30:00,5,Approve,111,0,"Good Luck",26,2,24,0,approved,3,1,0,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-03-28 05:15:47","2019-03-28 05:18:07",0,pending,0
+824,36,2019-03-28,12:30:00,14:00:00,16,Approve,128,0,"Good Luck",26,2,24,0,approved,3,1,1,13:53:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-03-28 06:08:53","2019-03-28 08:23:43",0,pending,0
+825,36,2019-03-28,12:30:00,14:00:00,20,Approve,87,0,"Good Luck",26,2,24,0,approved,3,1,0,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-03-28 06:29:20","2019-03-28 06:31:16",0,pending,0
+830,36,2019-03-28,15:00:00,16:30:00,5,Approve,128,0,"Good Luck",26,2,24,0,completed,3,1,2,14:57:00,00:00:00,00:00:00,14:57:00,00:00:00,22.6091,88.4142,"2019-03-28 09:22:25","2019-03-28 09:29:12",0,pending,1
+833,36,2019-03-30,10:00:00,10:30:00,16,Hh,128,0,Bbb,27,2,24,0,approved,3,1,0,00:00:00,00:00:00,00:00:00,00:00:00,00:00:00,0,0,"2019-03-28 10:47:04","2019-03-28 10:48:00",0,pending,0
