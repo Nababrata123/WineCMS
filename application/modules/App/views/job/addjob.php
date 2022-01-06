@@ -464,6 +464,14 @@
 					</div>
 				</div>
 			</div>
+
+		<div class="form-group">
+			<label for="tasterFeedback" class="col-sm-3 control-label">Feedback:</label>
+			<div class="col-sm-8">
+				<textarea id="general_note" name="general_note" placeholder="Taster's feedback"  class="form-control"></textarea>
+				<div class="help-block with-errors"></div>
+			</div>
+		</div>
 		  	
     	</fieldset>
 		</div>
