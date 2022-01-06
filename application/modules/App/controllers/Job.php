@@ -372,7 +372,6 @@ class Job extends Application_Controller {
 
             $exp_amount=$this->input->post('exp_amount');
             $exp_reason=$this->input->post('exp_reason');
-       
 
     		$this->form_validation->set_error_delimiters('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>', '</div>');
     		//if the form has passed through the validation
@@ -599,6 +598,17 @@ class Job extends Application_Controller {
                             if($exp_amount!='' || $exp_reason!=''){
                                 $expense_id=$this->Job_model->submit_expense_details_from_cms($expense_array);
                             }
+                            // Taster Feedback Insert.
+                            $general_note=$this->input->post('general_note');
+                           
+                            $general_note_array=array(
+                                'user_id'=>$taster_id,
+                                'job_id'=>$job_id,
+                                'general_note'=>$general_note
+                            );
+                
+                            $general_note=$this->Job_model->submit_general_notes('general_notes',$general_note_array);
+
                             
                             //Submit expense details images
                             $supported_imgs=$_FILES['expense_images'];
