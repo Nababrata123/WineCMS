@@ -76,7 +76,7 @@
 		  		<label for="inputFirstName" class="col-sm-3 control-label">Sales Rep*</label>
                 <input type="hidden" id="hidden_sales_rep_id" value="<?php if(isset($allinput['user_id']))
 				{ echo $allinput['user_id'];}?>">
-		  		<div class="col-sm-8">
+		  		<div class="col-sm-9">
 					  <?php if($id==0){ ?> 
 			  				<select name="user_id"  required class="form-control" onchange="get_store(this.value)">
 						  <?php }else{ ?> 
@@ -110,7 +110,7 @@
 
 		  	<div class="form-group">
 		  		<label for="inputFirstName" class="col-sm-3 control-label">Job Date*</label>
-		  		<div class="col-sm-8">
+		  		<div class="col-sm-9">
 				  <input type="text" id="tasting_date" name="tasting_date" class="form-control datepicker" placeholder="Enter job date" value="<?php if(isset($allinput['tasting_date']) && $allinput['tasting_date']!=''){echo date("m/d/Y", strtotime($allinput['tasting_date']));} ?>"  autocomplete="off" readonly="readonly" />
 		  			<div class="help-block with-errors df"></div>
 		  		</div>
@@ -138,7 +138,7 @@
 				</div>
 
 				<div class="col-sm-3">
-					<div class="form-group adjustmin" >
+					<!-- <div class="form-group adjustmin" > -->
 						<select name="start_time_minute" required class="form-control" id="start_time_minute">
 							<?php
 							for($i=0;$i<=59;$i++){
@@ -153,16 +153,16 @@
 							}
 							?>
 						</select>
-					</div>
+					<!-- </div> -->
 				</div>
 
 				<div class="col-sm-3">
-					<div class="form-group adjustam">
+					<!-- <div class="form-group adjustam"> -->
 						<select name="time_one" required class="form-control" id="time_one">
 							<option value="pm" <?php if(isset($allinput['time_one']) && $allinput['time_one'] == 'pm'){echo 'selected';}?>>PM</option>
 							<option value="am" <?php if(isset($allinput['time_one']) && $allinput['time_one'] == 'am'){echo 'selected';}?>>AM</option>
 						</select>
-					</div>
+					<!-- </div> -->
 				</div>
 			</div>
 
@@ -188,7 +188,7 @@
 				</div>
 
 				<div class="col-sm-3">
-					<div class="form-group adjustmin" >
+					<!-- <div class="form-group adjustmin" > -->
 						<select name="end_time_minute" required class="form-control" id="end_time_minute">
 							<?php
 							for($i=0;$i<=59;$i++){
@@ -203,16 +203,16 @@
 							}
 							?>
 						</select>
-					</div>
+					<!-- </div> -->
 				</div>
 
 				<div class="col-sm-3">
-					<div class="form-group adjustam">
+					<!-- <div class="form-group adjustam"> -->
 						<select name="time_two" required class="form-control" id="time_two">
 							<option value="pm" <?php if(isset($allinput['time_two']) && $allinput['time_two'] == 'pm'){echo 'selected';}?>>PM</option>
 							<option value="am" <?php if(isset($allinput['time_two']) && $allinput['time_two'] == 'am'){echo 'selected';}?>>AM</option>
 						</select>
-					</div>
+					<!-- </div> -->
 				</div>
 			</div>
 
@@ -220,7 +220,7 @@
 		  	<div class="form-group">
 		  		<label for="inputPhone" class="col-sm-3 control-label">Store*</label>
                 <input type="hidden" id="hidden_store_id" value="<?php if(isset($allinput['store_id'])){echo $allinput['store_id'];}?>">
-		  		<div class="col-sm-8">
+		  		<div class="col-sm-9">
 					  <?php if($id==0){ ?>
 						<select name="store_id"  required class="form-control" id="store" onchange="get_tester_wine(this.value)">
 						<option value="">Select Store</option>
@@ -387,7 +387,7 @@
 				</div>
 
 				<div class="col-sm-3">
-					<div class="form-group adjustmin" >
+					<!-- <div class="form-group adjustmin" > -->
 						<select name="actual_start_minute"  class="form-control" id="actual_start_minute" required>
 							<?php
 							for($i=0;$i<=59;$i++){
@@ -402,16 +402,16 @@
 							}
 							?>
 						</select>
-					</div>
+					<!-- </div> -->
 				</div>
 
 				<div class="col-sm-3">
-					<div class="form-group adjustam">
+					<!-- <div class="form-group adjustam"> -->
 						<select name="actual_time_one"  class="form-control" id="actual_time_one" required>
 							<option value="pm" <?php if(isset($allinput['actual_time_one']) && $allinput['actual_time_one'] == 'pm'){echo 'selected';}?>>PM</option>
 							<option value="am" <?php if(isset($allinput['actual_time_one']) && $allinput['actual_time_one'] == 'am'){echo 'selected';}?>>AM</option>
 						</select>
-					</div>
+					<!-- </div> -->
 				</div>
 			</div>
 
@@ -437,7 +437,7 @@
 				</div>
 
 				<div class="col-sm-3">
-					<div class="form-group adjustmin" >
+					<!-- <div class="form-group adjustmin" > -->
 						<select name="actual_end_minute"  class="form-control" id="actual_end_minute" required>
 							<?php
 							for($i=0;$i<=59;$i++){
@@ -452,22 +452,22 @@
 							}
 							?>
 						</select>
-					</div>
+					<!-- </div> -->
 				</div>
 				
 				<div class="col-sm-3">
-					<div class="form-group adjustam">
+					<!-- <div class="form-group adjustam"> -->
 						<select name="actual_time_two"  class="form-control" id="actual_time_two" required>
 							<option value="pm" <?php if(isset($allinput['actual_time_two']) && $allinput['actual_time_two'] == 'pm'){echo 'selected';}?>>PM</option>
 							<option value="am" <?php if(isset($allinput['actual_time_two']) && $allinput['actual_time_two'] == 'am'){echo 'selected';}?>>AM</option>
 						</select>
-					</div>
+					<!-- </div> -->
 				</div>
 			</div>
 
 		<div class="form-group">
-			<label for="tasterFeedback" class="col-sm-3 control-label">Feedback:</label>
-			<div class="col-sm-8">
+			<label for="tasterFeedback" class="col-sm-3 control-label">Taster's Feedback:</label>
+			<div class="col-sm-9">
 				<textarea id="general_note" name="general_note" placeholder="Taster's feedback"  class="form-control"></textarea>
 				<div class="help-block with-errors"></div>
 			</div>

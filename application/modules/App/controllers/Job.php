@@ -4035,19 +4035,23 @@ class Job extends Application_Controller {
     }
 
 
-    public function createTextFile(){
-        $file = "test.txt";
-        $txt = fopen($file, "w") or die("Unable to open file!");
-        fwrite($txt, "lorem ipsum");
-        fclose($txt);
+    public function writeFiles() // define writeFiles() function that call on the url
+    {  
 
-        header('Content-Description: File Transfer');
-        header('Content-Disposition: attachment; filename='.basename($file));
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate');
-        header('Pragma: public');
-        header('Content-Length: ' . filesize($file));
-        header("Content-Type: text/plain");
-        readfile($file);
+        $file = $_SERVER['DOCUMENT_ROOT'] . "/wine/assets/wine_expense_details_image/firstTest.txt";
+  
+        $txt = fopen($file, "w") or die("Unable to open file!");
+        fwrite($txt, "Naba first ");
+        fclose($txt);
+        
+        // header('Content-Description: File Transfer');
+        // header('Content-Disposition: attachment; filename='.basename($file));
+        // header('Expires: 0');
+        // header('Cache-Control: must-revalidate');
+        // header('Pragma: public');
+        // header('Content-Length: ' . filesize($file));
+        // header("Content-Type: text/plain");
+        // readfile($file);
+            
     }
 }
