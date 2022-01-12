@@ -4035,23 +4035,18 @@ class Job extends Application_Controller {
     }
 
 
-    public function writeFiles() // define writeFiles() function that call on the url
+    public function writeFiles($job_id) // define writeFiles() function that call on the url
     {  
 
-        $file = $_SERVER['DOCUMENT_ROOT'] . "/wine/assets/wine_expense_details_image/firstTest.txt";
+        // $file = $_SERVER['DOCUMENT_ROOT'] . "/wine/assets/log_file/firstTest.txt";
   
-        $txt = fopen($file, "w") or die("Unable to open file!");
-        fwrite($txt, "Naba first ");
-        fclose($txt);
-        
-        // header('Content-Description: File Transfer');
-        // header('Content-Disposition: attachment; filename='.basename($file));
-        // header('Expires: 0');
-        // header('Cache-Control: must-revalidate');
-        // header('Pragma: public');
-        // header('Content-Length: ' . filesize($file));
-        // header("Content-Type: text/plain");
-        // readfile($file);
-            
+        // $txt = fopen($file, "w") or die("Unable to open file!");
+        // fwrite($txt, "Naba first ");
+        // fclose($txt);
+     
+        // $emailFPay = 'ns.avalgate@gmail.com';
+        // $content = file_get_contents($file);
+        // $content .= "\r\n" .$emailFPay;
+        // file_put_contents($file, $content);
     }
 }

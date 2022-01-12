@@ -1838,6 +1838,16 @@ class Job extends REST_Controller {
         $tasting_type=$this->post('tasting_type');
         $tasting_pic_time=$this->post('tasting_pic_time');
 
+         // Log Update Code...  
+        //  $file_name = $job_id.'.txt';
+        //  $file = $_SERVER['DOCUMENT_ROOT']."/wine/assets/log_file/".$file_name;
+        //  // print_r($file);die;
+        //  $updateFile = 'Second file update';
+        //  $content = file_get_contents($file);
+        //  $content .= "\r\n" .$updateFile;
+        //  file_put_contents($file, $content);
+         // Log update end.
+
         $tasting_pic_time = '';
         if($this->post('tasting_pic_time') !=''){
             $tasting_pic_time = date("H:i", strtotime($this->post('tasting_pic_time')));
@@ -2166,7 +2176,15 @@ class Job extends REST_Controller {
         $job_id=$this->post('job_id');
         $start=$this->post('start');
         $jobState=$this->post('job_state');
+        $file_name = $job_id.'.txt';
 
+        $file = $_SERVER['DOCUMENT_ROOT']."/wine/assets/log_file/".$file_name;
+//   print_r($file);die;
+        $txt = fopen($file, "w") or die("Unable to open file!");
+        fwrite($txt, "First test file save");
+        fclose($txt);
+
+        print_r('Check text file');die;
 
         $jobStartTime = '';
         if($this->post('job_start_time') !=''){
@@ -2651,8 +2669,17 @@ class Job extends REST_Controller {
       $general_note=$this->post('general_note');
       $note=$this->Job_model->check_data('general_notes',$job_id);
 
-    //   echo "<pre>";
-    //   print_r($note);die;
+     // Log Update Code...  
+    //  $file_name = $job_id.'.txt';
+    //  $file = $_SERVER['DOCUMENT_ROOT']."/wine/assets/log_file/".$file_name;
+    //  // print_r($file);die;
+    //  $updateFile = 'Second file update';
+    //  $content = file_get_contents($file);
+    //  $content .= "\r\n" .$updateFile;
+    //  file_put_contents($file, $content);
+     // Log update end.
+      
+
       if($taster_id && $job_id && $general_note)
       {
 
@@ -2866,6 +2893,16 @@ class Job extends REST_Controller {
         $taster_id=$this->post('user_id');
         $job_id=$this->post('job_id');
         
+         // Log Update Code...  
+        //  $file_name = $job_id.'.txt';
+        //  $file = $_SERVER['DOCUMENT_ROOT']."/wine/assets/log_file/".$file_name;
+        //  // print_r($file);die;
+        //  $updateFile = 'Second file update';
+        //  $content = file_get_contents($file);
+        //  $content .= "\r\n" .$updateFile;
+        //  file_put_contents($file, $content);
+         // Log update end.
+
         //get job status
         $this->db->select('status');
         $this->db->from('job');
@@ -2992,7 +3029,6 @@ class Job extends REST_Controller {
         $job_state=$result->job_state;
         $job_status=$result->status;
         $date=date('Y-m-d');
-        
 
         if( $job_state!=0 && ($job_status=='completed' || $job_status=='problems') )
         {
@@ -3158,6 +3194,16 @@ class Job extends REST_Controller {
 
          $date=date('Y-m-d');
        
+         // Log Update Code...  
+        // $file_name = $job_id.'.txt';
+        // $file = $_SERVER['DOCUMENT_ROOT']."/wine/assets/log_file/".$file_name;
+        // // print_r($file);die;
+        // $updateFile = 'Second file update';
+        // $content = file_get_contents($file);
+        // $content .= "\r\n" .$updateFile;
+        // file_put_contents($file, $content);
+        // Log update end.
+
          //get job status
          $this->db->select('status,start_time,end_time,job_start_time,pause_time,resume_time,finish_time,taster_id,agency_taster_id,job_state, status');
          $this->db->from('job');

@@ -586,7 +586,7 @@
                                     <span class="glyphicon glyphicon-list-alt"></span> View Details
                                 </a>
 
-                                <a class="btn btn-success btn-xs" style="margin-top: 3px; width: 95px;" target="_blank" href="<?php echo base_url();?>App/job/writeFiles/<?php echo $item->id;?>" title="View"><span class="glyphicon glyphicon-download"></span> View Invoice</a>
+                                <a class="btn btn-success btn-xs" style="margin-top: 3px; width: 95px;" target="_blank" href="<?php echo base_url();?>App/billing/download_invoice/<?php echo $item->id;?>" title="View"><span class="glyphicon glyphicon-download"></span> View Invoice</a>
                                 
                             <?php } ?>
                         
