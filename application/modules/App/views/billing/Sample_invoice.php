@@ -261,10 +261,10 @@
 				<th width="50%" align="left">Cost</th>
 			</tr>
 			<?php 
-			if($more_job_info->expense_amount!="$" && $more_job_info->expense_reason!=""){
+			if($more_job_info->expense_amount!="$"){
 			?>
 			<tr>
-				<td align="left"><?php echo $more_job_info->expense_reason;?></td>
+				<td align="left"><?php if($more_job_info->expense_reason == ''){ 'N/A'; }else{ echo $more_job_info->expense_reason;} ?></td>
 				<td align="left"><?php echo $more_job_info->expense_amount;?></td>
 			</tr>
 			<?php
