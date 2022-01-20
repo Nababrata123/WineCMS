@@ -4324,6 +4324,16 @@ function get_taster_rate($taster_id)
 
 }
 
+function job_log_update($job_id, $log_info)
+{
+    $this->db->select('*');
+    $this->db->from('log_info');
+    $this->db->where('job_id',$job_id);
+    $value=$this->db->get();
+    
+    return $value->result_array();
+}
+
 }
 /* End of file user_model.php */
 /* Location: ./application/models/user_model.php */

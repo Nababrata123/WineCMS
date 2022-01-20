@@ -2176,13 +2176,22 @@ class Job extends REST_Controller {
         $job_id=$this->post('job_id');
         $start=$this->post('start');
         $jobState=$this->post('job_state');
+
+        //New Task Device Info..
+        $device_name=$this->post('device_name');
+        $device_model=$this->post('device_model');
+        $os_version=$this->post('os_version');
+        $ip_address=$this->post('ip_address');
+        $app_version=$this->post('app_version');
+
         $file_name = $job_id.'.txt';
 
+        $device_info = $device_name."\r\n".$device_model."\r\n".$os_version."\r\n".$ip_address."\r\n".$app_version;
         $file = $_SERVER['DOCUMENT_ROOT']."/wine/assets/log_file/".$file_name;
-//   print_r($file);die;
         $txt = fopen($file, "w") or die("Unable to open file!");
-        fwrite($txt, "First test file save");
+        fwrite($txt, $device_info);
         fclose($txt);
+        // End Device info..
 
         print_r('Check text file');die;
 
@@ -3493,6 +3502,25 @@ class Job extends REST_Controller {
             }
 
      }
+
+
+       //Submit expense details and general notes new
+  public function logInfo_post()
+  {
+      $taster_id = $this->post('user_id');
+      $job_id = $this->post('job_id');
+
+      $logInfo = $this->post('log_info');
+
+        //End Upload
+        if ($expense_id)
+        {
+            $this->set_response([
+                'success' => TRUE,
+            ], REST_Controller::HTTP_OK); // OK (200) being the HTTP response code
+        }
+ 
+  }
 
 
 }

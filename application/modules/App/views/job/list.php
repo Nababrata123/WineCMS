@@ -748,6 +748,14 @@
     </script>
     <?php } ?>
 
+    <?php if($this->session->flashdata('job_update_success') != "") { ?>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            swal("Well done!", "Job successfully updated.", "success");
+        });
+    </script>
+    <?php } ?>
+
 <script type="text/javascript">
 
 	function openMap(latitude, longitude, store_id){

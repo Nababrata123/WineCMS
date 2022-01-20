@@ -1172,7 +1172,7 @@ class Job extends Application_Controller {
                 else
                 {
                     $this->session->set_flashdata('message_type', 'danger');
-                        $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster has been assigned with other job.');
+                    $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster has been assigned with other job.');
                     redirect('/App/job/publish_job/'.$job_id);
                 }
             } //validation run
@@ -1336,37 +1336,7 @@ class Job extends Application_Controller {
                     'job_status'=>$job_status,
                     'wine_id'=>$wineList
                 );
-            
-                // echo "<pre>";
-                // print_r($job);die;
-                /*
-                if($agency_taster != ''){
-                    $job = array(
-                        'tasting_date' => htmlspecialchars($tasting_date, ENT_QUOTES, 'utf-8'),
-                        'start_time' => htmlspecialchars($start_time, ENT_QUOTES, 'utf-8'),
-                        'end_time' => htmlspecialchars($end_time, ENT_QUOTES, 'utf-8'),
-                        'store_id' => htmlspecialchars($this->input->post('store_id'), ENT_QUOTES, 'utf-8'),
-                        'admin_note' => htmlspecialchars($this->input->post('admin_note'), ENT_QUOTES, 'utf-8'),
-                        'taster_note' => htmlspecialchars($this->input->post('taster_note'), ENT_QUOTES, 'utf-8'),
-                        'taster_id' => $taster_id,
-                        'agency_taster_id'=>$agency_taster,
-                        'status'=>$status,
-                        'job_status'=>$job_status,
-                        'wine_id'=>$wineList
-                    );
-                }*/
-              /*
-                if($end_time < $start_time && $data['job_info']->state!=1)
-                {
-                    $this->session->set_flashdata('message_type', 'danger');
-                    $this->session->set_flashdata('message', '<strong>Oh snap!</strong> End time should be greater that start time.');
-                    if($data['job_info']->job_status== 4){
-                        redirect('App/Job/index/status/problems');
-                    }else{
-                        redirect('App/Job');
-                    }
-                }*/
-                
+ 
                 $datetime1 = strtotime($start_time);
                 $datetime2 = strtotime($end_time);
                 $interval  = abs($datetime2 - $datetime1);
@@ -1377,8 +1347,7 @@ class Job extends Application_Controller {
                     $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The start time and the end time should not be same. There should be a gap of minimum 30 min between start and end time.');
                     if($data['job_info']->job_status== 4){
                         redirect('App/Job/index/status/problems');
-                    }else{
-                       
+                    }else{  
                         redirect('App/Job');
                     }
                 }
@@ -1496,10 +1465,9 @@ class Job extends Application_Controller {
                             }
                         }
                     }
-
-                    
-                        $this->session->set_flashdata('message_type', 'success');
-                        $this->session->set_flashdata('message', '<strong>Well done!</strong> Job successfully updated.');
+                        // $this->session->set_flashdata('message_type', 'success');
+                        // $this->session->set_flashdata('message', '<strong>Well done!</strong> Job successfully updated.');
+                        $this->session->set_flashdata('job_update_success', 'yes');
                     } else{
                         $this->session->set_flashdata('message_type', 'danger');
                         $this->session->set_flashdata('message', '<strong>Oh snap!</strong> Change something and try again.');
@@ -1514,7 +1482,7 @@ class Job extends Application_Controller {
                 else
                 {
                     $this->session->set_flashdata('message_type', 'danger');
-                        $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster has been assigned with other job.');
+                     $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster has been assigned with other job.');
                    
                     if($data['job_info']->job_status== 4){
                         redirect('App/Job/index/status/problems');
@@ -1830,10 +1798,6 @@ class Job extends Application_Controller {
                 }
             }
 
-            // if(count($tastingWine) != $storeTypeChange) {
-            //     $data['get_wine_info'] = array();
-            // }
-
             $this->load->view('job/completed_edit_job_modal',$data);
 
         }else if($data['job']->job_state==1){
@@ -1967,23 +1931,6 @@ class Job extends Application_Controller {
             $this->db->update('general_notes',$general_note_array);
         }
 
-        // $manager_verification_array=array(
-        //     'comment'=>$Comments
-        // );
-        // $this->db->where('job_id',$job_id);
-        // $this->db->update('manager_verification_details',$manager_verification_array);
-
-        // $testerFeedback=array(
-        //     'general_note'=>$Comments
-        // );
-        // $this->db->where('job_id',$job_id);
-        // $this->db->update('general_notes',$testerFeedback);
-        // $expense_array=array(
-        //     'exp_amount'=>$exp_amount,
-        //     'exp_reason'=>$exp_reason
-        // );
-        // $this->db->where('job_id',$job_id);
-        // $this->db->update('expense_details',$expense_array);
         $date=date("Y-m-d");
         $expense_array=array(
             'taster_id'=>$taster_id,
@@ -2038,8 +1985,7 @@ class Job extends Application_Controller {
             //if the form has passed through the validation
             if ($this->form_validation->run())
             {
-                //echo $this->tablename;
-                // print "<pre>"; print_r($_POST);die;
+
                 $count = 0;
                 $items = $this->input->post('item_id');
                 $currenttab = $this->input->post('currenttab');
@@ -2073,297 +2019,6 @@ class Job extends Application_Controller {
                 redirect('/App/job/index/status/'.$currenttab.'');
         }
     }
-
-    public function create_billing_one_old()
-    {
-        $this->load->model('Job_model');
-        $job_id=$this->input->post('job_id');
-        $taster_id=$this->input->post('taster_id');
-        $first_time=$this->input->post('time_one');
-        $second_time=$this->input->post('time_two');
-        //$job_start_time=date("H:i", strtotime($this->input->post('job_start_time').$first_time));
-       // $job_end_time=date("H:i", strtotime($this->input->post('finish_time').$second_time));
-        $start_hour=$this->input->post('start_time_hour');
-        $start_minute=$this->input->post('start_time_minute');
-        $actual_start_time=$start_hour.":".$start_minute;
-        $job_start_time = date("H:i", strtotime($actual_start_time.$first_time));
-        
-        $end_hour=$this->input->post('end_time_hour');
-        $end_minute=$this->input->post('end_time_minute');
-        $actual_end_time=$end_hour.":".$end_minute;
-        $job_end_time = date("H:i", strtotime($actual_end_time.$second_time));
-
-        $exp_amount="$".$this->input->post('exp_amount');
-        $exp_reason=$this->input->post('exp_reason');
-        $comment=$this->input->post('comment');
-        $signature_img=$_FILES['signature_img']['name'];
-        $date=date("Y-m-d");
-        //get user details
-        $user=$this->Job_model->get_user_details($taster_id);
-        $user_meta=$this->Job_model->get_user_meta($taster_id);
-       
-        $name=$this->input->post('name');
-        if ($name == trim($name) && strpos($name, ' ') !== false) {
-            
-            $v=explode(" ",$name);
-            $first_name=$v[0];
-            $last_name=$v[1];
-        }
-        else
-        {
-            $first_name=$name;
-            $last_name='';
-        }
-        $first_name=$first_name;
-        $last_name=$last_name;
-        
-        //Create expense details array
-        $expense_array=array(
-            'taster_id'=>$taster_id,
-            'job_id'=>$job_id,
-            'exp_amount'=>$exp_amount,
-            'exp_reason'=>$exp_reason,
-            'date'=>$date
-        );
-        if($job_end_time < $job_start_time)
-        {
-            $this->session->set_flashdata('message_type', 'danger');
-            $this->session->set_flashdata('message', '<strong>Oh snap!</strong> End time should be greater that start time.');
-           redirect($this->agent->referrer());
-                    
-        }
-     
-        //Start signature image upload to directory
-        if (!empty($_FILES['signature_img']['name'])) {
-            // Update Product Image
-            $config['upload_path'] = DIR_SIGNATURE_IMAGE;
-            $config['max_size'] = '10000';
-            $config['allowed_types'] = 'jpg|png|jpeg';
-            $config['overwrite'] = FALSE;
-            $config['remove_spaces'] = TRUE;
-            $this->load->library('upload', $config);
-            $images = array();
-                $_FILES['images']['name']= $_FILES['signature_img']['name'];
-                $_FILES['images']['type']= $_FILES['signature_img']['type'];
-                $_FILES['images']['tmp_name'] = $_FILES['signature_img']['tmp_name'];
-                $_FILES['images']['error']= $_FILES['signature_img']['error'];
-                $_FILES['images']['size']= $_FILES['signature_img']['size'];
-                $config['file_name'] = 'signature-'.rand().date('YmdHis');
-                $images = $config['file_name'];
-                $this->upload->initialize($config);
-                if ($this->upload->do_upload('images')) {
-                    $config_thumb['image_library'] = 'gd2';
-                    $config_thumb['source_image'] = DIR_SIGNATURE_IMAGE.$this->upload->file_name;
-                    $config_thumb['create_thumb'] = FALSE;
-                    $config_thumb['maintain_ratio'] = TRUE;
-                    $config_thumb['master_dim'] = 'auto';
-                    $config_thumb['width'] = DIR_SIGNATURE_IMAGE_SIZE; // image re-size  properties
-                    $config_thumb['height'] = DIR_SIGNATURE_IMAGE_SIZE; // image re-size  properties
-                    $this->load->library('image_lib', $config_thumb); //codeigniter default function
-                    $this->image_lib->initialize($config_thumb);
-                    if (!$this->image_lib->resize()) {
-                         echo $this->image_lib->display_errors();
-                    }
-                    $this->image_lib->clear();
-                    $upload_data =  $this->upload->data();
-                    $uploaded_pics = array();
-                    $uploaded_pics = $upload_data['file_name'];
-                } else {
-                   echo  $this->upload->display_errors(); die;
-                }
-        }
-        else
-        {
-            $uploaded_pics=$this->input->post('old_image');
-        }
-        
-        //Create manager verification 
-        $manager_verification_array=array(
-            'taster_id'=>$taster_id,
-            'job_id'=>$job_id,
-            'first_name'=>$first_name,
-            'last_name'=>$last_name,
-           // 'cell_number'=>$cell_number,
-            'comment'=>$comment,
-            'signature_img'=>$uploaded_pics,
-            'date'=>$date
-        );
-        $admin_note=$this->input->post('admin_note');
-        $general_note=$this->input->post('general_note');
-        $admin_note_array=array(
-            'job_id'=>$job_id,
-            'admin_note'=>$admin_note
-        );
-        $general_note_array=array(
-            'user_id'=>$taster_id,
-            'job_id'=>$job_id,
-            'general_note'=>$general_note
-        );
-        //Delete old expense data
-        $data['expense_details']=$this->Job_model->get_expense_details($job_id);
-       
-        $data['manager_verification_details']=$this->Job_model->get_manager_verification_details($job_id);
-       // print_r($data['manager_verification_details']);die;
-        $this->Job_model->setInvoiceNumber($job_id);
-        if(isset($data['expense_details'][0]['job_id']) && isset($data['expense_details'][0]['exp_amount']) && isset($data['expense_details'][0]['exp_reason']))
-        {
-            //Update expense data
-           
-            $expense_id=$this->Job_model->update_data('expense_details','id', $data['expense_details'][0]['exp_id'], $expense_array);
-        }
-        else
-        {
-           
-            $expense_id=$this->Job_model->submit_expense_details_from_cms($expense_array);
-        }
-      
-        //Submit expense details images
-        $supported_imgs=$_FILES['expense_images'];
-        if (!empty($supported_imgs['name'][0])) {
-                        // Update Product Image
-                        $config['upload_path'] = DIR_EXPENSE_IMAGE;
-                        $config['max_size'] = '10000';
-                        $config['allowed_types'] = 'jpg|png|jpeg';
-                        $config['overwrite'] = FALSE;
-                        $config['remove_spaces'] = TRUE;
-                        $this->load->library('upload', $config);
-                        $images = array();
-                        foreach ($supported_imgs['name'] as $key => $image) {
-                            $_FILES['images[]']['name']= $supported_imgs['name'][$key];
-                            $_FILES['images[]']['type']= $supported_imgs['type'][$key];
-                            $_FILES['images[]']['tmp_name'] = $supported_imgs['tmp_name'][$key];
-                            $_FILES['images[]']['error']= $supported_imgs['error'][$key];
-                            $_FILES['images[]']['size']= $supported_imgs['size'][$key];
-                            $config['file_name'] = 'expense-'.rand().date('YmdHis');
-                            $images[] = $config['file_name'];
-                            $this->upload->initialize($config);
-
-                            if ($this->upload->do_upload('images[]')) {
-                                $config_thumb['image_library'] = 'gd2';
-                                $config_thumb['source_image'] = DIR_EXPENSE_IMAGE.$this->upload->file_name;
-                                $config_thumb['create_thumb'] = FALSE;
-                                $config_thumb['maintain_ratio'] = TRUE;
-                                $config_thumb['master_dim'] = 'auto';
-                                $config_thumb['width'] = DIR_EXPENSE_IMAGE_SIZE; // image re-size  properties
-                                $config_thumb['height'] = DIR_EXPENSE_IMAGE_SIZE; // image re-size  properties
-                                $this->load->library('image_lib', $config_thumb); //codeigniter default function
-                                $this->image_lib->initialize($config_thumb);
-                                if (!$this->image_lib->resize()) {
-                                     echo $this->image_lib->display_errors();
-                                }
-                                $this->image_lib->clear();
-                                $upload_data =  $this->upload->data();
-                                $uploaded_pics = array();
-                                $uploaded_pics = $upload_data['file_name'];
-                                // Update database here
-                                $image_id=$this->Job_model->insert_expense_supported_images($expense_id, $uploaded_pics);
-                            } else {
-                                $this->upload->display_errors(); die;
-                            }
-                        }
-        }
-        else
-        {
-            //echo $expense_id;die;
-            $old_exp_images=$this->input->post('old_exp_image[]');
-            if(empty($old_exp_images))
-            {
-                foreach($old_exp_images as $val)
-                {
-                    $image_id=$this->Job_model->insert_expense_supported_images($expense_id,$val);
-                }
-            }
-            else
-            {
-                //Delete old expense images
-                $this->Job_model->delete_old_expense_images('expense_details_images',$expense_id);
-                foreach($old_exp_images as $val)
-                {
-                    $image_id=$this->Job_model->insert_expense_supported_images($expense_id,$val);
-                }
-            }
-            
-            
-        }
-
-        //End to sumit expense details images
-        if($expense_id)
-        {
-            //Delete old manager verification data
-            if(!empty($data['manager_verification_details'][0]))
-            {
-                //Update
-                $verifiction=$this->Job_model->update_data('manager_verification_details','id', $data['manager_verification_details'][0]['id'], $manager_verification_array);
-
-            }
-            else
-            {
-                $verifiction=$this->Job_model->submit_manager_verification_details($manager_verification_array);
-            }
-            
-            if($verifiction)
-            {
-                $admin_note=$this->Job_model->submit_admin_note($job_id,$admin_note_array);
-                $general_note=$this->Job_model->submit_general_notes('general_notes',$general_note_array);
-                if($general_note)
-                {
-                    //Set job to ready for billing
-                    $difference=strtotime($job_end_time)-strtotime($job_start_time);
-                    //Calculate total pause time
-                    $time_array=$this->Job_model->calculate_pause_time($job_id);
-                    $total_pause_time=0;
-                    if(!empty($time_array))
-                    {
-                        foreach($time_array as $value)
-                        {
-                            $pause_time=strtotime($value['resume_time'])-strtotime($value['pause_time']);
-                            $total_pause_time=$total_pause_time+$pause_time;
-                        }
-                     
-                    }
-                    else
-                    {
-                        $total_pause_time=0;
-                    }
-                    $working_hour=gmdate("H:i", ($difference - $total_pause_time));
-                    $billing_status=$this->Job_model->move_to_billing($job_id,$job_start_time,$job_end_time,$working_hour);
-                    
-                        $wine=$this->input->post('wine');
-                        $bottles_sampled=$this->input->post('bottles_sampled');
-                        $open_bottles_sampled=$this->input->post('open_bottles_sampled');
-                        $bottles_sold=$this->input->post('bottles_sold');
-                        $this->db->select('wine_id, job_id');
-                        $this->db->from('completed_job_wine_details');
-                        $this->db->where('job_id',$job_id);
-                        $result=$this->db->get();
-                        $final_result=$result->result_array();
-                        //print_r($final_result);die;
-                        foreach($final_result as $fr){
-                            $this -> db -> where('job_id', $fr['job_id']);
-                            $this -> db -> where('wine_id', $fr['wine_id']);
-                            $this -> db -> delete('completed_job_wine_details');
-                        }
-                        $i=0;
-                        foreach($wine as $w){
-                            $data=array('wine_id'=>$w, 'bottles_sampled'=> $bottles_sampled[$i], 'open_bottles_sampled'=> $open_bottles_sampled[$i], 'bottles_sold'=>$bottles_sold[$i], 'job_id'=> $job_id, 'taster_id'=> $taster_id );
-                            $this->db->insert('completed_job_wine_details',$data);
-                                ++$i;
-                        }
-
-                    if($billing_status)
-                    {
-                        $this->session->set_flashdata('message_type', 'success');
-                        $this->session->set_flashdata('message', '<strong>Well done!</strong> Job has been moved to billing successfully.');
-                    }
-                }
-            }
-            
-            
-        }
-        redirect('/App/Job/index/status/problems');
-    }
-
-
     
     public function create_billing_one()
     {
@@ -2580,8 +2235,7 @@ class Job extends Application_Controller {
                     $image_id=$this->Job_model->insert_expense_supported_images($expense_id,$val);
                 }
             }
-            
-            
+                
         }
 
         //End to sumit expense details images
@@ -2673,8 +2327,7 @@ class Job extends Application_Controller {
                         // redirect('/App/job/index/status/problems','refresh');
                     }
                 }
-            }
-            
+            }  
             
         }
         redirect('/App/Job/index/status/problems');
@@ -2700,6 +2353,7 @@ class Job extends Application_Controller {
         }
         redirect('/App/Job/index/status/problems');
     }
+
     public function open_activity_modal()
     {
         $job_id=$this->input->post('job_id');
@@ -2747,6 +2401,7 @@ class Job extends Application_Controller {
         $data['taster_id']=$taster_id;
         $this->load->view('job/display_tester',$data);
     }
+    
     public function approve_job($job_id)
     {
         $input_taster_id=$this->input->post('taster_id[]');
@@ -2861,6 +2516,7 @@ class Job extends Application_Controller {
         }
                 redirect('/App/Job/index/status/accepted');
     }
+
     public function approve_request()
     {
         $job_id=$this->input->post('job_id');
@@ -2889,107 +2545,7 @@ class Job extends Application_Controller {
     /**
      *
      */
-    // public function search_submit() {
-    //     if ($this->input->server('REQUEST_METHOD') === 'POST')
-    //     {
-    //         $sampling_date = $this->clean_value($this->input->post('sampling_date'));
-           
-    //         $search_text = base64_encode($this->input->post('search_text'));
-            
-    //         // if (strpos($search_text, '/') !== false) {
-    //         //     $search_text = substr($search_text, 0, strpos($search_text, '/'));
-    //         // }
-    //         // if (strpos($search_text, '\'') !== false) {
-    //         //     $search_text = substr($search_text, 0, strpos($search_text, '\''));
-    //         // }
-    //         // if (strpos($search_text, '%') !== false) {
-    //         //     $search_text = substr($search_text, 0, strpos($search_text, '%'));
-    //         // }
-           
-    //         $taster=$this->input->post('search_by_taster');
-    //         $sales_rep=$this->input->post('sales_rep');
-    //         $tasterarray = array();
-            
-
-    //         if ($taster)
-    //         {
-    //             foreach ($taster as $value)
-    //             {
-    //                 array_push($tasterarray,$value);
-    //             }
-    //         }
-    //         $st='';
-    //         foreach($tasterarray as $i)
-    //         {
-    //             $st.=$i."@";
-    //         }
-    //         $st=rtrim($st,"@");
-    //         //echo $st;die;
-    //        $store = $this->input->post('search_by_store');
-    //        $search_by_rating = $this->input->post('search_by_rating');
-    //        $search_by_status = $this->input->post('search_by_status');
-    //        $sort_by_date = $this->input->post('sort_by_date');
-    //        $entry_date = $this->clean_value($this->input->post('entry_date'));
-    //        $status=$this->input->post('status');
-    //        //print_r($this->input->post());die;
-    //         $url = "App/Job/index/";
-    //         if ($status != '') {
-    //             $url .= "status/". urlencode($status)."/";
-    //         }else{
-    //             $url .= "status/". urlencode('pre_assigned')."/";
-    //         }
-    //         if ($sampling_date != '') {
-    //             $url .= "tasting_date/". urlencode($sampling_date)."/";
-    //         }
-    //         if ($taster != '') {
-    //             $url .= "taster/".$st."/";
-    //         }
-            
-    //         if ($sales_rep != '') {
-    //         $url .= "sales_rep/".$sales_rep."/";
-    //         }
-    //         if ($store != '') {
-    //             $url .= "store/".$store."/";
-    //         }
-    //         if ($entry_date != '') {
-    //             $url .= "entry_date/". urlencode($entry_date)."/";
-    //         }
-    //         if ($search_text != '') {
-    //             $url .= "search_text/".$search_text."/";
-    //         }
-    //         if ($search_by_rating != '') {
-    //             $url .= "search_by_rating/".$search_by_rating."/";
-    //         }
-    //         if ($search_by_status != '') {
-    //             $url .= "search_by_status/".$search_by_status."/";
-    //         }
-    //         if ($sort_by_date != '') {
-    //             $url .= "sort_by_date/".$sort_by_date."/";
-    //         }
-    //         redirect($url);
-    //     }
-    // }
-    /*public function search_submit() {
-        if ($this->input->server('REQUEST_METHOD') === 'POST')
-        {
-           $sampling_date = $this->clean_value($this->input->post('sampling_date'));
-           $taster=$this->input->post('search_by_taster');
-           $status = $this->clean_value($this->input->post('status'));
-
-           //print_r($this->input->post());die;
-            $url = "App/Job/index/";
-            if ($status != '') {
-                $url .= "status/". urlencode($status)."/";
-            }
-            if ($sampling_date != '') {
-                $url .= "tasting_date/". urlencode($sampling_date)."/";
-            }
-            if ($taster != '') {
-                $url .= "taster/".$taster."/";
-            }
-            redirect($url);
-        }
-    }*/
+ 
     public function search_submit() {
         if ($this->input->server('REQUEST_METHOD') === 'POST')
         {

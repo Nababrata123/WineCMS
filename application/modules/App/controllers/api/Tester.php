@@ -56,10 +56,7 @@ class Tester extends REST_Controller {
 		$device_type = $this->post('device_type');
 		$device_token = $this->post('device_token');
 		$last_login_ip = $this->post('last_login_ip');
-        // $last_login_ip = '192.168.0.101';
         
-
-
     	// If NULL, then check the id passed as users/:id
 
     	if ($email === NULL && $password === NULL)
