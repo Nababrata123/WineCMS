@@ -286,14 +286,11 @@ $('#view').on('change', function() {
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
-    $('#user-table').DataTable({
-        
-        
+    $('#user-table').DataTable({   
         "lengthMenu": [10, 20, 50, 100, 500],
        "iDisplayLength": 10,    
         "stateSave": true,
-		"bSort" : false
-        
+		"bSort" : false     
     });
 });
 </script>

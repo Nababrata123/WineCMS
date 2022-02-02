@@ -246,7 +246,7 @@
 		<fieldset>
     		<legend>Basic Info</legend>
     		
-			<div class="form-group">
+			<div class="form-group" id="admin_note_div">
 		  		<label for="inputConfirmPassword" class="col-sm-3 control-label">Admin note</label>
 		  		<div class="col-sm-8">
 		  			<textarea name="admin_note" class="form-control" id="admin_note"  placeholder="Enter admin note" ><?php if(isset($allinput['admin_note'])){echo $allinput['admin_note'];} ?></textarea>
@@ -254,7 +254,7 @@
 		  		</div>
 		  	</div>
 
-		  	<div class="form-group">
+		  	<div class="form-group" id="taster_note_div">
 		  		<label for="inputConfirmPassword" class="col-sm-3 control-label">Taster note</label>
 		  		<div class="col-sm-8">
 		  			<textarea name="taster_note" class="form-control" id="taster_note"  placeholder="Enter taster note"><?php if(isset($allinput['taster_note'])){echo $allinput['taster_note'];} ?></textarea>
@@ -611,6 +611,9 @@ function dateChanged(ev) {
 		// throw error here..
 		$("#invoice_div").show();
 		$("#select_wine_div").hide();
+		$("#admin_note_div").hide();
+		$("#taster_note_div").hide();
+		
 		if (taster_id != ''){
 			$.ajax({
 			type:'POST',
@@ -632,7 +635,8 @@ function dateChanged(ev) {
 		$("#invoice_div").hide();
 		$("#select_wine_div").show();
 		$("#agency_taster_div").hide();	
-			
+		$("#admin_note_div").show();
+		$("#taster_note_div").show();	
 	}
     $(this).datepicker('hide');
 }
@@ -950,16 +954,18 @@ $(document).ready(function(){
 	var todayDate = new Date(currentDate);
 	var chosseJobDate = new Date($("#tasting_date").val());
 
-// alert(chosseJobDate);
-// alert(todayDate);
 	if (chosseJobDate < todayDate && chosseJobDate!='') {
 		// throw error here..
 		$("#invoice_div").show();
 		$("#select_wine_div").hide();
+		$("#admin_note_div").hide();
+		$("#taster_note_div").hide();
 		
 	}else {
 		$("#invoice_div").hide();
 		$("#select_wine_div").show();
+		$("#admin_note_div").show();
+		$("#taster_note_div").show();
 			
 	}
 

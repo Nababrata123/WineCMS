@@ -986,8 +986,6 @@ class Job extends REST_Controller {
 
                 //$difference=strtotime($update_array['finish_time'])-strtotime($job_start_time);
 
-                
-
                 $time_array=$this->Job_model->calculate_pause_time($job_id);
                 $total_pause_time=0;
                 if(!empty($time_array))
@@ -1047,11 +1045,7 @@ class Job extends REST_Controller {
                     }
 
                 //}
-                
-                
-
-                
-                
+         
             }
             else if($job_state==3)
             {
@@ -3189,8 +3183,11 @@ class Job extends REST_Controller {
 
          $latitude=$this->post('latitude');
          $longitude=$this->post('longitude');
+         $latitude_end=$this->post('latitude_end');
+         $longitude_end=$this->post('longitude_end');
  
          $is_out_of_range=$this->post('out_of_range');
+
          $overtime=$this->post('overtime');
 
          $general_note=$this->post('general_note');
@@ -3241,7 +3238,9 @@ class Job extends REST_Controller {
             'latitude'=>$latitude,
             'longitude'=>$longitude,
             'overtime'=>$overtime,
-            'is_out_of_range'=>$is_out_of_range
+            'is_out_of_range'=>$is_out_of_range,
+            'latitude_end'=>$latitude_end,
+            'longitude_end'=>$longitude_end
         );
 
 

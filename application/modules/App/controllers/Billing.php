@@ -196,7 +196,7 @@ class Billing extends Application_Controller {
         $checked_id=$this->input->post('item_id[]');
         $currenttab=$this->input->post('currenttab');
         $operation=$this->input->post('operation');
-       // echo 'current tab:: '.$currenttab." Operation:: ".$operation.' ';
+    //    echo 'current tab:: '.$currenttab." Operation:: ".$operation.' ';die;
         if($operation=='delete'){
             //echo 'current tab:: '.$currenttab." Operation:: ".$operation.' '; die;
             $count = 0;
@@ -222,8 +222,8 @@ class Billing extends Application_Controller {
         //$this->load->model('Job_model');
         // get data
         $data['jobs'] = $this->Job_model->get_csv($checked_id);
-       // echo "<pre>";
-        //print_r($data['jobs']);die;
+    //    echo "<pre>";
+        // print_r($data['jobs']);die;
         // file creation
         //ob_start();
          $file = fopen('php://output', 'w');
@@ -232,7 +232,9 @@ class Billing extends Application_Controller {
         $delimiter = ',';
         if(!empty($data['jobs'][0]))
         {
+
             $header = array_keys($data['jobs'][0]);
+            // print_r($header);die;
             /*            $header[1]="user";
             $header[5]="store";
             $header[8]="wine";*/
@@ -241,6 +243,7 @@ class Billing extends Application_Controller {
             $header[2]="Invoice Date";
             $header[3]="Invoice Amount";
             $header[4]="Store Name";
+            // print_r($header);die;
             fputcsv($file, $header,$delimiter);
             foreach ($data['jobs'] as $key=>$line){
                 fputcsv($file,$line);
@@ -617,7 +620,7 @@ class Billing extends Application_Controller {
         $currenttab=$this->input->post('currenttab');
         $operation=$this->input->post('operation');
 
-    //    echo 'current tab:: '.$currenttab." Operation:: ".$operation.' ';
+    //    echo 'current tab:: '.$currenttab." Operation:: ".$operation.' ';die;
         if($operation=='delete'){
             //echo 'current tab:: '.$currenttab." Operation:: ".$operation.' '; die;
             $count = 0;

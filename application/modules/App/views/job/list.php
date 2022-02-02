@@ -430,14 +430,19 @@
                 <!-- for problem all tags -->
                 <?php if($filters['status'] == "problems")
                     {   
-                    if(($item->is_out_of_range == 1 && $item->endtime_state != 1) || ($item->is_out_of_range == 2 && $item->endtime_state != 1)){
-                    ?><a style="margin:2px" href="javascript:void(0)" title="map" onclick="openMap(<?php echo $item->latitude; ?>,<?php echo $item->longitude; ?>, <?php echo $item->store_id; ?> );">
-                        <span style="padding: 5px;" class="label label-warning"><?php 
-                    if($item->is_out_of_range == 2){
-                    echo "Out of Range - End";
-                    }else if($item->is_out_of_range == 1){ ?> <?php
-                    echo " Out of Range - Start";
-                    }?> </span></a> 
+                    if(($item->is_out_of_range == 1 && $item->endtime_state != 1) || ($item->is_out_of_range == 2 && $item->endtime_state != 1) || ($item->is_out_of_range == 3 && $item->endtime_state != 1)){ ?>
+                   <?php if($item->is_out_of_range == 2){ ?>
+                        <a class="btn btn-warning btn-xs" style="margin:2px; width: 105px;" href="javascript:void(0)" title="map" onclick="openMap(<?php echo $item->latitude; ?>,<?php echo $item->longitude; ?>, <?php echo $item->store_id; ?> );">
+                        <span style="padding: 5px;" class="label"><?php echo " Out of Range - End ";?></span></a>
+                   <?php }else if($item->is_out_of_range == 1){ ?>
+                        <a class="btn btn-warning btn-xs" style="margin:2px; width: 105px;" href="javascript:void(0)" title="map" onclick="openMap(<?php echo $item->latitude; ?>,<?php echo $item->longitude; ?>, <?php echo $item->store_id; ?> );">
+                        <span style="padding: 5px;" class="label"><?php echo "Out of Range - Start";?></span></a>
+                    <?php } else if($item->is_out_of_range == 3){ ?>
+                        <a class="btn btn-warning btn-xs" style="margin:2px; width: 105px;" href="javascript:void(0)" title="map" onclick="openMap(<?php echo $item->latitude; ?>,<?php echo $item->longitude; ?>, <?php echo $item->store_id; ?> );">
+                        <span style="padding: 5px;" class="label"><?php echo "Out of Range - Start";?></span></a></br>
+                        <a class="btn btn-warning btn-xs" style="margin:2px; width: 105px;" href="javascript:void(0)" title="map" onclick="openMap(<?php echo $item->latitude_end; ?>,<?php echo $item->longitude_end; ?>, <?php echo $item->store_id; ?> );">
+                        <span style="padding: 5px;" class="label"><?php echo " Out of Range - End ";?></span></a>
+                    <?php } ?> 
                     <?php  }else if($item->job_state == '0'){ ?> 
                         <span class="label label-primary">Accepted</span>
                     <?php }else{?> 
