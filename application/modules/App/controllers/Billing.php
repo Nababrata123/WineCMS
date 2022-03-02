@@ -337,17 +337,25 @@ class Billing extends Application_Controller {
                $store = $this->Job_model->get_store_name_mail($job_id);
                $store_name = $store[0]['store_name'];
                $store_address = $store[0]['store_address'];
-               $salesrep = $this->Job_model->get_mail_selsrep_name($job_id);
-               $salesrep_name = $salesrep->sales_rep_name;
-               $salesrep_email = $salesrep->email;
-     
-            //    print_r($salesrep_email);die;
+
+            //    $salesrep = $this->Job_model->get_mail_selsrep_name($job_id);
+            //    $salesrep_name = $salesrep->sales_rep_name;
+            //    $salesrep_email = $salesrep->email;
+
                $this->load->library('mail_template');
-     
-               $data=$this->archiveJobMailTemplate($job_id, $manager_name, $samplingDate, $tasterName, $startTime, $finish_time, $wineNames,$salesrep_name,$store_name,$store_address);
-               $this->mail_template->email_to_store($salesrep_email, 'Wine Move to archive - '.$samplingDate, $data);
-     
-                // print_r($salesrep_email);die;
+
+               $salesIdArray = explode(',', $$completedJobData->user_id);
+               $this->db->select("email, first_name, last_name");
+               $this->db->from('users');
+               $this->db->where_in('id',$salesIdArray->user_id);
+               $m_result=$this->db->get()->result_array();
+               
+               $salesrep_name='';
+               foreach ($m_result as $res){
+                   $salesrep_name.=$res['first_name']." ".$res['last_name'];
+                   $data=$this->archiveJobMailTemplate($job_id, $manager_name, $samplingDate, $tasterName, $startTime, $finish_time, $wineNames,$salesrep_name,$store_name,$store_address);
+                   $this->mail_template->email_to_store($res['email'], 'Wine Move to archive - '.$samplingDate, $data);
+               }
      
              }
         }
@@ -568,9 +576,6 @@ class Billing extends Application_Controller {
                 $brand_array = explode(",",$userMeta[0]->meta_value);
             }
 
-            // print_r($from_date);
-            // print_r($to_date);
-            // print_r($brand_array);die;
             $data['expense_details']=$this->Job_model->get_brandwise_expense($brand, $from_date, $to_date, $taster, $agency, $store, $sales_rep, $wine_type, $size, $month, $brand_array);
 
         }
@@ -592,9 +597,16 @@ class Billing extends Application_Controller {
             $selected_brand =$this->Users_model->get_selected_brand($brand_name_array);
             $data['wine_type'] = $this->Users_model->get_selected_brand_wine($selected_brand);
             $data['brand']=$selected_brand;
-            // print_r($sales_rep_id);die;
+           
+            if(!empty($sales_rep_id[0])){
+                $data['sales_rep_selected'] = 1;
+                $data['sales_rep']=$this->Users_model->get_sales_rep($sales_rep_id);
+            }else{
+                $data['sales_rep']=$this->Job_model->get_sales_rep();
+                $data['sales_rep_selected'] = 0;
+            }
             // $data['sales_rep']=$sales_rep_name;
-            $data['sales_rep']=$this->Users_model->get_sales_rep($sales_rep_id);
+            
 
         }else{
             $data['brand']=$this->Job_model->get_brand();

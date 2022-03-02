@@ -780,6 +780,7 @@ class Cron extends Application_Controller {
 
     public function wine_ImageUpload_From_server(){
 
+        // echo "Hello";die;
                 // Get Image From Folder..
                 $ImagesArray = [];
                 $file_display = ['jpg', 'jpeg', 'png'];

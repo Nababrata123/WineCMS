@@ -14,7 +14,7 @@ select::-ms-expand {
     <div class="modal-content">
       <div class="modal-header bg-info">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Job Details</h4>
+        <h4 class="modal-title">Job Details N</h4>
       </div>
       
 
@@ -76,14 +76,14 @@ select::-ms-expand {
 					  <?php } ?>
 
             <label for="inputFirstName" class="col-sm-3 control-label">Sales Rep: </label>
-              
-              <?php foreach($sales_rep as $value){?>  
+            <div class="col-sm-3"><?php echo $sales_rep_name; ?></div>
+              <!-- <?php foreach($sales_rep as $value){?>  
                       <?php if($value['id']==$job->user_id){ ?>
                         <div class="col-sm-3"><?php echo $value['last_name']." ".$value['first_name'];?></div>
                       <?php
                       break; 
                       } ?>    
-                <?php } ?>
+                <?php } ?> -->
           </div>
           </div>
 
@@ -100,7 +100,7 @@ select::-ms-expand {
 
             <label class="col-sm-3 control-label">Sales rep phone:</label>
             
-              <div class="col-sm-3"><?php if($sales_rep_details->phone !=''){echo $sales_rep_details->phone;}else{ echo 'N/A'; }?> </div>
+              <div class="col-sm-3"><?php if($sales_rep_details['phone'] !=''){echo $sales_rep_details['phone'];}else{ echo 'N/A'; }?> </div>
                     
             
           </div>
@@ -290,7 +290,7 @@ select::-ms-expand {
             <div class="col-sm-3"><?php if(isset($general_note)){echo $general_note;}else{ echo 'N/A'; }?></div>
 
             <label class="col-sm-3 control-label">Admin note:</label>
-            <div class="col-sm-3"><?php if($sales_rep_details->admin_note != ''){echo $sales_rep_details->admin_note;}else{ echo 'N/A'; }?></div>
+            <div class="col-sm-3"><?php if($sales_rep_details['admin_note'] != ''){echo $sales_rep_details['admin_note'];}else{ echo 'N/A'; }?></div>
 
           </div>
           </div>

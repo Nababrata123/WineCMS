@@ -11,7 +11,7 @@ $current_date=date('Y-m-d', strtotime('yesterday'));
 $current=date("g.i a", time());
 $current_time=date("H:i:s", strtotime($current));
 $current_time = '23:59:00';
-// echo $current;die;
+echo $current;die;
 
 
 $CI->db->select("*");

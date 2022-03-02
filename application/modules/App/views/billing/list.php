@@ -201,7 +201,7 @@
                         ?></td>
 			<!--<td><?php //echo substr($item->admin_note,0,50) ;?></td>-->
 			<td><?php
-				$sales_rep=$this->Job_model->get_user_name($item->user_id);
+				$sales_rep=$this->Job_model->get_salesrep_name($item->user_id);
 				echo $sales_rep;
 			?></td>
 			<?php 

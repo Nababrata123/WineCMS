@@ -236,12 +236,12 @@ input[type=submit] {
 		  	</div> -->
 
 		<div class="form-group">
-			<label for="inputFirstName" class="col-sm-3 control-label">Sales Rep*</label>
+			<label for="inputFirstName" class="col-sm-3 control-label">Sales Rep</label>
 			<!-- <input type="hidden" id="hidden_sales_rep_id" value="<?php if(isset($allinput['user_id']))
 			{ echo $allinput['user_id'];}?>"> -->
 			<div class="col-sm-7">
 					
-					<select name="user_id"  required class="form-control">
+					<select name="user_id" class="form-control">
 					<option value="">Select Sales Rep</option>
 					<?php
 						foreach($sales_rep as $value){

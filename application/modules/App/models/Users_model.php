@@ -242,13 +242,17 @@ class Users_model extends CI_Model {
         if (count($metaData) ==2){
             $salesRep = $metaData[1];
             $salesRepId = $salesRep->meta_value;
-            $this->db->select('CONCAT(users.last_name, " ", users.first_name) as full_name');
-            $this->db->from('users');
-            $this->db->where('users.id',$salesRepId);
-            $this->db->where('users.is_deleted',0);
-            $query = $this->db->get();
-            $sales_rep = $query->result();
-            $result->salesRep = $sales_rep[0]->full_name;
+            if (!empty($salesRepId)){
+                $this->db->select('CONCAT(users.last_name, " ", users.first_name) as full_name');
+                $this->db->from('users');
+                $this->db->where('users.id',$salesRepId);
+                $this->db->where('users.is_deleted',0);
+                $query = $this->db->get();
+                $sales_rep = $query->result();
+                $result->salesRep = $sales_rep[0]->full_name;
+            }else{
+                $result->salesRep = 'N/A';
+            }
         }else{
             $result->salesRep = 'N/A';
         }

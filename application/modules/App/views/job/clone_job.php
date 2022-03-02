@@ -41,17 +41,36 @@
 	<div class="col-sm-6">
       	<fieldset>
     		<legend>Basic Info</legend>
-    		<div class="form-group">
+    		<!-- <div class="form-group">
 		  		<label for="inputFirstName" class="col-sm-3 control-label">Sales Representative</label>
 		  		<div class="col-sm-8">
-                     <input type="text" readonly value="<?php echo $sales_rep;?>" class="form-control">
+                     <input type="text" readonly value="<?php echo $sales_rep;?>" class="form-control"> -->
 		  			<!-- <strong><?php echo $sales_rep;?></strong> -->
-		  		</div>
+		  		<!-- </div>
+		  	</div> -->
+
+			  <div class="form-group">
+		  		<label for="inputPhone" class="col-sm-3 control-label">Store*</label>
+		  		<div class="col-sm-9">
+				  <input type="text" readonly value="<?php echo $store->name;?>" class="form-control">
+				  <input type="hidden" name="store_id" id="store_id" value="<?php echo $store_id;?>">
+			  		<!-- <select name="store_id" class="form-control" onchange="get_tester_wine(this.value);" id="store">
+			  			<option value="">Select store</option>
+			  			<?php
+                           
+                            
+			  				foreach($store as $value){
+			  			?>
+			  			<option value="<?php echo $value['id'];?>" <?php if($value['id']==$job->store_id){echo "selected";}?>><?php echo $value['name'];?></option>
+			  			<?php } ?>
+			  		</select> -->
+			  		<!-- <div class="help-block with-errors"></div> -->
+			  	</div>
 		  	</div>
-            <input type="hidden" name="user_id" value="<?php echo $sales_rep_id;?>">
+
 		  	<div class="form-group">
 		  		<label for="inputFirstName" class="col-sm-3 control-label">Job date*</label>
-		  		<div class="col-sm-8">
+		  		<div class="col-sm-9">
 		  			<input type="text" name="tasting_date" class="form-control datepicker" id="tasting_date" placeholder="Enter job date" value="" readonly>
 		  			<div class="help-block with-errors"></div>
 		  		</div>
@@ -84,7 +103,7 @@
 					<div class="help-block with-errors df"></div>
 				</div>
 				<div class="col-sm-3">
-					<div class="form-group adjustmin" >
+					<!-- <div class="form-group adjustmin" > -->
 						<select name="start_time_minute" class="form-control" id="start_time_minute">
 							<?php
 							for($i=0;$i<=59;$i++){
@@ -99,15 +118,15 @@
 							}
 							?>
 						</select>
-					</div>
+					<!-- </div> -->
 				</div>
 				<div class="col-sm-3">
-					<div class="form-group adjustam">
+					<!-- <div class="form-group adjustam"> -->
 						<select name="time_one" class="form-control" id="time_one">
 							<option value="pm" <?php if(date('A', strtotime($job->start_time))=='PM'){echo "selected";}?> >PM</option>
 							<option value="am" <?php if(date('A', strtotime($job->start_time))=='AM'){echo "selected";}?> >AM</option>
 						</select>
-					</div>
+					<!-- </div> -->
 				</div>
 			</div>
 			<div class="form-group">
@@ -131,7 +150,7 @@
 					<div class="help-block with-errors df"></div>
 				</div>
 				<div class="col-sm-3">
-					<div class="form-group adjustmin" >
+					<!-- <div class="form-group adjustmin" > -->
 						<select name="end_time_minute" class="form-control" id="end_time_minute">
 							<?php
 							for($i=0;$i<=59;$i++){
@@ -146,44 +165,45 @@
 							}
 							?>
 						</select>
-					</div>
+					<!-- </div> -->
 				</div>
 				<div class="col-sm-3">
-					<div class="form-group adjustam">
+					<!-- <div class="form-group adjustam"> -->
 						<select name="time_two" class="form-control" id="time_two">
 							<option value="pm"<?php if(date('A', strtotime($job->end_time))=='PM'){echo "selected";}?> >PM</option>
 							<option value="am" <?php if(date('A', strtotime($job->end_time))=='AM'){echo "selected";}?> >AM</option>
 						</select>
-					</div>
+					<!-- </div> -->
 				</div>
 			</div>
-            <input type="hidden" id="hidden_store_id" value="">
-		  	<div class="form-group">
-		  		<label for="inputPhone" class="col-sm-3 control-label">Store*</label>
-		  		<div class="col-sm-8">
-			  		<select name="store_id" class="form-control" onchange="get_tester_wine(this.value);" id="store">
-			  			<option value="">Select store</option>
+            <!-- <input type="hidden" id="hidden_store_id" value=""> -->
+		  	
+			<div class="form-group">
+		  		<label for="inputFirstName" class="col-sm-3 control-label">Sales Rep*</label>
+                <input type="hidden" id="hidden_sales_rep_id" value="<?php ?>">
+		  		<div class="col-sm-9">
+			  				<select name="user_id[]" required class="form-control chosen-select"  multiple="multiple" data-placeholder="Select Sales Rep" id="sales_Rep">
 			  			<?php
-                           
-                            
-			  				foreach($store as $value){
+			  				foreach($sales_rep as $value){	
 			  			?>
-			  			<option value="<?php echo $value['id'];?>" <?php if($value['id']==$job->store_id){echo "selected";}?>><?php echo $value['name'];?></option>
+						  <option value="<?php echo $value['id'];?>"<?php if(in_array($value['id'],$sales_rep_id)){echo "selected";}?>><?php echo $value['last_name']." ".$value['first_name'];?></option>
+
 			  			<?php } ?>
 			  		</select>
 			  		<div class="help-block with-errors"></div>
 			  	</div>
 		  	</div>
+
 		  	<div class="form-group">
 		  		<label for="inputConfirmPassword" class="col-sm-3 control-label">Admin note</label>
-		  		<div class="col-sm-8">
+		  		<div class="col-sm-9">
 		  			<textarea name="admin_note" class="form-control" id="admin_note"  placeholder="Enter admin note"><?php echo $job->admin_note;?></textarea>
 		  			<div class="help-block with-errors"></div>
 		  		</div>
 		  	</div>
 		  	<div class="form-group">
 		  		<label for="inputConfirmPassword" class="col-sm-3 control-label">Taster note</label>
-		  		<div class="col-sm-8">
+		  		<div class="col-sm-9">
 		  			<textarea name="taster_note" class="form-control" id="taster_note"  placeholder="Enter taster note"><?php echo $job->taster_note;?></textarea>
 		  			<div class="help-block with-errors"></div>
 		  		</div>

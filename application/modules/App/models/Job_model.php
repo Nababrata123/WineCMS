@@ -315,6 +315,7 @@ class Job_model extends CI_Model {
 
     function get_jobdetails($user_id,$job_id)
     {
+       
         if($user_id!='')
         {
             $this->db->select("job.id as job_id, job.taster_id as taster_id, job.agency_taster_id as agency_tester_id,job.endtime_state as is_job_start, job.status,DATE_FORMAT(job.tasting_date, '%d-%m-%Y') as job_date,TIME_FORMAT(start_time, '%h:%i%p') as start_time,TIME_FORMAT(end_time, '%h:%i%p') as end_time,store.id as store_id,store.name as store_name,store.adress as address,store.suite_number as suite_and_apt,store.phone as store_phone,store.latitude as store_latitude,store.longitude as store_longitude,zone.id as zone_id,CONCAT(last_name, ' ',first_name) as sales_rep_name,users.email as sales_rep_email, user_meta.meta_value as sales_rep_phone,job.taster_note, store.wine_sell_type");
@@ -343,9 +344,6 @@ class Job_model extends CI_Model {
         $this->db->where($qr);
         $result=$this->db->get();
         $jobdetails=$result->result_array();
-
-        // echo "<pre>";
-        // print_r($jobdetails);die;
 
        // For Agency Taster Name..
        if (count($jobdetails)>0){
@@ -608,19 +606,26 @@ class Job_model extends CI_Model {
 
            if($filter['search_by_status']=="outOfRangeStart")
            {
+               $outofRange = array(1,3);
                 $this->db->where('job.job_status',4);
                 $this->db->where('job.accept_status',1);
                 $this->db->where('job.status','problems');
-                $this->db->where('job.is_out_of_range',1);
+                // $this->db->where('job.is_out_of_range',1);
+                // $this->db->where('job.is_out_of_range',3);
+                
+                $this->db->where_in('job.is_out_of_range',$outofRange);
+                // $this->db->where('job.is_out_of_range <>',3);
                 $this->db->where('job.job_state <>','0');
            }
 
            if($filter['search_by_status']=="outOfRangeEnd")
            {
+                $outofRange = array(2,3);
                 $this->db->where('job.job_status',4);
                 $this->db->where('job.accept_status',1);
                 $this->db->where('job.status','problems');
-                $this->db->where('job.is_out_of_range',2);
+                // $this->db->where('job.is_out_of_range',2);
+                $this->db->where_in('job.is_out_of_range',$outofRange);
                 $this->db->where('job.job_state <>','0');
            }
 
@@ -1665,8 +1670,8 @@ class Job_model extends CI_Model {
         $result_user = $this->db->get();
        // echo $this->db->last_query();die;
         $user_details=$result_user->result_array();
-        //echo "<pre>";
-        //print_r($user_details);die;
+        // echo "<pre>";
+        // print_r($user_details);die;
         return $user_details;
     }
     function get_sales_rep_details($id)
@@ -2452,6 +2457,7 @@ class Job_model extends CI_Model {
 
     function get_accepted_joblist($tester_id,$todays_job,$serverTime=NULL)
     {
+        // print_r($tester_id);die;
         $previous_date=date('Y-m-d', strtotime('-2 months'));
         $todays_date=date("Y-m-d");
         $this->db->select("job.id as job_id,job.status,job.previous_taster_id,job.job_state,job.ready_for_billing, DATE_FORMAT(job.tasting_date, '%d-%m-%Y') as job_date,TIME_FORMAT(start_time, '%h:%i%p') as start_time,TIME_FORMAT(end_time, '%h:%i%p') as end_time,store.name as store_name,store.adress as address,store.suite_number  as suite_and_apt");
@@ -2459,6 +2465,7 @@ class Job_model extends CI_Model {
         $this->db->group_by('job_accept_reject.job_id');
         $this->db->join('store','job.store_id=store.id');
         $this->db->join('job_accept_reject','job.id=job_accept_reject.job_id');
+
         if(isset($todays_job) && $todays_job==1)
         {
             $this->db->where('job_accept_reject.date',$todays_date);
@@ -3384,6 +3391,7 @@ class Job_model extends CI_Model {
     }
     function get_store_for_sales_rep($sales)
     {
+        // print_r($sales);die;
         $this->db->select('*');
         $this->db->from('store');
         $qr="(store.sales_rep LIKE '%$sales%')";
@@ -3400,7 +3408,6 @@ class Job_model extends CI_Model {
     function get_store_for_wine_tpye($sales, $wineIds)
     {
   
-        
         $wineIdsarray = explode(',', $wineIds);
 
         $this->db->select('flavour');
@@ -3420,11 +3427,21 @@ class Job_model extends CI_Model {
         $queryTrim = rtrim($query,' OR');
         $queryString = $queryTrim.')';
 
+        // For sales rep query..
+        $salesIdsarray = explode(',', $sales);
+        $sales_query='(';
+        foreach($salesIdsarray as $k=>$v){
+            $sales_query.="store.sales_rep like '%$v%' OR ";
+        }
+        $queryTrim = rtrim($sales_query,' OR');
+        $salesQueryString = $queryTrim.')';
+       
         $this->db->select('*');
         $this->db->from('store');
-        $qr="(store.sales_rep LIKE '%$sales%')";
-        //echo $qr;die;
-        $this->db->where($qr);
+
+        // $qr="(store.sales_rep LIKE '%$sales%')";
+        
+        $this->db->where($salesQueryString);
         $this->db->where('store.status','active');
         $this->db->where('store.is_deleted',0);
         $this->db->where($queryString);
@@ -3540,7 +3557,6 @@ class Job_model extends CI_Model {
     function get_brandwise_expense($brand, $from_date, $to_date, $taster, $agency, $store, $sales_rep, $wine_type, $size, $month, $brand_array)
     {
 
-
         //Get wine according to brand
         $this->db->select('wine.id as wine_id, wine.brand, wine.type, wine.name, wine.UOM');
         $this->db->from('wine');
@@ -3549,12 +3565,10 @@ class Job_model extends CI_Model {
             $this->db->where_in('wine.id',$wine_type);
         }
 
-       
         $this->db->where('wine.is_deleted',0);
         $val=$this->db->get();
         $result_wine_arr=$val->result_array();
      
-      
         $selected_wine_id_array=array();
 
         if(count(result_wine_arr)>0){
@@ -3567,10 +3581,13 @@ class Job_model extends CI_Model {
         //End
         $from_date=date('Y-m-d',strtotime($from_date));
         $to_date=date('Y-m-d',strtotime($to_date));
-        $this->db->select("job.id as job_id, job.wine_id as job_wine_id, job.tasting_date, job.working_hour, job.taster_rate, store.name as store_name, CONCAT(ub.last_name,' ',ub.first_name) as sales_rep_name, job.taster_id, job.agency_taster_id");
+        // $this->db->select("job.id as job_id, job.wine_id as job_wine_id, job.tasting_date, job.working_hour, job.taster_rate, store.name as store_name, job.taster_id, job.agency_taster_id, job.user_id");
+        $this->db->select("job.id as job_id, job.wine_id as job_wine_id, job.tasting_date, job.working_hour, job.taster_rate, store.name as store_name, CONCAT(users.last_name,' ',users.first_name) as sales_rep_name, job.taster_id, job.agency_taster_id, job.user_id");
         $this->db->from('job');
         $this->db->join('store','job.store_id=store.id','left');
-        $this->db->join('users ub','job.user_id=ub.id','left');
+        // $this->db->join('users','job.user_id=users.id','left');
+        $this->db->join("users","find_in_set(job.user_id,users.id)<> 0","left",false);
+      
         $this->db->where('job.tasting_date >=',$from_date);
         $this->db->where('job.tasting_date <=',$to_date);
        
@@ -3588,9 +3605,10 @@ class Job_model extends CI_Model {
             $this->db->where_in('job.taster_id',$agency);
         }
 
-        if(count($sales_rep)>0){
-            $this->db->where_in('job.user_id',$sales_rep);
-        }
+        // if(count($sales_rep)>0){
+            // $this->db->where_in('job.user_id',$sales_rep);
+            // $this->db->where('FIND_IN_SET(users.id, job.user_id)');
+        // }
 
         if(count($month)>0){
             $this->db->where_in('MONTH(job.tasting_date)', $month);
@@ -3600,13 +3618,16 @@ class Job_model extends CI_Model {
         $this->db->where('job.is_deleted',0);
         $this->db->order_by('job.tasting_date','DESC');
         $result=$this->db->get()->result_array();
+        $array = array('classesID' => '5,6,7');
+        
+        echo "<pre>";
+        print_r($array);die;
+        print_r($sales_rep);
+        print_r($result);die;
 
         $result_wine = array();
-    // echo "<pre>";
         for($i=0;$i<count($result);$i++)
         {
-
-
             $job_id=$result[$i]['job_id'];
             
             $total_expense_bottles=array();
@@ -3617,7 +3638,6 @@ class Job_model extends CI_Model {
             $this->db->where('completed_job_wine_details.job_id=',$job_id);
             $total_expense_bottles=$this->db->get()->result_array();
 
-
             // From and To Date Job Result Brand Wise Toatal Sampled and Sold Bottles Details..
             $this->db->select('completed_job_wine_details.bottles_sampled, completed_job_wine_details.bottles_sold, completed_job_wine_details.open_bottles_sampled, completed_job_wine_details.wine_id,wine.brand, wine.name as wine_type, wine.UOM as wine_uom, wine.size as wine_size');
             $this->db->from('completed_job_wine_details');
@@ -3626,15 +3646,12 @@ class Job_model extends CI_Model {
             if ($this->session->userdata('role')=='brand_wise_users'){ 
                 $this->db->where_in('wine.brand',$brand_array);
             }
-            // print_r($job_id);
+
             $this->db->where('completed_job_wine_details.job_id=',$job_id);
-          
             $expense_bottles=$this->db->get()->result_array();
 
-            // print_r($expense_bottles);die;
             // Toatal Expense Ammount Calculate...
             $expense_amount=$this->get_expense_amount($job_id);
-            // print_r($expense_amount);die;
             if(!empty($expense_amount))
             {
                 $time = explode(':',$result[$i]['working_hour']);
@@ -3676,14 +3693,26 @@ class Job_model extends CI_Model {
                  }
                  
         }
-// print_r($expense_bottles);die;
+
           if(count($expense_bottles)>0){
+
+            $salesIdArray = explode(',', $result[$i]['user_id']);
+            $this->db->select("email, first_name, last_name");
+            $this->db->from('users');
+            $this->db->where_in('id',$salesIdArray);
+            $m_result=$this->db->get()->result_array();
+            
+            $salesRepName='';
+            foreach ($m_result as $res){
+                $salesRepName.=$res['first_name']." ".$res['last_name'].", ";
+            }
+            $salesRepName=rtrim($salesRepName,", ");
 
             $tastingDate = $result[$i]['tasting_date'];
             $job_id=$result[$i]['job_id'];
             $store_name = $result[$i]['store_name'];
             $result_has_wine=$result[$i]['has_wine'];
-            $sales_rep_name = $result[$i]['sales_rep_name'];
+            $sales_rep_name = $salesRepName;
            
             // Set Individual Wine Details...
             for($a=0;$a<count($expense_bottles);$a++){
@@ -3700,7 +3729,6 @@ class Job_model extends CI_Model {
               $expense_bottles[$a]['has_wine']='yes';
             
               $expense_bottles[$a]['expense_amount'] = '$'.$individual_amount;
-
 
               if(count($selected_wine_id_array)>0 && $expense_bottles[$a]['has_wine'] !='no'){
 
@@ -3752,7 +3780,6 @@ class Job_model extends CI_Model {
              array_push($result_wine,$expense_bottles);
             //End
         }
-        // print_r($result_wine);die;
         return $result_wine;
     }
 
@@ -3805,7 +3832,7 @@ class Job_model extends CI_Model {
        
             $sales_rep_id=$result[$i]['user_id'];
             //get name
-            $sales_rep_name=$this->get_user_name($sales_rep_id);
+            $sales_rep_name=$this->get_salesrep_name($sales_rep_id);
             $result[$i]['sales_rep']=$sales_rep_name;
             
              // Taster & Agency...
@@ -4333,6 +4360,92 @@ function job_log_update($job_id, $log_info)
     
     return $value->result_array();
 }
+
+function get_sales_rep_from_store($storeId)
+{
+  
+    $this->db->select('*');
+    $this->db->from('store');
+    $qr="(store.sales_rep LIKE '%$sales%')";
+    $this->db->where($qr);
+    $this->db->where('store.status','active');
+    $this->db->where('store.is_deleted',0);
+    $this->db->order_by('store.name','ASC');
+    $value=$this->db->get();
+    //echo $this->db->last_query();die;
+    return $value->result_array();
+}
+
+ function get_user_role_new($table_name,$user_id)
+ {
+     $this->db->select('role_id');
+     $this->db->from($table_name);
+     $this->db->where_in('users.id',$user_id);
+     $query = $this->db->get();
+     $user_role=$query->result_array();
+     return $user_role;
+ }
+
+ function get_salesrep_name($id)
+ {
+    $sales_id = explode(',', $id);
+    
+     $this->db->select("CONCAT(last_name, ' ',first_name) as sales_rep_name");
+     $this->db->from('users');
+     $this->db->where_in('id',$sales_id);
+     $result=$this->db->get();
+     $value=$result->result_array();
+
+     if(count($value)>0){
+        $sales_rep_name='';
+        for($i=0;$i<count($value);$i++){
+             $sales_rep_name.=$value[$i]['sales_rep_name'].", ";
+        }
+        $sales_rep_name=rtrim($sales_rep_name,", ");
+        
+        return $sales_rep_name;
+     }   
+ }
+
+ function get_salesrep_phone_new($job_id, $sales_id){
+   
+        $sales_array = explode(',', $sales_id);
+        $this->db->select('user_id,meta_key,meta_value');
+        $this->db->from('user_meta');
+        $this->db->where('user_meta.meta_key','phone');
+        $this->db->where_in('user_meta.user_id',$sales_array);
+        $query = $this->db->get();
+        $result=$query->result_array();
+        
+        if (count($result)>0){
+            $sales_rep_phone='';
+            foreach ($result as $res){
+                $sales_rep_phone.=$res['meta_value'].", ";
+            }
+            $sales_rep_phone=rtrim($sales_rep_phone,", ");
+        }
+
+        $data['phone'] = $sales_rep_phone;
+        $data['admin_note'] = $this->get_admin_note($job_id);
+ 
+    return $data;
+    
+}
+
+function get_multiple_selsrep_name_email($user_id){
+
+    $sales_id = explode(',', $user_id);
+    
+    $this->db->select("CONCAT(last_name, ' ',first_name) as sales_rep_name, email");
+    $this->db->from('users');
+    $this->db->where_in('id',$sales_id);
+    $result=$this->db->get();
+    $sales_rep_result=$result->result_array();
+
+       return $sales_rep_result;
+    
+}
+
 
 }
 /* End of file user_model.php */

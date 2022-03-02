@@ -196,18 +196,31 @@
               <?php }else{?>
                 <div class="col-sm-3">
                   <div class="form-group" style="width:100%;">
-                  <label for="inputName">Sales rep </label><br />
+                  <?php if ($sales_rep_selected == 1) {?>
+                    <label for="inputName">Sales rep </label><br />
                    <select name="sales_rep[]" id="sales_rep" class="selectpicker disabled">
                     <?php 
                         foreach($sales_rep as $val)
                         {
-                          // print_r($val);die;
                     ?>
                      <option value="<?php echo $val['id'];?>" <?php echo "selected";?>><?php echo $val['last_name']." ".$val['first_name'];?></option>
                      
 
                   <?php }?>
                 </select>
+                    <?php } else {?>
+                      <label for="inputName">Sales rep </label><br />
+                      <select name="sales_rep[]" id="sales_rep" class="selectpicker" multiple data-live-search="true" data-live-search-placeholder="Search" data-actions-box="true">
+                    <?php 
+                        foreach($sales_rep as $val)
+                        {
+                    ?>
+                    <!-- <option value="<?php echo $val['id'];?>"><?php echo $val['last_name']." ".$val['first_name'];?></option> -->
+                    
+                      <option value="<?php echo $val['id'];?>" <?php if(count($filter['sales_rep'])>0){ foreach($filter['sales_rep'] as $salesrep_id){ if($salesrep_id==$val['id']){echo "selected"; break;}}}?>><?php echo $val['last_name']." ".$val['first_name'];?></option>
+                <?php }?>
+                </select>
+                  <?php }?>
                </div>
               </div> 
              <?php }?>

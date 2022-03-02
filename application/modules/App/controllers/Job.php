@@ -176,15 +176,11 @@ class Job extends Application_Controller {
             $filter['status'] = $status;
             $pegination_uri['status'] = $status;
         }
-
-        // print_r($pegination_uri);
-        // print_r($filter);
+;
         // Get the total rows without limit
         $total_rows = $this->Job_model->get_job_list($filter, null, null, true);
-        // print_r($total_rows);die;
+     
        $config = $this->init_pagination('App/Job/index/'.$this->uri->assoc_to_uri($pegination_uri).'/page/' ,25, $total_rows); 
-
-        // print_r($config);die;
       
         $limit_end = ($page * $config['per_page']) - $config['per_page'];
         if ($limit_end < 0){
@@ -193,9 +189,10 @@ class Job extends Application_Controller {
         $filter['limit'] = $config['per_page'];
         $filter['offset'] = $limit_end;
  
+        // print_r($filter['offset']);die;
         // Get the jobs List
         $data['jobs'] = $this->Job_model->get_job_list($filter, '', '');
-        // print_r(count($data['jobs']));
+
         /* Pre assigned jobs */
         // $data['count_pre_assigned']=$this->Job_model->count_job('job',1);
         /* assigned jobs */
@@ -205,12 +202,9 @@ class Job extends Application_Controller {
         /* problems jobs */
         $data['count_problems']=$this->Job_model->count_job('job',4);
 
-        // print_r(count($data['count_pre_assigned']));'</br>';die;
-        // print_r(count($data['count_assigned']));'</br>';die;
-        // print_r(count($data['count_accepted']));'</br>';die;
         // $data['jobs_count']= $data['count_pre_assigned']+ $data['count_assigned']+$data['count_accepted'];
         $data['jobs_count'] = $total_rows;
-        // print_r($data['jobs_count']);die;
+       
         //Get tester according to zone for 
 		
         $data['taster']=$this->Job_model->get_taster();
@@ -356,7 +350,7 @@ class Job extends Application_Controller {
 
             $this->session->set_userdata('inputdata',$newdata);
 
-    		$this->form_validation->set_rules('user_id', 'Sales representative', 'trim|required');
+    		// $this->form_validation->set_rules('user_id', 'Sales representative', 'trim|required');
 			$this->form_validation->set_rules('tasting_date', 'Tasting date', 'trim|required');
             $this->form_validation->set_rules('start_time_hour', 'Start time', 'trim|required');
 	    	$this->form_validation->set_rules('end_time_hour', 'End time', 'trim|required');
@@ -380,6 +374,7 @@ class Job extends Application_Controller {
     		{
                 
     			$user_id = $this->input->post('user_id');
+                
                 $tasting_date = date("Y-m-d",strtotime($this->input->post('tasting_date')));
 
                 if($this->input->post('start_time_hour')!='')
@@ -458,8 +453,18 @@ class Job extends Application_Controller {
                 $exp_reason=$this->input->post('exp_reason');
                 $taster_note = $this->input->post('taster_note');
               
+                  //Make user_Id array to string
+                  $userId='';
+                  if(!empty($user_id))
+                  {
+                      for($i=0;$i<count($user_id);$i++)
+                      {
+                          $userId.=$user_id[$i].",";
+                      }
+                      $userId=rtrim($userId,",");
+                  } 
          
-                $job['user_id']=$user_id;
+                $job['user_id']=$userId;
                 $job['tasting_date']=$tasting_date;
                 $job['start_time']=$start_time;
                 $job['end_time']=$end_time;
@@ -497,11 +502,11 @@ class Job extends Application_Controller {
                 $job['agency_taster_id']=$agency_taster_id;
 
                 //Get user role
-                $user_role=$this->Job_model->get_user_role('users',$user_id);
-                if($user_role==3)
+                $user_role=$this->Job_model->get_user_role_new('users',$user_id);
+              /*  if($user_role==3)
                 {
                     $job['confirm_status']=1;
-                }
+                }*/
 
                 //Get user role
                 $user_role=$this->Job_model->get_user_role('users',$taster_id);
@@ -745,17 +750,24 @@ class Job extends Application_Controller {
                     $job['status']=$status;
                     
                     //Get user role
-                    $user_role=$this->Job_model->get_user_role('users',$user_id);
-                    if($user_role==3)
+                    $user_role=$this->Job_model->get_user_role_new('users',$user_id);
+                    // echo "<pre>";
+                    // print_r($user_role);die;
+
+                    // If it is needed then open. 23-02-2022
+                   /* if($user_role==3)
                     {
                         $job['confirm_status']=1;
-                    }
+                    }*/
     
                     if (!empty($job))
                     {
                         if($count_job == 0)
                         {
                             //echo "u";die;
+                            // echo "<pre>";
+                            // print_r($job);die;
+
                             $insert_id=$this->Job_model->create_job('job',$job);
                             if($insert_id)
                             {
@@ -828,7 +840,7 @@ class Job extends Application_Controller {
         //Get sales representative
         $data['sales_rep']=$this->Job_model->get_sales_rep();
         //get store
-        $data['store']=$this->Job_model->get_store();
+        // $data['store']=$this->Job_model->get_store();
         //get wine
         
         $data['wine']=$this->Job_model->get_all_wine();
@@ -839,6 +851,7 @@ class Job extends Application_Controller {
         $data['page'] = 'add_job';
         $data['page_title'] = SITE_NAME.' :: Job Management &raquo; Add Job';
         //Get sales representative
+        // print_r($id);die;
         if($id!=0){
             $data['sales_rep']=$this->Job_model->get_sales_rep_by_store_id($id);
         }else{
@@ -848,7 +861,7 @@ class Job extends Application_Controller {
         if($id!=0){
             $data['store']=$this->Job_model->get_store_by_id($id);
         }else{
-        $data['store']=$this->Job_model->get_store(); 
+            $data['store']=$this->Job_model->get_store(); 
         }
         //get wine
         if($id!=0){
@@ -871,6 +884,9 @@ class Job extends Application_Controller {
         // For testing..
         $data['get_wine_info']=$this->Job_model->get_wines_sampled_sold_details(0);
         // $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_all_wine()), true);
+
+        // echo "<pre>";
+        // print_r($data['store']);die;
 
 		$data['main_content'] = 'job/addjob';
     	$this->load->view(TEMPLATE_PATH, $data);
@@ -1821,6 +1837,7 @@ class Job extends Application_Controller {
 
             $this->load->view('job/job_start_edit_job_modal',$data);
         }else{
+            // echo $sales_rep_id;die;
             $data['store']=$this->Job_model->get_store_for_wine_tpye($sales_rep_id, $data['job']->wine_id);
             $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_wine($storeId)), true);
             $wineList=json_decode(json_encode($this->Job_model->get_wine_names($wineIdArray)), true);
@@ -2532,6 +2549,8 @@ class Job extends Application_Controller {
         $hidden_store_id=$this->input->post('hidden_store_id');
         $data['hidden_store']=$hidden_store_id;
         $data['store']=$this->Job_model->get_store_for_sales_rep($sales_rep_id);
+        // $data['store']=$this->Job_model->get_sales_rep_by_store_id(5328);
+       
         $this->load->view('job/get_store', $data);
     }
     /**
@@ -2589,6 +2608,8 @@ class Job extends Application_Controller {
            $entry_date = $this->clean_value($this->input->post('entry_date'));
            $status = $this->input->post('status');
 
+        //    echo $search_by_status;die;
+        //    echo $status;die;
             $url = "App/Job/index/";
 
             if ($status == "problems"){
@@ -2950,9 +2971,22 @@ class Job extends Application_Controller {
             //if the form has passed through the validation
             if ($this->form_validation->run())
             {
+                
                 $user_id=$this->input->post('user_id');
                 $tasting_date = date("Y-m-d",strtotime($this->input->post('tasting_date')));
                 $store_id=$this->input->post('store_id');
+
+                // print_r($store_id);die;
+                //Make user_Id array to string
+                $userId='';
+                if(!empty($user_id))
+                {
+                    for($i=0;$i<count($user_id);$i++)
+                    {
+                        $userId.=$user_id[$i].",";
+                    }
+                    $userId=rtrim($userId,",");
+                } 
 
                 if($this->input->post('start_time_hour')!='')
                 {
@@ -3027,32 +3061,12 @@ class Job extends Application_Controller {
                     $job_status=1;
                 }
 
-                /*
-                if ($taster == 'agency'){
-                    if($taster_id!='')
-                    {
-                        $status='pending';
-                        $job_status=1;
-                    }
-                }else{
-                    if($taster_id!='')
-                    {
-                        $status='assigned';
-                        $job_status=2;
-                    }
-                    else
-                    {
-                        $status='pending';
-                        $job_status=1;
-                    }
-                }*/
-
                 $job = array(
-                    'user_id' => htmlspecialchars($user_id, ENT_QUOTES, 'utf-8'),
+                    'user_id' => $userId,
                     'tasting_date' => htmlspecialchars($tasting_date, ENT_QUOTES, 'utf-8'),
                     'start_time' => htmlspecialchars($start_time, ENT_QUOTES, 'utf-8'),
                     'end_time' => htmlspecialchars($end_time, ENT_QUOTES, 'utf-8'),
-                    'store_id' => htmlspecialchars($this->input->post('store_id'), ENT_QUOTES, 'utf-8'),
+                    'store_id' => htmlspecialchars($store_id, ENT_QUOTES, 'utf-8'),
                     'admin_note' => htmlspecialchars($this->input->post('admin_note'), ENT_QUOTES, 'utf-8'),
                     'taster_note' => htmlspecialchars($this->input->post('taster_note'), ENT_QUOTES, 'utf-8'),
                     'taster_id' => $taster_id,
@@ -3061,14 +3075,6 @@ class Job extends Application_Controller {
                     'status'=> $status,
                     'job_status'=>$job_status,
                 );
-
-                /*
-                if($end_time < $start_time)
-                {
-                    $this->session->set_flashdata('message_type', 'danger');
-                    $this->session->set_flashdata('message', '<strong>Oh snap!</strong> End time should be greater that start time.');
-                    redirect('/App/job/clone_job/'.$job_id);
-                }*/
 
                 //if the insert has returned true then we show the flash message
                 //Check job for same store and same time
@@ -3131,17 +3137,22 @@ class Job extends Application_Controller {
         //get details of job
         $data['job']  = $this->Job_model->job_details($job_id);
         $sales_rep_id=$data['job']->user_id;
-        $data['sales_rep_id']=$sales_rep_id;
-        $data['store']=$this->Job_model->get_store_for_sales_rep($sales_rep_id);
+        $data['sales_rep_id']=explode(',', $sales_rep_id);
+        // $data['store']=$this->Job_model->get_store_for_sales_rep($sales_rep_id);
+        $data['store']=$this->Job_model->get_store_name($data['job']->store_id);
+
         //get wine
-        $store_id=$data['job']->store_id;
-        $data['wine']=$this->Job_model->get_wine($store_id);
+        // $store_id=$data['job']->store_id;
+        $data['store_id']=$data['job']->store_id;
+        $data['wine']=$this->Job_model->get_wine($data['job']->store_id);
         //get tester or agency
         $data['tester']=$this->Job_model->get_tester_or_agency($job_id);
         //get question answers
         $data['question_answers']=$this->Job_model->get_question_answers();
         //Get sales representaive name
-        $data['sales_rep']=$this->Job_model->get_user_name($data['job']->user_id);
+        $data['sales_rep']=$this->Job_model->get_sales_rep_by_store_id($data['job']->store_id);
+        // $data['sales_rep']=$this->Job_model->get_user_name($data['job']->user_id);
+
         if (!is_numeric($job_id) || $job_id == 0 || empty($data['job'])) {
             redirect('/App/job');
         }        
@@ -3201,6 +3212,17 @@ class Job extends Application_Controller {
 		foreach($data['wine'] as $win){
 			$html['wineHtml'].='<option value="'.$win->id.'">'.$win->name.'</option>';
 		}
+
+        //Sales Rep
+        $data['sales_rep']=$this->Job_model->get_sales_rep_by_store_id($store_id);
+        // echo "<pre>";
+        // print_r($data['sales_rep']);die;
+         //Sales html
+            // foreach($data['sales_rep'] as $sales){
+            //     $name = $sales['last_name']." ".$sales['first_name'];
+            //     $html['salesHtml'].='<option value="'.$sales['id'].'">'.$name.'</option>';
+            // }
+        
 		echo json_encode($html);
     }
     
@@ -3212,6 +3234,7 @@ class Job extends Application_Controller {
         $data['job']  = $this->Job_model->job_details($job_id);
         
         $sales_rep_id=$data['job']->user_id;
+        // print_r($sales_rep_id);die;
 
         $taster_id=$data['job']->taster_id;
         $agency_taster_id=$data['job']->agency_taster_id;
@@ -3287,17 +3310,18 @@ class Job extends Application_Controller {
             $data['store']=json_decode(json_encode($this->Job_model->get_store()), true);
             $data['expense_details']=$this->Job_model->get_expense_details($job_id);
              $data['general_note']=$this->Job_model->get_general_note($job_id);
-             $data['sales_rep']=$this->Job_model->get_sales_rep();
+            //  $data['sales_rep']=$this->Job_model->get_sales_rep();
 
              $data['get_wine_info']=$this->Job_model->get_wines_sampled_sold_details($job_id);
         
              $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_all_wine()), true);
              $data['expence_amount']=$this->Job_model->get_expense_amount($job_id);
              $data['manager_verification_details']=$this->Job_model->get_manager_verification_details($job_id);
-             $data['sales_rep_details']=$this->Job_model->get_salesrep_phone($job_id);
-             
-            //echo "<pre>";
-            // print_r($data);die;
+            //  $data['sales_rep_details']=$this->Job_model->get_salesrep_phone($job_id);
+            
+            $data['sales_rep_details']=$this->Job_model->get_salesrep_phone_new($job_id,$sales_rep_id);
+             $data['sales_rep_name']=$this->Job_model->get_salesrep_name($sales_rep_id);
+
             $this->load->view('billing/completed_view_details_modal',$data);
         }else{
             $data['store']=$this->Job_model->get_store_for_sales_rep($sales_rep_id);
@@ -3604,5 +3628,40 @@ class Job extends Application_Controller {
         // $content = file_get_contents($file);
         // $content .= "\r\n" .$emailFPay;
         // file_put_contents($file, $content);
+    }
+
+    public function get_sales_rep_for_store()
+    {
+        $store_id=$this->input->post('store_id');
+        $data['sales_rep']=$this->Job_model->get_sales_rep_by_store_id($store_id);
+        $html['salesHtml'] = '';
+        if (count($data['sales_rep'])>0){
+            foreach($data['sales_rep'] as $sales){
+                $name = $sales['last_name']." ".$sales['first_name'];
+                $html['salesHtml'].='<option value="'.$sales['id'].'">'.$name.'</option>';
+            }
+        }
+
+        $data['tester']=$this->Job_model->get_tester_or_agency_ajax($store_id);
+		$data['wine']=$this->Job_model->get_wine($store_id);
+		// create dynamic taster and wine html
+		$html['tasHtml']='<option value="">Select a taster</option>';
+		$html['wineHtml']='';
+		foreach($data['tester'] as $tes){
+			$role_id=$this->Job_model->get_user_role('users',$tes['id']);
+			if($role_id=='5')
+			{
+				$name=$this->Job_model->get_agency_name('user_meta',$tes['id']);
+			}else{
+				$name = $tes['last_name']." ".$tes['first_name'];
+			}
+			$html['tasHtml'].='<option value="'.$tes['id'].'">'.$name.'</option>';
+		}
+		//wine html
+		foreach($data['wine'] as $win){
+			$html['wineHtml'].='<option value="'.$win->id.'">'.$win->name.'</option>';
+		}
+       
+		echo json_encode($html);
     }
 }

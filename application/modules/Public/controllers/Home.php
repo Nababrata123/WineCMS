@@ -467,14 +467,22 @@ class Home extends Front_Controller {
 		$store = $this->Job_model->get_store_name_mail($job_id);
        $store_name = $store[0]['store_name'];
        $store_address = $store[0]['store_address'];
-       $salesrep = $this->Job_model->get_mail_selsrep_name($job_id);
-       $salesrep_name = $salesrep->sales_rep_name;
-		$this->db->select("email, first_name");
-		$this->db->from('users');
-		$this->db->where('id',$completedJobData->user_id);
-		$m_result=$this->db->get()->row_array();
 
-			// print_r($_POST);die;
+    //    $salesrep = $this->Job_model->get_mail_selsrep_name($job_id);
+    //    $salesrep_name = $salesrep->sales_rep_name;
+	   
+	    $salesIdArray = explode(',', $completedJobData->user_id);
+		$this->db->select("email, first_name, last_name");
+		$this->db->from('users');
+		$this->db->where_in('id',$salesIdArray);
+		$m_result=$this->db->get()->result_array();
+		
+		$salesrep_name='';
+		foreach ($m_result as $res){
+			$salesrep_name.=$res['first_name']." ".$res['last_name'].", ";
+		}
+		$salesrep_name=rtrim($salesrep_name,", ");
+
 			$stars = $this->input->post('rating');
 			$feedback = $this->input->post('feedback');
 			if($feedback==''){
@@ -490,12 +498,21 @@ class Home extends Front_Controller {
 
 			// print_r($insData);die;
 			if ($this->db->insert('job_rating', $insData)) {
-
-				$dataforsalesrep = $this->jobRatingMailTemplate($job_id, $m_result['first_name'], $tastingDate, $data['tasterName'], $data['job_start_time'], $data['finish_time'], $data['wineNames'], $store_name, $store_address, $salesrep_name, $stars, $feedback);
+	
 
 				$dataforadmin = $this->jobRatingMailTemplate($job_id, 'Admin', $tastingDate, $data['tasterName'], $data['job_start_time'],$data['finish_time'], $data['wineNames'], $store_name, $store_address, $salesrep_name, $stars, $feedback);
-				$salesRepMailAddress = $m_result['email'];
-				$this->email_to_user($salesRepMailAddress, 'Wine Sampling - '.$tastingDate, $dataforsalesrep);
+				// $salesRepMailAddress = $m_result['email'];
+
+				foreach ($m_result as $res){
+
+					$salesFirstName = $res['first_name'];
+					$salesrepName.=$res['first_name']." ".$res['last_name'];
+
+					$dataforsalesrep = $this->jobRatingMailTemplate($job_id, $salesFirstName, $tastingDate, $data['tasterName'], $data['job_start_time'], $data['finish_time'], $data['wineNames'], $store_name, $store_address, $salesrepName, $stars, $feedback);
+
+					$this->email_to_user($res['email'], 'Wine Sampling - '.$tastingDate, $dataforsalesrep);
+				}
+
 				// $this->email_to_user('rr.avalgate@gmail.com', 'Wine Sampling - '.$tastingDate, $dataforadmin); //admin mail for Development.
 				$this->email_to_user('fraidy@thekgroupny.com', 'Wine Sampling - '.$tastingDate, $dataforadmin); //admin mail for Clone Live.
 				//$this->email_to_user('tastingresults@gmail.com', 'Wine Sampling - '.$tastingDate, $dataforadmin); //admin mail for Live.

@@ -232,14 +232,24 @@ class Store_model extends CI_Model {
     public function get_store_list_for_csv($items_to_export)
     {
         $ids = array();
-        foreach($items_to_export as $key=>$val) {
-         array_push($ids, $key);
+     
+        if (!empty($items_to_export)){
+            foreach($items_to_export as $key=>$val) {
+                array_push($ids, $key);
+               }
         }
+        
         $this->db->select('store.id,store.name,store.adress as address,store.suite_number,store.city,store.state,store.zipcode,store.phone,store.email,store.account_number,store.special_request,zone.id as zone,store.sales_rep, store.wine_sell_type as product_type');
         $this->db->from('store');
         $this->db->join('zone', 'store.zone = zone.id AND zone.is_deleted=0', 'left ');
-        //$this->db->where('store.is_deleted',0);
-        $this->db->where_in('store.id',$ids);
+        
+        if(!empty($ids)){
+            $this->db->where_in('store.id',$ids);
+        }else{
+            $this->db->where('store.is_deleted',0);
+            $this->db->order_by('store.id', 'desc');
+        }
+        
         $query = $this->db->get();
         $store_result = $query->result_array();
    

@@ -168,6 +168,8 @@
 						<button type="submit" name="operation" value="inactive" class="btn btn-sm btn-warning"><span class="glyphicon glyphicon-ban-circle"></span> Deactivate</button>
 						<button type="submit" name="operation" value="delete" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete the Stores?')"><span class="glyphicon glyphicon-trash"></span> Delete</button>
                         <button type="submit" name="operation" value="export" class="btn btn-sm btn-info">Export to csv</button>
+						<button type="" name="" value="" class="btn btn-sm btn-primary" onclick="export_store_list();">Export to all store</button>
+						<!-- <a class="btn btn-info btn-xs" href="javascript:void(0)" title="View" onclick="export_store_list()"> <span class="glyphicon glyphicon-eye-open"></span> Export to all csv </a> -->
 					</td>
 				</tr>
         </table>
@@ -276,8 +278,9 @@ var from_begining='<?php echo $this->session->userdata("from_begining")?>';
 //alert(from_begining);
 if(from_begining=='yes')
 {
+	
 	$('#user-table').DataTable({
-		  "processing": true,
+		"processing": true,
 		"serverSide": true,
 		"iDisplayLength": 50,
 		"lengthMenu": [10, 20, 50, 100, 500],
@@ -296,8 +299,9 @@ if(from_begining=='yes')
 }
 else
 {
+	// alert('abc');
 	$('#user-table').DataTable({
-		  "processing": true,
+		"processing": true,
 		"serverSide": true,
 		"iDisplayLength": 50,
 		"lengthMenu": [10, 20, 50, 100, 500],
@@ -306,7 +310,7 @@ else
 			"dataType": "json",
 			"type": "POST",
 		},
-		"stateSave": true,
+		"stateSave": false,
 		"bSort" : false
 		/* "columnDefs": [ {
 			'targets': [0,3,4,5], // column index (start from 0)
@@ -316,6 +320,12 @@ else
 }
 
 });
+
+function export_store_list(){
+	url = "<?php echo base_url('App/store/export_all_store');?>"
+    window.location.href = url;
+}
+
 </script>
 <style>
 

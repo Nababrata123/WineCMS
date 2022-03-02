@@ -76,15 +76,8 @@ select::-ms-expand {
 					  <?php } ?>
 
             <label for="inputFirstName" class="col-sm-3 control-label">Sales Rep: </label>
-              
-              <?php foreach($sales_rep as $value){?>  
-                      <?php if($value['id']==$job->user_id){ ?>
-                        <div class="col-sm-3"><?php echo $value['last_name']." ".$value['first_name'];?></div>
-                      <?php
-                      break; 
-                      } ?>    
-                <?php } ?>
-            
+            <div class="col-sm-3"><?php echo $sales_rep_name; ?></div>
+             
           </div>
           </div>
 

@@ -633,9 +633,11 @@ class Store extends Application_Controller {
 
 
     public function update_status() {
+       
         $this->session->set_userdata('from_begining','no');
     	if ($this->input->server('REQUEST_METHOD') === 'POST')
     	{
+          
     		//form validation
     		$this->form_validation->set_rules('operation', 'Operation', 'required');
     		$this->form_validation->set_rules('item_id[]', 'User', 'trim|required');
@@ -645,7 +647,7 @@ class Store extends Application_Controller {
     		//if the form has passed through the validation
     		if ($this->form_validation->run())
     		{
-    			//print "<pre>"; print_r($_POST);die;
+             
     			$count = 0;
     			$items = $this->input->post('item_id');
                 
@@ -653,17 +655,15 @@ class Store extends Application_Controller {
                 if($operation=='export')
                 {
                     $items_to_export = $this->input->post('item_id[]');
-                    //echo "<pre>";
-                    //print_r($items_to_export);die;
+                
                     $filename = 'report_export_store_'.date('m-d-Y-His').'.csv';
 					header('Content-Type: text/html; charset=UTF-8');
                     header("Content-Description: File Transfer");
-
                     header("Content-Disposition: attachment; filename=$filename");
+                    header("Content-Type: application/csv; "); 
 
-                    //header("Content-Type: application/csv; "); 
                     $data['students'] =  $this->Store_model->get_store_list_for_csv($items_to_export);
-                    
+                  
                      $file = fopen('php://output', 'w');
 
                     $delimiter = ',';
@@ -671,7 +671,6 @@ class Store extends Application_Controller {
                     {
                         $header = array_keys($data['students'][0]);
                         //$header[0]='SL No';
-                        
                         
                         fputcsv($file, $header,$delimiter);
 						//print_r($data['students']);die;
@@ -744,6 +743,68 @@ class Store extends Application_Controller {
     		}
     		redirect('/App/store');
     	}
+    }
+
+
+    public function export_all_store() {
+        // print_r("Hello");die;
+        $this->session->set_userdata('from_begining','no');
+ 
+        $count = 0;
+        $items = $this->input->post('item_id');
+        $operation = $this->input->post('operation');
+        $items_to_export = $this->input->post('item_id[]');
+        $filename = 'report_export_store_'.date('m-d-Y-His').'.csv';
+        
+        header('Content-Type: text/html; charset=UTF-8');
+        header("Content-Description: File Transfer");
+        header("Content-Disposition: attachment; filename=$filename");
+        header("Content-Type: application/csv; "); 
+
+        $data['students'] =  $this->Store_model->get_store_list_for_csv($items_to_export);
+
+        $file = fopen('php://output', 'w');
+
+        $delimiter = ',';
+        if(!empty($data['students'][0]))
+        {
+            $header = array_keys($data['students'][0]);
+
+            fputcsv($file, $header,$delimiter);
+            //print_r($data['students']);die;
+            foreach ($data['students'] as $key=>$line){							
+                if(isset($line['name']))
+                $line['name']=htmlspecialchars_decode($line['name']);
+                if(isset($line['address']))                         
+                $line['address']=htmlspecialchars_decode($line['address']);
+                if(isset($line['suite_number']))                            
+                $line['suite_number']=htmlspecialchars_decode($line['suite_number']);
+                if(isset($line['city']))                            
+                $line['city']=htmlspecialchars_decode($line['city']);
+                if(isset($line['state']))                           
+                $line['state']=htmlspecialchars_decode($line['state']);
+                if(isset($line['zipcode']))                         
+                $line['zipcode']=htmlspecialchars_decode($line['zipcode']); 
+                if(isset($line['phone']))                       
+                $line['phone']=htmlspecialchars_decode($line['phone']);
+                if(isset($line['account_number']))                          
+                $line['account_number']=htmlspecialchars_decode($line['account_number']);
+                if(isset($line['special_request']))                         
+                $line['special_request']=htmlspecialchars_decode($line['special_request']); 
+                if(isset($line['zone']))                        
+                $line['zone']=htmlspecialchars_decode($line['zone']);
+                if(isset($line['product_type']))                            
+                $line['product_type']=htmlspecialchars_decode($line['product_type']);
+                if(isset($line['sales_rep']))                           
+                $line['sales_rep']=htmlspecialchars_decode($line['sales_rep']); 
+                fputcsv($file,$line);
+            }
+        }
+        fclose($file);
+        
+        exit;
+
+    redirect('/App/store');
     }
 
 
