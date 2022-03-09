@@ -1854,7 +1854,8 @@ class Job extends Application_Controller {
             }
            
            $data['get_wine_info'] =  $wineInfo;
-
+        //    echo "<pre>";
+        //    print_r($job->store_id);die;
             $this->load->view('job/edit_job_modal',$data);
         }
     }
@@ -3318,7 +3319,8 @@ class Job extends Application_Controller {
              $data['expence_amount']=$this->Job_model->get_expense_amount($job_id);
              $data['manager_verification_details']=$this->Job_model->get_manager_verification_details($job_id);
             //  $data['sales_rep_details']=$this->Job_model->get_salesrep_phone($job_id);
-            
+            echo "<pre>";
+            print_r($data['manager_verification_details']);die;
             $data['sales_rep_details']=$this->Job_model->get_salesrep_phone_new($job_id,$sales_rep_id);
              $data['sales_rep_name']=$this->Job_model->get_salesrep_name($sales_rep_id);
 

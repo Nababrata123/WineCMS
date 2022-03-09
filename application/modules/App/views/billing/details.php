@@ -44,7 +44,7 @@
             <label class="col-sm-2 control-label">Signature:</label>
             <div class="col-sm-4">
               <?php
-                if(!empty($signature_and_comment)){
+                if(!empty($signature_and_comment->signature_img)){
               ?>
               <!-- <img src="<?php //echo BASE_URL.DIR_SIGNATURE_IMAGE.$signature_and_comment->signature_img;?>"> -->
                 <img src="<?php echo "https://img245.managed.center/".$signature_and_comment->signature_img;?>">
@@ -52,7 +52,7 @@
                 }
                 else
                 {
-                  echo "No signature";
+                  echo "No image available";
                 }
               ?>
                 

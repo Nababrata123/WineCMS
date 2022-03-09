@@ -173,7 +173,7 @@ select::-ms-expand {
           <div class="row">
             <label for="inputPhone" class="col-sm-3 control-label">Signature Image:</label>
            
-            <?php if(isset($manager_verification_details[0]['signature_img']))
+            <?php if(!empty($manager_verification_details[0]['signature_img']))
           {
           ?>
         

@@ -406,6 +406,8 @@ class Billing extends Application_Controller {
         $this->load->model('Job_model');
         $job_id=$this->input->post('job_id');
         $data['more_job_info']=$this->Job_model->get_more_job_info($job_id);
+        echo "<pre>";
+        print_r($data);die;
         $this->load->view('billing/more_info',$data);
    }
    public function question_answers()

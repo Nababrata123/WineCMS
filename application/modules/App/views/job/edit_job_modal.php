@@ -258,6 +258,8 @@
           </div>
         </div>
         </div>
+
+        <!-- <input type="hidden" id="store" name="store_id" readonly value="<?php echo $job->store_id;?>" class="form-control"> -->
         
         <div class="form-group">
           <label for="inputPhone" class="col-sm-3 control-label">Store</label>

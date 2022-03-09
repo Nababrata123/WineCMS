@@ -220,13 +220,16 @@ class Job_model extends CI_Model {
     function get_more_job_info($job_id)
     {
         // echo $job_id;die;
-        $this->db->select("DATE(job.tasting_date) as sampling_date, CONCAT_WS(' ',ua.last_name,ua.first_name) as taster_name, store.name as store_name, store.zipcode as store_zipcode, store.adress as address, job.wine_id as wine, job.start_time, job.end_time, job.working_hour, job.taster_id, job.agency_taster_id, job.taster_rate, job.job_start_time as actual_start_time, job.finish_time as actual_end_time, CONCAT_WS(' ',ub.last_name,ub.first_name) as sales_rep_name");
+        $this->db->select("DATE(job.tasting_date) as sampling_date, CONCAT_WS(' ',ua.last_name,ua.first_name) as taster_name, store.name as store_name, store.zipcode as store_zipcode, store.adress as address, job.wine_id as wine, job.start_time, job.end_time, job.working_hour, job.taster_id, job.agency_taster_id, job.taster_rate, job.job_start_time as actual_start_time, job.finish_time as actual_end_time, CONCAT_WS(' ',ub.last_name,ub.first_name) as sales_rep_name, job.user_id");
         $this->db->from('job');
         $this->db->join('users ua','job.taster_id=ua.id','left');
         $this->db->join('store','job.store_id=store.id','left');
         $this->db->join('users ub','job.user_id=ub.id','left');
         $this->db->where('job.id',$job_id);
         $result=$this->db->get()->row();
+
+        $salesRepName = $this->get_salesrep_name($result->user_id);
+        $result->sales_rep_name = $salesRepName;
         // echo "<pre>";
         // print_r($result);die;
         //Get sampling details
@@ -481,6 +484,27 @@ class Job_model extends CI_Model {
         $this->db->where('job_id',$job_id);
         $user_role=$this->db->get()->row('general_note');
         return $user_role;
+    }
+
+    function get_salesrep_name($id)
+    {
+       $sales_id = explode(',', $id);
+       
+        $this->db->select("CONCAT(last_name, ' ',first_name) as sales_rep_name");
+        $this->db->from('users');
+        $this->db->where_in('id',$sales_id);
+        $result=$this->db->get();
+        $value=$result->result_array();
+   
+        if(count($value)>0){
+           $sales_rep_name='';
+           for($i=0;$i<count($value);$i++){
+                $sales_rep_name.=$value[$i]['sales_rep_name'].", ";
+           }
+           $sales_rep_name=rtrim($sales_rep_name,", ");
+           
+           return $sales_rep_name;
+        }   
     }
 }
 /* End of file user_model.php */
