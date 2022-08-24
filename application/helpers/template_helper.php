@@ -373,7 +373,7 @@ if(!function_exists('get_user_type'))
         $ci->db->from($table_name);
         $ci->db->where('users.id',$user_id);
         $user_role=$ci->db->get()->row();
-        
+  
         return $user_role->user_type;
     }
 }

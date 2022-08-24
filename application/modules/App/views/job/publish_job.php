@@ -48,19 +48,44 @@
 	<div class="col-sm-6">
       	<fieldset>
     		<legend>Basic Info</legend>
-    		<div class="form-group">
+
+    		<!-- <div class="form-group">
                <input type="hidden" name="job_id" id="job_id" value="<?php echo $job->id;?>">
 		  		<label for="inputFirstName" class="col-sm-3 control-label">Sales Representative*</label>
 		  		<div class="col-sm-8">
                     <input type="text" readonly value="<?php echo $sales_rep;?>" class="form-control">
-		  			<!-- <strong><?php echo $sales_rep;?></strong> -->
 		  		</div>
             
-			  </div>
+			  </div> -->
+
+			  <div class="form-group">
+		  		<label for="inputPhone" class="col-sm-3 control-label">Store*</label>
+		  		<div class="col-sm-9">
+				  <input type="text" readonly value="<?php echo $store->name;?>" class="form-control">
+				  <input type="hidden" name="store_id" id="store_id" value="<?php echo $store_id;?>">
+			  	</div>
+		  	</div>
+
+			  <div class="form-group">
+		  		<label for="inputFirstName" class="col-sm-3 control-label">Sales Rep*</label>
+                <input type="hidden" id="hidden_sales_rep_id" value="<?php ?>">
+		  		<div class="col-sm-9">
+			  				<select name="user_id[]" required class="form-control chosen-select"  multiple="multiple" data-placeholder="Select Sales Rep" id="sales_Rep">
+			  			<?php
+			  				foreach($sales_rep as $value){	
+			  			?>
+						  <option value="<?php echo $value['id'];?>"<?php if(in_array($value['id'],$sales_rep_id)){echo "selected";}?>><?php echo $value['last_name']." ".$value['first_name'];?></option>
+
+			  			<?php } ?>
+			  		</select>
+			  		<div class="help-block with-errors"></div>
+			  	</div>
+		  	</div>
+
 		  	<div class="form-group">
 			
 		  		<label for="inputFirstName" class="col-sm-3 control-label">Job date*</label>
-		  		<div class="col-sm-8">
+		  		<div class="col-sm-9">
 				  <?php if($assign_status==0){ ?>
 					<input type="text" name="tasting_date" class="form-control datepicker"  id="tasting_date" placeholder="Enter job date" value="<?php echo date("m/d/Y", strtotime($job->tasting_date));?>" required autocomplete="off" readonly>
 				<?php }else{?>
@@ -102,7 +127,7 @@
 					<div class="help-block with-errors df"></div>
 				</div>
 				<div class="col-sm-3">
-					<div class="form-group adjustmin" >
+					<!-- <div class="form-group adjustmin" > -->
 					<?php if($assign_status==0){ ?>
 					<select name="start_time_minute" required class="form-control" id="start_time_minute">
 							<?php
@@ -121,10 +146,10 @@
 						<?php }else{?> 
 						<input id="start_time_minute" name="start_time_minute" readonly value="<?php echo $start_minute;?>" class="form-control">
 					<?php }?>
-					</div>
+					<!-- </div> -->
 				</div>
 				<div class="col-sm-3">
-					<div class="form-group adjustam">
+					<!-- <div class="form-group adjustam"> -->
 					<?php if($assign_status==0){ ?>
 						<select name="time_one" required class="form-control" id="time_one">
 							<option value="pm" <?php if(date('A', strtotime($job->start_time))=='PM'){echo "selected";}?>>PM</option>
@@ -133,7 +158,7 @@
 						<?php }else{?> 
 							<input id="time_one" name="time_one" readonly value="<?php echo date('A', strtotime($job->start_time));?>" class="form-control">
 					<?php }?>
-					</div>
+					<!-- </div> -->
 				</div>
 			</div>
 			<div class="form-group">
@@ -161,7 +186,7 @@
 					<div class="help-block with-errors df"></div>
 				</div>
 				<div class="col-sm-3">
-					<div class="form-group adjustmin" >
+					<!-- <div class="form-group adjustmin" > -->
 					<?php if($assign_status==0){ ?>
 						<select name="end_time_minute" required class="form-control" id="end_time_minute">
 							<?php
@@ -180,10 +205,10 @@
 						<?php }else{?> 
 							<input id="end_time_minute" name="end_time_minute" readonly value="<?php echo $end_minute;?>" class="form-control">
 					<?php }?>
-					</div>
+					<!-- </div> -->
 				</div>
 				<div class="col-sm-3">
-					<div class="form-group adjustam">
+					<!-- <div class="form-group adjustam"> -->
 					<?php if($assign_status==0){ ?>
 						<select name="time_two" required class="form-control" id="time_two">
 							<option value="pm" <?php if(date('A', strtotime($job->end_time))=='PM'){echo "selected";}?>>PM</option>
@@ -192,41 +217,13 @@
 						<?php }else{?> 
 							<input id="time_two" name="time_two" readonly value="<?php echo date('A', strtotime($job->end_time));?>" class="form-control">
 					<?php }?>
-					</div>
+					<!-- </div> -->
 				</div>
 			</div>
-            <input type="hidden" id="hidden_store_id" value="">
-		  	<div class="form-group">
-		  		<label for="inputPhone" class="col-sm-3 control-label">Store*</label>
-		  		<div class="col-sm-8">
-				  <?php if($assign_status==0){ ?>
-			  		<select name="store_id"  required class="form-control" onchange="get_tester_wine(this.value)" id="store">
-			  			<option value="">Select store</option>
-			  			<?php
-                            
-			  				foreach($store as $value){
-			  			?>
-			  			<option value="<?php echo $value['id'];?>" <?php if($value['id']==$job->store_id){echo "selected";}?>><?php echo $value['name'];?></option>
-			  			<?php } ?>
-					  </select>
-					  <?php }else{?> 
-							<input type="hidden" id="store" name="store_id" readonly value="<?php echo $job->store_id;?>" class="form-control">
-							<?php foreach($store as $value){ ?>
-								<?php if($value['id']==$job->store_id){ ?>
-							<input readonly value="<?php echo $value['name'];?>" class="form-control">
-								<?php 
-								break; 
-								 } ?>
-					<?php
-					
-					}
-					}?>
-			  		<div class="help-block with-errors"></div>
-			  	</div>
-		  	</div>
+
 		  	<div class="form-group">
 		  		<label for="inputConfirmPassword" class="col-sm-3 control-label">Admin note</label>
-		  		<div class="col-sm-8">
+		  		<div class="col-sm-9">
 				  <?php if($assign_status==0){ ?>
 		  			<textarea name="admin_note" class="form-control" id="admin_note"  placeholder="Enter admin note"><?php echo $job->admin_note;?></textarea>
 					  <?php }else{?> 
@@ -237,7 +234,7 @@
 		  	</div>
 		  	<div class="form-group">
 		  		<label for="inputConfirmPassword" class="col-sm-3 control-label">Taster note</label>
-		  		<div class="col-sm-8">
+		  		<div class="col-sm-9">
 				  <?php if($assign_status==0){ ?>
 		  			<textarea name="taster_note" class="form-control" id="taster_note"  placeholder="Enter taster note"><?php echo $job->taster_note;?></textarea>
 					  <?php }else{?> 
@@ -476,6 +473,10 @@ $(document).ready(function(){
 			}else if($('#store').val()==''){
 				$('#store').focus();
 				swal("Oops!", "Select a store.", "warning");
+				return false;
+			}else if($('#sales_Rep').val()==''){
+				$('#sales_Rep').trigger('chosen:activate');
+				swal("Oops!", "Please select a sales representative!", "warning");
 				return false;
 			}else if($('#testers').val()==''){
 				$('#testers').focus();

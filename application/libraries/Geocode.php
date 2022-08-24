@@ -61,7 +61,7 @@ class Geocode {
 
 			$url = "https://maps.googleapis.com/maps/api/geocode/json?address=".urlencode($location)."&key=".GEOCODE_API."&sensor=false";
 
-            // print_r($url);die;
+            print_r($url);die;
 
 			$ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $url);

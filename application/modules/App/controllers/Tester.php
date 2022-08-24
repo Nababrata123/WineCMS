@@ -113,8 +113,6 @@ class Tester extends Application_Controller {
             $status = 0;
         }
 
-	    
-
 	    if ($status <> '') {
 		    $filter['status'] = $status;
 	    } else {
@@ -144,8 +142,6 @@ class Tester extends Application_Controller {
 	    // Get the total rows without limit
 	    $total_rows = $this->Tester_model->get_tester_list($filter, null, null, true);
 
-        // echo "<pre>";
-        // print_r($total_rows);die;
 	    /*$config = $this->init_pagination('App/tester/index/'.$this->uri->assoc_to_uri($pegination_uri).'//page/',13, $total_rows,$filter['view']);
 
 
@@ -159,26 +155,15 @@ class Tester extends Application_Controller {
         $filter['limit'] = $filter['view'];
 	    $filter['offset'] = $limit_end;*/
 
-	    // Get the Users List
-	    //$data['users'] = $this->Tester_model->get_tester_list($filter, 'id', 'asc');
-
-	    //Get agency list for search
-        //$data['all_agency'] = $this->Tester_model->get_agency_list_for_search();
-        //echo "<pre>";
-        //print_r($data['all_agency']);die;
         if(!$this->session->userdata('from_begining') || $this->session->userdata('from_begining')=='yes')
         {
             //$this->session->unset_userdata('from_begining');
             $this->session->set_userdata('from_begining','yes');
-            
-        }
-        else
-        {
+        } else {
             //$this->session->unset_userdata('from_begining');
             $this->session->set_userdata('from_begining','no');
-           
         }
-        // print_r($filter);die;
+
     	$data['filter'] = $filter;
 	    $data['page'] = 'tester';
     	$data['page_title'] = SITE_NAME.' :: Taster Management';
@@ -189,18 +174,15 @@ class Tester extends Application_Controller {
 
     public function test()
     {
-        //echo 1;die;
+   
         $data = array();
-        //print "<pre>";print_r($this->input->post());print "</pre>";
+    
         // Get the stores List
         $memData=$this->Tester_model->get_datatables($this->input->post());
-        
-
-        //$i = $this->input->post('start');
+  
         foreach($memData as $member){
             $row = array();
-           // $i++;
-           // $created = date( 'jS M Y', strtotime($member->created));
+    
             if ($member->status == "active") 
             {
                 $status= '<span class="label label-success">Active</span>';
@@ -224,17 +206,19 @@ class Tester extends Application_Controller {
                             <span class="glyphicon glyphicon-eye-open"></span> View
                         </a>';
             $created_by=$member->created_by;
-                    if($created_by==7)
-                    {
-                       // $name=get_username('admin',$created_by);
+                    if($created_by==7){
                         $c_name='Self';
-                    }
-                    else
-                    {
+                    }else{
                         $c_name=get_username('agency',$created_by);
-                        
                     }
-            $reset_password_link=base_url('App/tester/reset_pass/'.$id);
+
+            if($member->is_empty_email != 1){
+                $reset_password_link = base_url('App/tester/reset_pass/'.$id);
+            }else{
+                $reset_password_link = '';
+            }       
+            // $reset_password_link=base_url('App/tester/reset_pass/'.$id);
+
             $edit_link=base_url('App/tester/edit/'.$id);
             if($id==$this->session->userdata('id'))
             {
@@ -244,7 +228,13 @@ class Tester extends Application_Controller {
             {
                 $p='';
             }
-            $confirm="return confirm('Do you really want to reset the password for this user?');";
+
+            if($member->is_empty_email != 1){
+                $confirm="return confirm('Do you really want to reset the password for this user?');";
+            }else{
+                $confirm="alert('Cannot reset password. Taster does not have a login.');";
+            }
+
             $delete_script='<script>$(".delete_button").click(function(){var id=$(this).data("id");$("#permanent_delete").data("id",id);$("#delete").data("id", id);$("#myDeleteModal").modal("show");});</script>';
             $action='<a class="btn btn-info btn-xs" href="'.$reset_password_link.'" onclick="'.$confirm.'" title="Reset Password">
                             <span class="glyphicon glyphicon-lock"></span> Reset Password
@@ -262,7 +252,11 @@ class Tester extends Application_Controller {
             $name= $member->last_name." ".$member->first_name;
             $row[]=$checkop;
             $row[]=$name;
-            $row[]=$member->email;
+            if($member->is_empty_email != 1){
+                $row[]=$member->email;
+            }else{
+                $row[]='N/A';
+            }
             $row[]=$zone;
             $row[]=$last_login;
 			$row[]=$status;
@@ -271,18 +265,15 @@ class Tester extends Application_Controller {
             $row[]=$c_name;
             $row[]=$action;
             $data[]=$row;
-            //$data[] = array( $checkop,$name, $member->email,$zone,$last_login, $status,$details,$c_name,$action);
         }
-        //echo "<pre>";
-       // print_r($data);
+
         $output = array(
             "draw" => $this->input->post('draw'),
             "recordsTotal" => $this->Tester_model->countAll(),
             "recordsFiltered" => $this->Tester_model->countFiltered($this->input->post()),
             "data" => $data,
         );
-        
-        
+    
         // Output to JSON format
         echo json_encode($output);
 
@@ -339,9 +330,19 @@ class Tester extends Application_Controller {
 
     		$this->form_validation->set_rules('first_name', 'First Name', 'trim|required');
 			$this->form_validation->set_rules('last_name', 'Last Name', 'trim|required');
-    		$this->form_validation->set_rules('email', 'Email address', 'trim|required|valid_email|xss_clean');
-	    	$this->form_validation->set_rules('password', 'Password', 'matches[c_password]');
-	    	$this->form_validation->set_rules('c_password', 'Confirm Password', 'trim|required');
+    		
+            $email = $this->input->post('email');
+            $password = $this->input->post('password');
+            $c_password = $this->input->post('c_password');
+
+            if ($email != ''){
+                $this->form_validation->set_rules('password', 'Password', 'trim|required');
+                $this->form_validation->set_rules('c_password', 'Confirm Password', 'trim|required');
+            }
+            if ($password != ''){
+                $this->form_validation->set_rules('email', 'Email address', 'trim|required|valid_email|xss_clean');
+                $this->form_validation->set_rules('c_password', 'Confirm Password', 'trim|required');
+            }
 			
 			// Custom field validation
             $meta = $this->input->post('meta');
@@ -376,10 +377,24 @@ class Tester extends Application_Controller {
                             if($meta['zipcode']=='')
                             {
                                 $this->form_validation->set_rules($field_name, 'Zipcode', 'required');
-                            }  
+                            }
+                            
                         }
+                        //Check duplicate vendor number
+                        /* if($field_name=='manual_account_number')
+                        {
+                            $vendor_number=$meta['manual_account_number'];
+                            $vendor=$this->Tester_model->check_duplicate_vendor_number($vendor_number);
+                            if($vendor!=0)
+                            {
+                                $this->session->set_flashdata('message_type', 'danger');
+                                $this->session->set_flashdata('message', '<strong>Oh snap!</strong> Vendor number already exists.');
+                                redirect('/App/tester/add');
+                            }
+                            
+                        } */
+                        
                     }
-
 		    		if (isset($value['required']) && $value['required'] == true) {
                         
 		    			$this->form_validation->set_rules($field_name, $field_label, 'required');
@@ -413,33 +428,48 @@ class Tester extends Application_Controller {
     				'user_type'=>htmlspecialchars($this->input->post('user_type'), ENT_QUOTES, 'utf-8'),
     				'email' => htmlspecialchars($this->input->post('email'), ENT_QUOTES, 'utf-8'),
     				'status' => htmlspecialchars($this->input->post('status'), ENT_QUOTES, 'utf-8'),
-    				'password' => md5($raw_password),
+    				// 'password' => md5($raw_password),
     				//'created_by' => $this->session->userdata('id'),
      				'created_on' => date('Y-m-d H:i:s')
     			);
 
-                if($this->input->post('agency_id')!="")
-                {
+
+                if($this->input->post('agency_id')!=""){
                     $user['created_by']=$this->input->post('agency_id');
-                }
-                else
-                {
+                }else{
                     $user['created_by']=$this->session->userdata('id');
                 }
-				
-    			$meta = $this->input->post('meta');
-	
-    			
-                $email=$this->input->post('email');
-                $response=$this->Tester_model->check_duplicate_email($email);
 
+                if ($raw_password != ''){
+                    $user['password'] = md5($raw_password);
+                }
+
+    			$meta = $this->input->post('meta');
+                $email=$this->input->post('email');
+
+                if ($email == '' || $raw_password == ''){
+                    $user['is_empty_email'] = '1';
+                }else{
+                    $user['is_empty_email'] = '0';
+                }
+
+                if ($email == ''){
+                    $response = 0 ;
+                }else{
+                    $response=$this->Tester_model->check_duplicate_email($email);
+                }
 
     			//if the insert has returned true then we show the flash message
                 if($response==0)
                 {
         			if ($user_id = $this->Tester_model->insert($this->tablename, $user)) {
 
-             
+                        // Update dummy email Id.
+                        if ($email == ''){
+                            $user['email'] = 'kaross'.$user_id.'@gmail.com';
+                            $this->Tester_model->update($this->tablename, 'id', $user_id, $user);
+                        }
+        
         				// Insert the Mata Data
         				$this->Tester_model->replace_user_meta($user_id, $meta);
 
@@ -448,7 +478,11 @@ class Tester extends Application_Controller {
     					// Send Email to users
     					$this->load->library('mail_template');
                         //$activation_link = BASE_URL.'recover_password/'.md5(time()).'/'.base64_encode($user_id);
-        				$this->mail_template->new_user_email($user['first_name'] . " " .$user['last_name'], $user['email'], $raw_password);
+        				// $this->mail_template->new_user_email($user['first_name'] . " " .$user['last_name'], $user['email'], $raw_password);
+
+                        if ($this->input->post('email') != ''){
+                            $this->mail_template->new_user_email($user['first_name'] . " " .$user['last_name'], $user['email'], $raw_password);
+                        }
 
         				$this->session->set_flashdata('message_type', 'success');
         				$this->session->set_flashdata('message', '<strong>Well done!</strong> User have been added successfully.');
@@ -479,8 +513,6 @@ class Tester extends Application_Controller {
     	$data['main_content'] = 'tester/add';
     	$this->load->view(TEMPLATE_PATH, $data);
     }
-
-
     // My callback function
     public function check_duplicate_email($post_email) {
 
@@ -500,6 +532,7 @@ class Tester extends Application_Controller {
 		if ($id === 0) {
 			$id = $this->session->userdata('id');
 		}
+
         $is_deleted = check_is_deleted('users',$id);
         if($is_deleted==false)
         {
@@ -508,45 +541,64 @@ class Tester extends Application_Controller {
 		// Include the Module JS file.
     	add_js('assets/modules/'.$this->router->fetch_module().'/js/AppTester.js');
     	
-
-    	//get usermeta
-        $this->db->select('*');
-        $this->db->from('user_meta');
-        $this->db->where('user_meta.user_id',$id);
-        
-        $user_meta = $this->db->get();
-
-        
-        $data['user_meta']=$user_meta->result_array();
-        $meta_array=array();
-        foreach($data['user_meta'] as $m)
-        {
-            $key=$m['meta_key'];
-            $value=$m['meta_value'];
-            //array_push($meta_array,$meta_array[$key] = $value);
-            $meta_array[$key] = $value;
-        }
-        /*echo "<pre>";
-        print_r($meta_array);die;*/
-        $data['user_meta']=$meta_array;
-
+        // Current user details..
+        $data['tester']  = $this->Tester_model->get_tester_details($id);
 
 
      	//if save button was clicked, get the data sent via post
      	if ($this->input->server('REQUEST_METHOD') === 'POST')
      	{
+
+            $input=$this->input->post();
+            //Set input data to session
+            $newdata = array(
+                   'email'  => $input['email']
+               );
+            $this->session->set_userdata('editInputData',$newdata);
+
+            //get usermeta
+            $this->db->select('*');
+            $this->db->from('user_meta');
+            $this->db->where('user_meta.user_id',$id);
+            $user_meta = $this->db->get();
+
+            $data['user_meta']=$user_meta->result_array();
+            $meta_array=array();
+            foreach($data['user_meta'] as $m)
+            {
+                $key=$m['meta_key'];
+                $value=$m['meta_value'];
+                $meta_array[$key] = $value;
+            }
+            $data['user_meta']=$meta_array;
+
      		//form validation
             $data['user_meta'] = $this->input->post('meta');
      		
 			$this->form_validation->set_rules('first_name', 'First Name', 'trim|required');
             $this->form_validation->set_rules('last_name', 'Last Name', 'trim|required');
-            $this->form_validation->set_rules('email', 'Email address', 'trim|required|valid_email|xss_clean');
-            
-
-    		if ($this->input->post('password')) {
+           
+    		/*if ($this->input->post('password')) {
 	    		$this->form_validation->set_rules('password', 'Password', 'matches[c_password]');
 	    		$this->form_validation->set_rules('c_password', 'Confirm Password', 'trim|required');
-    		}
+    		}*/
+
+            $email = $this->input->post('email');
+            $password = $this->input->post('password');
+            $c_password = $this->input->post('c_password');
+
+            if ($email != ''){
+                $this->form_validation->set_rules('password', 'Password', 'trim|required');
+                $this->form_validation->set_rules('c_password', 'Confirm Password', 'trim|required');
+            }
+            if ($password != ''){
+                $this->form_validation->set_rules('email', 'Email address', 'trim|required|valid_email|xss_clean');
+                $this->form_validation->set_rules('c_password', 'Confirm Password', 'trim|required');
+            }
+           /* if ($c_password != ''){
+                $this->form_validation->set_rules('email', 'Email address', 'trim|required|valid_email|xss_clean');
+                $this->form_validation->set_rules('password', 'Password', 'matches[c_password]');
+            }*/
 
      		// Custom field validation
             if(is_array($data['user_meta'])){
@@ -565,6 +617,8 @@ class Tester extends Application_Controller {
 
      		if ($this->form_validation->run())
      		{
+                $raw_password = htmlspecialchars($this->input->post('password'), ENT_QUOTES, 'utf-8');
+
      			$user = array(
     				'first_name' => htmlspecialchars($this->input->post('first_name'), ENT_QUOTES, 'utf-8'),
                     'last_name' => htmlspecialchars($this->input->post('last_name'), ENT_QUOTES, 'utf-8'),
@@ -574,69 +628,172 @@ class Tester extends Application_Controller {
      				'updated_by' => $this->session->userdata('id'),
      				'updated_on' => date('Y-m-d H:i:s')
     			);
-                if($this->input->post('agency_id')!="" && $this->input->post('checked_val')!="")
-                {
-                    $user['created_by']=$this->input->post('agency_id');
+
+                $meta = $this->input->post('meta');
+                $email = $this->input->post('email');
+
+                // Check Previous rate..
+                if(array_key_exists("rate_per_hour",$meta_array)){
+                    $meta['prev_rate_per_hour'] = $meta_array['rate_per_hour'];
                 }
-                else
-                {
-                    $user['created_by']=$this->session->userdata('id');
+                if(array_key_exists("tasters_rate",$meta_array)){
+                    $meta['prev_tasters_rate'] = $meta_array['tasters_rate'];
                 }
-    			$meta = $this->input->post('meta');
-				if($this->input->post('chk')){
+                
+                if($this->input->post('chk')){
 					if(array_key_exists("rate_per_hour",$meta))
 					{
 					  unset($meta['rate_per_hour']);
-					}
-					
+					}	
 				}else{
 					if(array_key_exists("tasters_rate",$meta))
 					{
 					  unset($meta['tasters_rate']);
 					}
 				}
-				/* echo '<pre>';
-				print_r($meta);
-				die; */
-    			if ($this->input->post('password')) {
+
+                if($this->input->post('agency_id')!="" && $this->input->post('checked_val')!="")
+                {
+                    $user['created_by']=$this->input->post('agency_id');
+                } else {
+                    $user['created_by']=$this->session->userdata('id');
+                }
+
+    		    /*if ($this->input->post('password')) {
     				$user['password'] = md5(htmlspecialchars($this->input->post('password'), ENT_QUOTES, 'utf-8'));
-    			}
+    			}*/
 
-     			//if the insert has returned true then we show the flash message
-     			if ($this->Tester_model->update($this->tablename, 'id', $id, $user)) {
+                if ($raw_password != '' && $raw_password != "Aaaa@000"){
+                    $user['password'] = md5($raw_password);
+                }else{
+                    $user['password'] = '';
+                }
 
-     				// Insert the Mata Data
-    				$this->Tester_model->replace_user_meta($id, $meta);
+                if ($email == '' || $raw_password == ''){
+                    $user['is_empty_email'] = '1';
+                }else{
+                    $user['is_empty_email'] = '0';
+                }
 
-     				$this->session->set_flashdata('message_type', 'success');
-     				if ($this->input->post('ref') == 'profile') {
-     					$this->session->set_flashdata('message', '<strong>Well done!</strong> Profile successfully updated.');
-     				} else {
-     					$this->session->set_flashdata('message', '<strong>Well done!</strong> User successfully updated.');
-     				}
-     			} else{
-     				$this->session->set_flashdata('message_type', 'danger');
-     				$this->session->set_flashdata('message', '<strong>Oh snap!</strong> Change something and try again.');
-     			}
+                if ($email == '' && $data['tester']->is_empty_email != 1){             
+                    $user['email'] = 'kaross'.$id.'@gmail.com';
+                }else{
+                    if($email != ''){
+                        $user['email'] = htmlspecialchars($email, ENT_QUOTES, 'utf-8');
+                    }else{
+                        $user['email'] = $data['tester']->email;
+                    }	
+				}
+
+                if ($email == ''){
+                    $response = 0 ;
+                }else{
+                    $response=$this->Tester_model->check_duplicate_email($email);
+                }
+
+            if ($data['tester']->email == $email){
+                   //if the insert has returned true then we show the flash message
+                   if ($this->Tester_model->update($this->tablename, 'id', $id, $user)) {
+
+                     // Insert the Mata Data
+                     $this->Tester_model->replace_user_meta($id, $meta);
+
+                     if(array_key_exists("rate_per_hour",$meta)){
+                        $job_data['current_taster_rate'] = $meta['rate_per_hour'];
+                        $job_data['taster_rate'] = $meta['rate_per_hour'];
+                    }
+                    if(array_key_exists("tasters_rate",$meta)){
+                        $job_data['current_taster_rate'] = $meta['tasters_rate'];
+                        $job_data['taster_rate'] = $meta['tasters_rate'];
+                    }
+  
+                      // Update Existing job...
+                    $job_info  = $this->Tester_model->job_info($id);
+                     foreach($job_info as $job){
+                       $this->Tester_model->update('job', 'id', $job->id, $job_data);
+                     }
+
+                     $this->session->unset_userdata('editInputData');
+
+                    $this->session->set_flashdata('message_type', 'success');
+                    if ($this->input->post('ref') == 'profile') {
+                        $this->session->set_flashdata('message', '<strong>Well done!</strong> Profile successfully updated.');
+                    } else {
+                        $this->session->set_flashdata('message', '<strong>Well done!</strong> User successfully updated.');
+
+                        redirect('/App/tester');
+                    }
+                } else{
+                    $this->session->set_flashdata('message_type', 'danger');
+                    $this->session->set_flashdata('message', '<strong>Oh snap!</strong> Change something and try again.');
+                }
+            }else{
+                if($response==0){
+                    //if the insert has returned true then we show the flash message
+                    if ($this->Tester_model->update($this->tablename, 'id', $id, $user)) {
+    
+                        // Insert the Mata Data
+                        $this->Tester_model->replace_user_meta($id, $meta);
+                        
+                        if(array_key_exists("rate_per_hour",$meta)){
+                            $job_data['current_taster_rate'] = $meta['rate_per_hour'];
+                        }
+                        if(array_key_exists("tasters_rate",$meta)){
+                            $job_data['current_taster_rate'] = $meta['tasters_rate'];
+                        }
+  
+                        // Update Existing job...
+                        $job_info  = $this->Tester_model->job_info($id);
+                        foreach($job_info as $job){
+                             $this->Tester_model->update('job', 'id', $job->id, $job_data);
+                        }
+
+                        $this->session->unset_userdata('editInputData');
+    
+                        $this->session->set_flashdata('message_type', 'success');
+                        if ($this->input->post('ref') == 'profile') {
+                            $this->session->set_flashdata('message', '<strong>Well done!</strong> Profile successfully updated.');
+                        } else {
+                            $this->session->set_flashdata('message', '<strong>Well done!</strong> User successfully updated.');
+                            redirect('/App/tester');
+                        }
+                        } else{
+                            $this->session->set_flashdata('message_type', 'danger');
+                            $this->session->set_flashdata('message', '<strong>Oh snap!</strong> Change something and try again.');
+                        }
+                    }else{
+                            $this->session->set_flashdata('message_type', 'danger');
+                            $this->session->set_flashdata('message', '<strong>Oh snap!</strong> Email ID already exists.');
+                    }
+            }
 
      			// If from profile page - redirect there
      			if ($this->input->post('ref') == 'profile') {
      				redirect('/profile');
      			}
-
-     			redirect('/App/tester');
-                //redirect($this->agent->referrer());
-                
+     			// redirect('/App/tester');
      		} //validation run
      	}
-
-     	$data['tester']  = $this->Tester_model->get_tester_details($id);
-     	//echo "<pre>";
-     	//print_r($data['tester']);die;
 
      	if (!is_numeric($id) || $id == 0 || empty($data['tester'])) {
      		redirect('/App/tester');
      	}
+
+        //get usermeta
+        $this->db->select('*');
+        $this->db->from('user_meta');
+        $this->db->where('user_meta.user_id',$id);
+        $user_meta = $this->db->get();
+
+        $data['user_meta']=$user_meta->result_array();
+        $meta_array=array();
+        foreach($data['user_meta'] as $m)
+        {
+            $key=$m['meta_key'];
+            $value=$m['meta_value'];
+            $meta_array[$key] = $value;
+        }
+        $data['user_meta']=$meta_array;
 
         //get zone
         $this->db->select('*');
@@ -659,6 +816,7 @@ class Tester extends Application_Controller {
     	$data['main_content'] = 'tester/edit';
     	$this->load->view(TEMPLATE_PATH, $data);
     }
+
     public function update_status() {
 
         $this->session->set_userdata('from_begining','no');
@@ -773,9 +931,10 @@ class Tester extends Application_Controller {
         {
             if ($this->Tester_model->delete($this->tablename, $id)) 
             {
-                
+                //Delete user meta
                 if($this->Tester_model->delete_user_meta('user_meta', $id))
                 {
+                
                     $this->session->set_flashdata('message_type', 'success');
                     $this->session->set_flashdata('message', '<strong>Well done!</strong> Taster successfully deleted.');
                 } else {
@@ -791,7 +950,6 @@ class Tester extends Application_Controller {
         }
     	redirect('/App/tester');
     }
-    
     public function temp_delete($id = null) {
         $this->session->set_userdata('from_begining','no');
 		// Permission Checking
@@ -847,9 +1005,8 @@ class Tester extends Application_Controller {
             if($meta->meta_key=='zone')
             {
                 $zone_id=$meta->meta_value;
-
                 $zone_id_array=explode(",",$zone_id);
-                //print_r($zone_id_array);die;
+    
                 foreach($zone_id_array as $id)
                 {
                     $zone_name=$this->Tester_model->get_zone_name($id);
@@ -859,8 +1016,7 @@ class Tester extends Application_Controller {
                 $meta->meta_value=$zone;
             }
         }
-        /*echo "<pre>";
-        print_r($data['user_meta']);die;*/
+  
         $blank_array=array();
         foreach($data['user_meta'] as $value)
         {
@@ -1249,7 +1405,8 @@ class Tester extends Application_Controller {
 
             $data = array();
         $memData=$this->Tester_model->get_tester_list( null, null, true);
-       
+        //echo "<pre>";
+          // print_r($memData);die;
            
         foreach($memData as $member){
             $row = array();

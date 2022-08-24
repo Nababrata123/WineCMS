@@ -82,6 +82,7 @@ class Tester_model extends CI_Model {
         foreach($meta as $meta_key => $meta_value) {
             if($meta_key=='zone')
             {
+                $string = '';
                 foreach($meta_value as $val)
                 {
                     $string.=$val.",";
@@ -283,8 +284,7 @@ class Tester_model extends CI_Model {
         $this->db->group_by("users.id");
 
         $query = $this->db->get();
-echo "<pre>";
-print_r($query->result());die;
+
         //echo $this->db->last_query()."<br>";
         return $query->result();
     }
@@ -315,7 +315,7 @@ print_r($query->result());die;
     function get_tester_details($id) {
     	$id = (int) $id;
 
-        $this->db->select('users.id,  users.first_name, users.last_name, users.email, users.last_login, users.created_on, users.updated_on, users.status,  CONCAT(users_created.first_name, " ", users_created.last_name) as created_by_name, CONCAT(users_updated.first_name, " ", users_updated.last_name) as updated_by_name,users.created_by as created_by');
+        $this->db->select('users.id,  users.first_name, users.last_name, users.email, users.last_login, users.created_on, users.updated_on, users.status,  CONCAT(users_created.first_name, " ", users_created.last_name) as created_by_name, CONCAT(users_updated.first_name, " ", users_updated.last_name) as updated_by_name,users.created_by as created_by, users.is_empty_email');
         $this->db->from('users');
         
         $this->db->join('users AS users_created', 'users.created_by = users_created.id', 'left');
@@ -330,12 +330,11 @@ print_r($query->result());die;
 
         return $result;
     }
-    
     function get_user_details($id)
     {
         $id = (int) $id;
 
-        $this->db->select('users.id as user_id,  users.first_name, users.last_name, users.email,users.created_by');
+        $this->db->select('users.id as user_id,  users.first_name, users.last_name, users.email,users.created_by, users.is_empty_email');
         $this->db->from('users');
         
         $this->db->join('users AS users_created', 'users.created_by = users_created.id', 'left');
@@ -368,18 +367,9 @@ print_r($query->result());die;
         
         $this->db->where('id',$id);
         $val = $this->db->get();
-        // echo $this->db->last_query();die;
+        //echo $this->db->last_query();die;
         $result=$val->row();
         $created_by_id=$result->created_by;
-        // echo $created_by_id;die;
-
-        $c_name = '';
-        if($created_by_id!=7)
-        {
-           // $name=get_username('admin',$created_by);
-           $c_name=get_username('agency',$created_by_id);
-        }
-       
 
         $this->db->select('CONCAT(users.last_name, " ", users.first_name) as full_name');
         $this->db->from('users');
@@ -387,16 +377,20 @@ print_r($query->result());die;
         $this->db->where('users.id',$created_by_id);
         $tester = $this->db->get();
         $value=$tester->row();
-       
+
+        $c_name = '';
+        if($created_by_id!=7)
+        {
+           $c_name=get_username('agency',$created_by_id);
+        }
+
         if (!empty($value)){
             return $value->full_name;
         }else{
             return $c_name;
         }
-      
-        
-    }
 
+    }
     function get_zone_name($id)
     {
         $this->db->select('name');
@@ -643,6 +637,62 @@ print_r($query->result());die;
            $this->db->order_by(key($order), $order[key($order)]);
         }
     }
+
+    public function get_users_table_lastId(){
+        $this->db->select("users.id, users.email");
+        $this->db->from("users");
+        $this->db->limit(1);
+        $this->db->order_by('id',"DESC");
+        $query = $this->db->get();
+        $result = $query->row();
+        return $result;
+    }
+
+    public function get_users_table_lastId_for_edit(){
+        $this->db->select("users.id, users.email");
+        $this->db->from("users");
+        $this->db->limit(2);
+        $this->db->order_by('id',"DESC");
+        $query = $this->db->get();
+        $result = $query->result();
+        $res = $result[1];
+
+        return $res;
+    }
+
+    //Get user type
+    public function get_user_type($table_name,$user_id)
+    {
+        $this->db->select('user_type,created_by');
+        $this->db->from($table_name);
+        $this->db->where('users.id',$user_id);
+        $user_role=$this->db->get();
+        return $user_role->result();
+    }
+
+    public function job_info($id)
+    {
+
+        // $user_type=$this->get_user_type('users',$id);
+
+        $this->db->select('job.id, job.current_taster_rate, job.taster_rate, job.taster_id,job.agency_taster_id');
+        $this->db->from('job');
+        // if($user_type[0]->user_type=='agency'){
+        //     $this->db->where('agency_taster_id',$id);
+        // }else{
+        //     $this->db->where('taster_id',$id);
+        // }
+
+        $this->db->where("(taster_id= $id OR agency_taster_id=$id)", NULL, FALSE);
+
+        $this->db->where('is_archived','0');
+        $this->db->where('is_deleted','0');
+        $query = $this->db->get();
+        $result = $query->result();
+
+        return $result;
+    }
+    
 }
 
 /* End of file user_model.php */

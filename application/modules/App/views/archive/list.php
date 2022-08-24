@@ -12,23 +12,6 @@
 
 <div class="container-fluid main">
 	<div class="form-group">
-	    <!--div class="col-sm-12 text-right">
-
-	   		<div class="btn-group" role="group" aria-label="...">
-				
-
-			  	<div class="btn-group" role="group">
-			    	<button type="button" class="btn btn-info"><span class="glyphicon glyphicon-download-alt"></span> Export To</button>
-						<button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-			      		<span class="caret"></span>
-			      		<span class="sr-only">Toggle Dropdown</span>
-			    	</button>
-
-			    	
-			  	</div>
-			</div>
-
-	    </div-->
 	</div>
 	<ol class="breadcrumb">
 		<li><a href="<?php echo base_url('dashboard');?>">Dashboard</a></li>
@@ -121,7 +104,7 @@
 					<th>Actual end time</th>
 					<th>Working hour</th>
 					<th>Total Amount</th>
-					<th>Q/A</th>
+					<!-- <th>Q/A</th> -->
 					<th>Additional info</th>
 					<th>Details</th>
                     <th>Expense</th>
@@ -200,25 +183,30 @@
                         ?>
                     </td>
 	            	<td>
-                        <?php //echo $item->finish_time;
-							//echo date('h:i:a', strtotime($item->finish_time));
-							if ($item->finish_time=='00:00:00'){
-                                echo 'N/A';
-                            }else{
-                                echo date('h:i:a', strtotime($item->finish_time));
-                            }
+						<?php //echo $item->finish_time;
+						if ($item->finish_time=='00:00:00'){ 
+							echo 'N/A'; 
+						}else{ 
+							echo date('h:i:a', strtotime($item->finish_time)); 
+						}
                         ?>
                     </td>
 	            	<td><?php echo $item->working_hour;?></td>
 	            	<?php
 	            		$time = explode(':', $item->working_hour);
 				        $total_minutes= ($time[0]*60) + ($time[1]) + ($time[2]/60);
-				        if($item->agency_taster_id==0)
-				            $taster_id=$item->taster_id;
-				        else
-				            $taster_id=$item->agency_taster_id;
-				        //$rate_per_hr=get_taster_rate_per_hour($taster_id);
-                        $rate_per_hr=$item->taster_rate;
+				        if($item->agency_taster_id==0){
+							$taster_id=$item->taster_id;
+						} else {
+							$taster_id=$item->agency_taster_id;
+						}
+
+						if($item->current_taster_rate != 0 ){
+							$rate_per_hr=$item->current_taster_rate;
+						}else{
+							$rate_per_hr=$item->taster_rate;
+						}
+
 				        $exp_amount=ltrim($item->exp_amount, '$'); 
 				        $total_amount=number_format((($rate_per_hr / 60)*$total_minutes),2)+$exp_amount;
 				        
@@ -230,11 +218,11 @@
 	            		?>
 	            			
 	            	</td>
-	            	<td>
-	            		<a class="btn btn-info btn-xs" href="javascript:void(0)" title="View" onclick="open_qa_modal(<?php echo $item->id;?>)">
+	            	<!-- <td>
+	            		<a class="btn btn-info btn-xs" href="javascript:void(0)" title="View" onclick="open_qa_modal(<?php //echo $item->id;?>)">
 	            			<span class="glyphicon glyphicon-eye-open"></span> View
 	            		</a>
-	            	</td>
+	            	</td> -->
 	            	<td>
 	            		<a class="btn btn-info btn-xs" href="javascript:void(0)" title="View" onclick="open_modal(<?php echo $item->id;?>)">
 	            			<span class="glyphicon glyphicon-eye-open"></span> View
@@ -259,13 +247,12 @@
                             }*/
                         ?>
           </td>
-
-		  <td>
+	            
+				<td>
             <a class="btn btn-warning btn-xs" style="width: 95px; margin-top:2px;" title="View" onclick="moveToBilling(<?php echo $item->id;?>);"><span class="glyphicon"></span>Move to billing</a>
             </td>
-	            </tr>
+			</tr>
 	            <?php } ?>
-
 	        </tbody>
 			<tfoot>
                 <tr>
@@ -283,7 +270,7 @@
 	</div>
 	<!--<input type="submit" name="Export to csv" value="Export to csv" class="btn btn-success">
     <button  value="move_to_archive" class="btn btn-warning" id="move_to_archive">Move to archive</button>-->
-	<!-- <button  value="move_to_archive" class="btn btn-warning" id="move_to_archive">Move to archive</button> -->
+	
 	<?php echo $this->pagination->create_links(); ?>
 </div>
 <!-- Modal -->
@@ -305,7 +292,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
 
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css">
+
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css">
 <script src="<?php echo base_url();?>assets/js/sweetalert.min.js"></script> 
+
 <script type="text/javascript">
 $('.datepicker').datepicker({
     format: 'yyyy-mm-dd',
@@ -382,9 +372,8 @@ function truncateDate(date) {
         var view = $(this).val();
         var search_text = $('#search_text');
         var inputName = $('#inputName');
-        var search_text_val = search_text.val().trim();
-        var inputName_val = inputName.val().trim();
-		
+        var search_text_val= search_text.val().trim();
+        var inputName_val= inputName.val().trim();
         //alert(fieldInput.val()); http://localhost/wine/App/archive/index/search_text/bill/view/20
         if(search_text_val!='' && inputName_val!=''){
             // window.location.href = base_url+"App/archive/index/view/"+view;
@@ -476,14 +465,42 @@ function truncateDate(date) {
 					success:function(data){
 						if(data){
 							$('#job'+jobId).remove();
-							swal("Moved!", "Job has been moved to archive successfully.", "success");
+							// swal("Moved!", "Job has been moved to billing successfully.", "success");
+							swal({
+								title: "Moved!",
+								text: "Job has been moved to billing successfully.",
+								type: "success",
+								timer: 1000
+							}, function() {
+								location.reload();
+								tr.hide();
+							});
+
 						}else{
-							swal("Moved!", "Your job has not been moved.", "error");
+							swal({
+								title: "Moved!",
+								text: "Your job has not been moved.",
+								type: "error",
+								timer: 1000
+							}, function() {
+								location.reload();
+								tr.hide();
+							});
+							// swal("Moved!", "Your job has not been moved.", "error");
 						}
 					}
 				});
 			} else {
-				swal("Cancelled", "Your job has not been moved.", "error");
+				// swal("Cancelled", "Your job has not been moved.", "error");
+				swal({
+					title: "Cancelled",
+					text: "Your job has not been moved.",
+					type: "error",
+					timer: 1000
+				}, function() {
+					location.reload();
+					tr.hide();
+				});
 			}
 		});
 	}
@@ -522,27 +539,56 @@ function truncateDate(date) {
 					   url:"<?php echo base_url();?>App/billing/moved_to_billing",
 					   data: {checked_value:checked_value},
 					   success:function(data){
-							swal({title: "Moved!", text: "Job has been moved to billing successfully.", type: "success"},
-								function(){ 
-								   location.reload();
-								}
-							);
+
+						swal({
+							title: "Moved!",
+							text: "Job has been moved to billing successfully.",
+							type: "success",
+							timer: 1000
+							}, function() {
+								location.reload();
+								tr.hide();
+							});
+
+							// swal({title: "Moved!", text: "Job has been moved to billing successfully.", type: "success"},
+							// 	function(){ 
+							// 	   location.reload();
+							// 	}
+							// );
 					   },
 					   error: function() {
-							swal({title: "Oops!", text: "Job are not moved to billing!.", type: "error"},
-								function(){ 
-								   location.reload();
-								}
-							);
+
+						swal({
+							title: "Oops!",
+							text: "Job are not moved to billing!.",
+							type: "error",
+							timer: 1000
+							}, function() {
+								location.reload();
+								tr.hide();
+							});
+
+							// swal({title: "Oops!", text: "Job are not moved to billing!.", type: "error"},
+							// 	function(){ 
+							// 	   location.reload();
+							// 	}
+							// );
 						}
 					});
 				} else {
-					swal("Cancelled", "Your job has not been moved.", "error");
+					// swal("Cancelled", "Your job has not been moved.", "error");
+					swal({
+							title: "Cancelled",
+							text: "Your job has not been moved.",
+							type: "error",
+							timer: 1000
+							}, function() {
+								location.reload();
+								tr.hide();
+							});
 				}
 			});
-        }
-        
-        
+        }  
     });
 	
 </script>

@@ -1,3 +1,62 @@
+<style>
+/* Style all input fields */
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+/* Style the submit button */
+input[type=submit] {
+  background-color: #04AA6D;
+  color: white;
+}
+
+/* Style the container for inputs */
+.container {
+  background-color: #f1f1f1;
+}
+
+/* The message box is shown when the user clicks on the password field */
+#message {
+  display:none;
+  background: #f1f1f1;
+  color: #000;
+  position: relative;
+  padding: 5px;
+}
+
+#message p {
+  padding: 0px 25px;
+  font-size: 10px;
+}
+
+/* Add a green text color and a checkmark when the requirements are right */
+.valid {
+  color: green;
+}
+
+.valid:before {
+  position: relative;
+  left: -25px;
+  content: "✔";
+}
+
+/* Add a red text color and an "x" when the requirements are wrong */
+.invalid {
+  color: #a94442;
+}
+
+.invalid:before {
+  position: relative;
+  left: -25px;
+  content: "✖";
+}
+</style>
 
 <div class="subnav">
 	<div class="container-fluid">
@@ -52,12 +111,35 @@
 		  	<div class="form-group">
 		  		<label for="inputEmail" class="col-sm-3 control-label">Email address</label>
 		  		<div class="col-sm-7">
-			  		<input type="email" name="email" class="form-control" id="inputEmail" placeholder="Enter email address" value="<?php echo $tester->email; ?>" required >
+			  		<input type="email" name="email" class="form-control" id="inputEmail" placeholder="Enter email address" value="<?php if($tester->is_empty_email == 0){ echo $tester->email; }  ?>" >
 			  		<div class="help-block with-errors"></div>
 			  	</div>
 		  	</div>
 
-		  	
+			  <div class="form-group">
+		  		<label for="inputPassword" class="col-sm-3 control-label">Password *</label>
+		  		<div class="col-sm-7">
+			  		<!-- <input type="password" name="password" data-minlength="3"  class="form-control" id="inputPassword" placeholder="Enter password" value="<?php if( $tester->is_empty_email != 1){ echo "********"; } ?>" autocomplete="new-password"> -->
+
+					  <input class="form-control" type="password" id="inputPassword" name="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" placeholder="Enter password" value="<?php if($tester->is_empty_email != 1){ echo "********"; } ?>">
+
+					<div id="message">
+					  	<p >Password must contain the following:</p>
+						<div>
+							<p id="letter" class="invalid">A lowercase letter</p><p id="capital" class="invalid">A capital (uppercase) letter</p><p id="number" class="invalid">A number</p><p id="length" class="invalid">Minimum 8 characters</p>
+						</div>
+                 	</div>
+
+			  	</div>
+		  	</div>
+
+		  	<div class="form-group">
+		  		<label for="inputConfirmPassword" class="col-sm-3 control-label">Confirm Password*</label>
+		  		<div class="col-sm-7">
+		  			<input type="password" name="c_password" class="form-control" id="inputConfirmPassword" data-match="#inputPassword" data-match-error="Whoops, these don't match" placeholder="Confirm password" autocomplete="new-password" value="<?php if($tester->is_empty_email != 1){ echo "********"; } ?>" >
+		  			<div class="help-block with-errors"></div>
+		  		</div>
+		  	</div>
 
 		  	<div class="form-group">
 		  		<label for="" class="col-sm-3 control-label">Status</label>
@@ -196,4 +278,65 @@
 			$( this ).attr( 'autocomplete', 'new-password' );
 		});
 	});
+</script>
+
+
+<script>
+var myInput = document.getElementById("inputPassword");
+var letter = document.getElementById("letter");
+var capital = document.getElementById("capital");
+var number = document.getElementById("number");
+var length = document.getElementById("length");
+
+// When the user clicks on the password field, show the message box
+myInput.onfocus = function() {
+  document.getElementById("message").style.display = "block";
+}
+
+// When the user clicks outside of the password field, hide the message box
+myInput.onblur = function() {
+  document.getElementById("message").style.display = "none";
+}
+
+// When the user starts to type something inside the password field
+myInput.onkeyup = function() {
+  // Validate lowercase letters
+  var lowerCaseLetters = /[a-z]/g;
+  if(myInput.value.match(lowerCaseLetters)) {  
+    letter.classList.remove("invalid");
+    letter.classList.add("valid");
+  } else {
+    letter.classList.remove("valid");
+    letter.classList.add("invalid");
+  }
+  
+  // Validate capital letters
+  var upperCaseLetters = /[A-Z]/g;
+  if(myInput.value.match(upperCaseLetters)) {  
+    capital.classList.remove("invalid");
+    capital.classList.add("valid");
+  } else {
+    capital.classList.remove("valid");
+    capital.classList.add("invalid");
+  }
+
+  // Validate numbers
+  var numbers = /[0-9]/g;
+  if(myInput.value.match(numbers)) {  
+    number.classList.remove("invalid");
+    number.classList.add("valid");
+  } else {
+    number.classList.remove("valid");
+    number.classList.add("invalid");
+  }
+  
+  // Validate length
+  if(myInput.value.length >= 8) {
+    length.classList.remove("invalid");
+    length.classList.add("valid");
+  } else {
+    length.classList.remove("valid");
+    length.classList.add("invalid");
+  }
+}
 </script>

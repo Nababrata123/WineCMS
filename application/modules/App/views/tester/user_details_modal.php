@@ -20,7 +20,7 @@
         <div class="form-group">
           <div class="col-md-12" style="padding:10px 0;">
             <label class="col-sm-2 control-label">Email id:</label>
-            <div class="col-sm-4"><?php if(isset($user->email)){echo wordwrap($user->email,16,"<br>\n",TRUE);}else{echo "null";}?></div>
+            <div class="col-sm-4"><?php if($user->is_empty_email != 1){echo wordwrap($user->email,16,"<br>\n",TRUE);}else{echo "N/A";}?></div>
           
             <label class="col-sm-3 control-label">Home Address:</label>
             <div class="col-sm-3"><?php if(isset($metadata['address']) && $metadata['address']!=''){echo $metadata['address'];}else{echo "Not Available";}?></div>

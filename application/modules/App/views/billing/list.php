@@ -8,10 +8,6 @@
 }
 
 .btn-success.active, .btn-success:active, .open>.dropdown-toggle.btn-success {
-    /* color: #fff;
-    background-color: #449d44;
-    border-color: #398439; */
-
 	color: #fff;
 	background-color: green;
 	border: 3px solid #0e440bcf !important;
@@ -19,10 +15,6 @@
 }
 
 .btn-success.focus, .btn-success:focus {
-    /* color: #fff;
-    background-color: #449d44;
-    border-color: #255625; */
-
 	color: #fff;
 	background-color: green;
 	border: 3px solid #0e440bcf !important;
@@ -65,7 +57,6 @@
 				echo $this->session->flashdata('message');
 				echo '</div>';
 			}
-
 		}
 	?>
     
@@ -166,7 +157,7 @@
           <th>Actual end time</th>
           <th>Working hour</th>
           <th>Total Amount</th>
-          <th>Q/A</th>
+          <!-- <th>Q/A</th> -->
           <th>Additional info</th>
           <th>Details</th>
           <th>Expense</th>
@@ -239,12 +230,20 @@
 			<?php
 	            		$time = explode(':', $item->working_hour);
 				        $total_minutes= ($time[0]*60) + ($time[1]) + ($time[2]/60);
-				        if($item->agency_taster_id==0)
+
+				        if($item->agency_taster_id==0){
 				            $taster_id=$item->taster_id;
-				        else
+						 } else{
 				            $taster_id=$item->agency_taster_id;
+						 }
 				        //$rate_per_hr=get_taster_rate_per_hour($taster_id);
-                         $rate_per_hr=$item->taster_rate;
+                        
+						 if ($item->current_taster_rate != 0){
+							$rate_per_hr=$item->current_taster_rate;
+						 }else{
+							$rate_per_hr=$item->taster_rate;
+						}
+
 				        $exp_amount=ltrim($item->exp_amount, '$'); 
 				        $total_amount=number_format((($rate_per_hr / 60)*$total_minutes),2)+$exp_amount;
 				        
@@ -253,9 +252,9 @@
 	            			//echo $item->exp_amount;
 	            			echo "$".$total_amount;
 	            		?></td>
-			<td><a class="btn btn-info btn-xs" href="javascript:void(0)" title="View" onclick="open_qa_modal(<?php echo $item->id;?>)"> <span class="glyphicon glyphicon-eye-open"></span> View </a></td>
+			<!-- <td><a class="btn btn-info btn-xs" href="javascript:void(0)" title="View" onclick="open_qa_modal(<?php echo $item->id;?>)"> <span class="glyphicon glyphicon-eye-open"></span> View </a></td> -->
 			<td><a class="btn btn-info btn-xs" href="javascript:void(0)" title="View" onclick="open_modal(<?php echo $item->id;?>)"> <span class="glyphicon glyphicon-eye-open"></span> View </a></td>
-			<td><a class="btn btn-info btn-xs" href="javascript:void(0)" title="View" onclick="completed_job_details_view_modal(<?php echo $item->id;?>)"> <span class="glyphicon glyphicon-eye-open"></span> View </a></td>
+			<td><a class="btn btn-info btn-xs" href="javascript:void(0)" title="View" onclick="completed_billing_details_view_modal(<?php echo $item->id;?>)"> <span class="glyphicon glyphicon-eye-open"></span> View </a></td>
 			<td><a class="btn btn-info btn-xs" href="javascript:void(0)" title="View" onclick="open_expense_modal(<?php echo $item->id;?>)"> <span class="glyphicon glyphicon-eye-open"></span> View </a></td>
 			<td>
 				<a class="btn btn-success btn-xs" target="_blank" href="<?php echo base_url();?>App/billing/download_invoice/<?php echo $item->id;?>" title="View" style="font-size: 15px;"><span class="glyphicon glyphicon-download"></span></a>
@@ -327,6 +326,21 @@
 		}); 
 	}
 
+    function completed_billing_details_view_modal(job_id)
+    {
+        // alert(job_id);
+    	$.ajax({
+		   type:'POST',
+		   url:"<?php echo base_url(); ?>App/job/completed_billing_details_view_modal/",
+		   data: {job_id:job_id},
+		   
+		   success:function(data){
+		    $("#div_result").html(data);
+		    $('#myModal').modal('show');
+		   }
+		});
+    }
+
 	function open_details_modal(job_id)
 	{
 		//alert(job_id);
@@ -340,23 +354,8 @@
 		    $('#myModal').modal('show');
 		   }
 		}); 
+
 	}
-
-    function completed_job_details_view_modal(job_id)
-    {
-        // alert(job_id);
-    	$.ajax({
-		   type:'POST',
-		   url:"<?php echo base_url(); ?>App/job/completed_job_details_view_modal/",
-		   data: {job_id:job_id},
-		   
-		   success:function(data){
-		    $("#div_result").html(data);
-		    $('#myModal').modal('show');
-		   }
-		});
-    }
-
 	function open_qa_modal(job_id)
 	{
 		$.ajax({
@@ -384,7 +383,7 @@
 		});
     }
 	$("#gcsv").click(function(){
-		// alert(1);
+		//alert(1);
 		generate_csv();
 	});
 	function generate_csv()
@@ -434,22 +433,27 @@
 					   url:"<?php echo base_url();?>App/billing/moved_to_archive",
 					   data: {checked_value:checked_value},
 					   success:function(data){
-							swal({title: "Moved!", text: "Job has been moved to archive successfully.", type: "success"},
+						swal({title: "Moved!", text: "Job has been moved to archive successfully.",timer: 1000, type: "success"},
 								function(){ 
 								   location.reload();
-								}
-							);
+								   tr.hide();
+								});
 					   },
 					   error: function() {
-							swal({title: "Oops!", text: "Job are not moved to archive!.", type: "error"},
+						swal({title: "Oops!", text: "Job are not moved to archive!.",timer: 1000, type: "error"},
 								function(){ 
 								   location.reload();
-								}
-							);
+								   tr.hide();
+								});
 						}
 					});
 				} else {
-					swal("Cancelled", "Your job has not been moved.", "error");
+					// swal("Cancelled", "Your job has not been moved.", "error");
+					swal({title: "Cancelled", text: "Your job has not been moved.",timer: 1000, type: "error"},
+						function(){ 
+							location.reload();
+							tr.hide();
+						});
 				}
 			});
         }
@@ -515,14 +519,29 @@
 					success:function(data){
 						if(data){
 							$('#job'+jobId).remove();
-							swal("Moved!", "Job has been moved to archive successfully.", "success");
+							// swal("Moved!", "Job has been moved to archive successfully.", "success");
+							swal({title: "Moved!", text: "Job has been moved to archive successfully.",timer: 1000, type: "success"},
+								function(){ 
+								   location.reload();
+								   tr.hide();
+							});
 						}else{
-							swal("Moved!", "Your job has not been moved.", "error");
+							// swal("Moved!", "Your job has not been moved.", "error");
+							swal({title: "Moved!", text: "Your job has not been moved.",timer: 1000, type: "error"},
+								function(){ 
+								   location.reload();
+								   tr.hide();
+							});
 						}
 					}
 				});
 			} else {
-				swal("Cancelled", "Your job has not been moved.", "error");
+				// swal("Cancelled", "Your job has not been moved.", "error");
+				swal({title: "Cancelled", text: "Your job has not been moved.",timer: 1000, type: "error"},
+					function(){ 
+						location.reload();
+						tr.hide();
+					});
 			}
 		});
 	}

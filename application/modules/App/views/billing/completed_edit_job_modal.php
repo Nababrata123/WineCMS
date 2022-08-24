@@ -253,7 +253,8 @@
         <div class="form-group">
 		  		<label for="inputFirstName" class="col-sm-3 control-label">Sales Rep</label>
 		  		<div class="col-sm-7">
-              <?php
+          <input readonly value="<?php echo $salesrep_name;?>" class="form-control">
+              <!-- <?php
               
                 foreach($sales_rep as $value){?>  
                       <?php if($value['id']==$job->user_id){ ?>
@@ -262,7 +263,7 @@
                       <?php 
                       break; 
                        } ?>      
-			  			<?php } ?>
+			  			<?php } ?> -->
 			  		<div class="help-block with-errors"></div>
 			  	</div>
         </div>

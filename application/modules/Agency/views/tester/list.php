@@ -111,7 +111,7 @@
 	            <tr>
 	            	<td><input type="checkbox" name="item_id[<?php echo $item->id;?>]" class="checkbox-item" value="Y"></td>
 	            	<td><?php echo $item->last_name . " " .  $item->first_name;?> <?php echo ($item->id == $this->session->userdata('id'))?'<span class="text-primary">(you)</span>':'';?></td>
-	            	<td><?php echo $item->email;?></td>
+	            	<td><?php if($item->is_empty_email != 1){ echo $item->email; }else{ echo 'N/A';}?></td>
 	            	
 					<td><?php echo ($item->last_login)?datetime_display($item->last_login):'--'?></td>
 	            	<td>

@@ -143,6 +143,7 @@ class Job extends Application_Controller {
 		}
 	    
 
+
 		$limit_end = ($page * $config['per_page']) - $config['per_page'];
 	    if ($limit_end < 0){
 	        $limit_end = 0;
@@ -153,10 +154,11 @@ class Job extends Application_Controller {
 
 	    // Get the Users List
 	    $data['jobs'] = $this->Job_model->get_job_list($filter, '', 'DESC');
-
         $logged_in_agency=$this->session->userdata('id');
 	    $data['taster']=$this->Job_model->get_tester($logged_in_agency);
-
+        //echo "<pre>";
+       // print_r($data['taster']);
+       // print_r($filter);die;
     	$data['filter'] = $uri;
 	    $data['page'] = 'job';
     	$data['page_title'] = SITE_NAME.' :: Job Management';
@@ -164,7 +166,6 @@ class Job extends Application_Controller {
     	$data['main_content'] ='job/list';
     	$this->load->view(TEMPLATE_PATH, $data);
 	}
-	
     public function open_accept_modal()
     {
         $job_id=$this->input->post('job_id');
@@ -187,14 +188,12 @@ class Job extends Application_Controller {
         //Get all tester created by this agency
         $data['tester']=$this->Job_model->get_tester($user_id);
 
+
 		$this->db->select('*');
 		$this->db->from('job');
 		$this->db->where('id',$job_id);
-		// echo "<pre>";
 		$job=$this->db->get()->row();
 		$data['job_state'] = $job->job_state;
-		// print_r($job->job_state);
-		// print_r($job);die;
 
         $this->load->view('job/assign_tester_modal',$data);
     }
@@ -207,13 +206,13 @@ class Job extends Application_Controller {
 		$this->db->where('id',$job_id);
 		$job=$this->db->get()->row();
 		$tablename ='job';
-	
 		$tasting_date = $job->tasting_date;
 		$start_time = $job->start_time;
 		$end_time = $job->end_time;
 		$prevous_taster_id = $job->previous_taster_id;
+		$pre_agency_taster_id = $job->agency_taster_id;
+
 		$count_job = $this->Job_model->check_tester_availablity($tablename,$taster_id,$tasting_date,$start_time,$end_time);
-		
 		if($count_job == 0){
 			if ($taster_id == $prevous_taster_id) {
 				$array=array(
@@ -226,6 +225,7 @@ class Job extends Application_Controller {
 			}else{
 				$array=array(
 					'agency_taster_id'=>$taster_id,
+					'previous_taster_id'=>$pre_agency_taster_id,
 					'request_job_approval_status'=>'approved',
 					'accept_status'=>1,
 					'job_status'=>3
@@ -244,21 +244,13 @@ class Job extends Application_Controller {
 				
 				$this->db->where('user_id',$taster_id);
 				$user_meta=$this->db->get()->row();
-				
-				/*
 				if(!empty($user_meta->meta_value))
 					$rate_per_hr=$user_meta->meta_value;
 				else
 					$rate_per_hr=0;
-					*/
-				if(!empty($user_meta->meta_value)){
-					$rate_per_hr=$user_meta->meta_value;
-				}else{
-					$rate_per_hr=0;
-				}
-				
-				$taster_rate_array=array('taster_rate'=>$rate_per_hr);
 
+				$taster_rate_array=array('taster_rate'=>$rate_per_hr, 'current_taster_rate'=>$rate_per_hr);
+			
 				//Update
 				$array = array('id' => $job_id);
 				$this->db->where($array);
@@ -983,7 +975,7 @@ class Job extends Application_Controller {
         $this->load->model('Job_model');
         $job_id=$this->input->post('job_id');
 		$data['more_job_info']=$this->Job_model->get_more_job_info($job_id);
-	
+		//print_r($data['more_job_info']);die;
         $this->load->view('job/more_info',$data);
    }
 }

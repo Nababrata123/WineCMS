@@ -143,7 +143,7 @@ class Billing extends Application_Controller {
         }
         
         $limit_end = ($page * $config['per_page']) - $config['per_page'];
-        $limit_end  = ($page * $filter['view']) - $filter['view'];
+        $limit_end          = ($page * $filter['view']) - $filter['view'];
         if ($limit_end < 0){
             $limit_end = 0;
         }
@@ -153,7 +153,6 @@ class Billing extends Application_Controller {
         // Get the jobs List
         $data['jobs'] = $this->Job_model->get_billing_list($filter, 'id', 'asc');
         
-        // print_r($data['openInvoiceStatus']);die;
 
         $data['page_no'] = $page;
         //$data['filters'] = $uri;
@@ -196,7 +195,7 @@ class Billing extends Application_Controller {
         $checked_id=$this->input->post('item_id[]');
         $currenttab=$this->input->post('currenttab');
         $operation=$this->input->post('operation');
-    //    echo 'current tab:: '.$currenttab." Operation:: ".$operation.' ';die;
+       // echo 'current tab:: '.$currenttab." Operation:: ".$operation.' ';
         if($operation=='delete'){
             //echo 'current tab:: '.$currenttab." Operation:: ".$operation.' '; die;
             $count = 0;
@@ -222,8 +221,8 @@ class Billing extends Application_Controller {
         //$this->load->model('Job_model');
         // get data
         $data['jobs'] = $this->Job_model->get_csv($checked_id);
-    //    echo "<pre>";
-        // print_r($data['jobs']);die;
+       // echo "<pre>";
+        //print_r($data['jobs']);die;
         // file creation
         //ob_start();
          $file = fopen('php://output', 'w');
@@ -232,9 +231,7 @@ class Billing extends Application_Controller {
         $delimiter = ',';
         if(!empty($data['jobs'][0]))
         {
-
             $header = array_keys($data['jobs'][0]);
-            // print_r($header);die;
             /*            $header[1]="user";
             $header[5]="store";
             $header[8]="wine";*/
@@ -243,7 +240,6 @@ class Billing extends Application_Controller {
             $header[2]="Invoice Date";
             $header[3]="Invoice Amount";
             $header[4]="Store Name";
-            // print_r($header);die;
             fputcsv($file, $header,$delimiter);
             foreach ($data['jobs'] as $key=>$line){
                 fputcsv($file,$line);
@@ -302,71 +298,63 @@ class Billing extends Application_Controller {
     {
         $checked_id=$this->input->post('checked_value');
         $archive=$this->Job_model->moved_to_archive($checked_id);
-/*
-        if($archive)
-            echo true;
-        else
-            echo false;
-            */
+       
+            $jobId_Array=explode(",",$checked_id);
 
-    //    $checked_id="3846, 3809";
-        $jobId_Array=explode(",",$checked_id);
-
-        if($archive) {
-            foreach($jobId_Array as $job_id){
-           
-                $manager_name=$this->Job_model->getManagerName($job_id);
-                $manager_name=$manager_name[0]['manager_name'];
-     
-                $completedJobData= $this->Job_model->get_completed_job_info($job_id);
-                $samplingDate = $completedJobData->tasting_date;
-                $samplingDate = date("F d, Y", strtotime($samplingDate));
-     
-                $jobStartTime = $completedJobData->job_start_time;
-                if($completedJobData->agency_taster_id){
-                    $tasterName=$this->Job_model->getTasterName($completedJobData->agency_taster_id);
-                }else{
-                    $tasterName=$this->Job_model->getTasterName($completedJobData->taster_id);
-                }
-               $tasterName=$tasterName->taster_name;
-               $startTime=$completedJobData->job_start_time;
-               $finish_time=$completedJobData->finish_time;
-               $taster_feedBack = $this->Job_model->get_general_note($job_id);
-               $wineNames=$this->Job_model->get_mail_wine_names($job_id);
-             //   $storeMangerMailAddress = $this->Job_model->get_store_mail($job_id);
-               $store = $this->Job_model->get_store_name_mail($job_id);
-               $store_name = $store[0]['store_name'];
-               $store_address = $store[0]['store_address'];
-
-            //    $salesrep = $this->Job_model->get_mail_selsrep_name($job_id);
-            //    $salesrep_name = $salesrep->sales_rep_name;
-            //    $salesrep_email = $salesrep->email;
-
-               $this->load->library('mail_template');
-
-               $salesIdArray = explode(',', $$completedJobData->user_id);
-               $this->db->select("email, first_name, last_name");
-               $this->db->from('users');
-               $this->db->where_in('id',$salesIdArray->user_id);
-               $m_result=$this->db->get()->result_array();
+            if($archive) {
+                foreach($jobId_Array as $job_id){
                
-               $salesrep_name='';
-               foreach ($m_result as $res){
-                   $salesrep_name.=$res['first_name']." ".$res['last_name'];
-                   $data=$this->archiveJobMailTemplate($job_id, $manager_name, $samplingDate, $tasterName, $startTime, $finish_time, $wineNames,$salesrep_name,$store_name,$store_address);
-                   $this->mail_template->email_to_store($res['email'], 'Wine Move to archive - '.$samplingDate, $data);
-               }
-     
-             }
-        }
+                    $manager_name=$this->Job_model->getManagerName($job_id);
+                    $manager_name=$manager_name[0]['manager_name'];
+         
+                    $completedJobData= $this->Job_model->get_completed_job_info($job_id);
+                    $samplingDate = $completedJobData->tasting_date;
+                    $samplingDate = date("F d, Y", strtotime($samplingDate));
+         
+                    $jobStartTime = $completedJobData->job_start_time;
+                    if($completedJobData->agency_taster_id){
+                        $tasterName=$this->Job_model->getTasterName($completedJobData->agency_taster_id);
+                    }else{
+                        $tasterName=$this->Job_model->getTasterName($completedJobData->taster_id);
+                    }
+                   $tasterName=$tasterName->taster_name;
+                   $startTime=$completedJobData->job_start_time;
+                   $finish_time=$completedJobData->finish_time;
+                   $taster_feedBack = $this->Job_model->get_general_note($job_id);
+                   $wineNames=$this->Job_model->get_mail_wine_names($job_id);
+                 //   $storeMangerMailAddress = $this->Job_model->get_store_mail($job_id);
+                   $store = $this->Job_model->get_store_name_mail($job_id);
+                   $store_name = $store[0]['store_name'];
+                   $store_address = $store[0]['store_address'];
 
-        if($archive)
-            echo true;
-        else
-            echo false;
-            
+                    $this->load->library('mail_template');
+
+                    $salesrep_name = $this->Job_model->get_salesrep_name($completedJobData->user_id);
+
+                    $salesIdArray = explode(',', $completedJobData->user_id);
+                    $this->db->select("email, first_name, last_name");
+                    $this->db->from('users');
+                    $this->db->where_in('id',$salesIdArray);
+                    $m_result=$this->db->get()->result_array();
+                    
+                    // $salesrep_name='';
+                    foreach ($m_result as $res){
+                        // $salesrep_name.=$res['first_name']." ".$res['last_name'];
+                        $data=$this->archiveJobMailTemplate($job_id, $manager_name, $samplingDate, $tasterName, $startTime, $finish_time, $wineNames,$salesrep_name,$store_name,$store_address);
+                        $this->mail_template->email_to_store($res['email'], 'Wine Move to archive - '.$samplingDate, $data);
+                    }
+                 }
+                 echo true;
+            }else{
+                echo false;
+            }
+    
+            // if($archive)
+            //     echo true;
+            // else
+            //     echo false;
+
     }
-
 
     public function moved_to_billing()
     {
@@ -377,7 +365,7 @@ class Billing extends Application_Controller {
         else
             echo false;
     }
-    
+
     private function init_pagination($uri,$segment=7,$total_rows,$view=NULL) {
 
         $this->config->load('pagination');
@@ -399,15 +387,12 @@ class Billing extends Application_Controller {
         $data['signature_and_comment']=$this->Job_model->get_signature_and_comment($job_id);
         $data['question_answer']=$this->Job_model->get_question_answer($job_id);
         $this->load->view('billing/details',$data);
-
    }
    public function more_info()
    {
         $this->load->model('Job_model');
         $job_id=$this->input->post('job_id');
         $data['more_job_info']=$this->Job_model->get_more_job_info($job_id);
-        echo "<pre>";
-        print_r($data);die;
         $this->load->view('billing/more_info',$data);
    }
    public function question_answers()
@@ -500,17 +485,32 @@ class Billing extends Application_Controller {
     }
     public function download_invoice($billing_id=NULL)
     {
-        // echo $billing_id;die;
-        $job_id=$this->input->post('checked_value');
-        //  echo $job_id;die;
+        //echo $billing_id;
+        $this->load->model('Job_model');
+        // $job_id=$this->input->post('checked_value');
 
         $this->load->model('Job_model');
         $job_id=$billing_id;
+        $result_array = $this->Job_model->get_feedback_question_answer($job_id); 
+        $data['number_of_tasters'] = '';
+        $data['weather'] = '';
+        $data['traffic'] = '';
+        $data['store_environment'] = '';
+        foreach ($result_array as $res){
+            if ($res['question_id'] == 1){
+                $data['number_of_tasters'] = $res['answer'];
+            }else if($res['question_id'] == 2){
+                $data['weather'] = $res['answer'];
+            }else if($res['question_id'] == 3){
+                $data['traffic'] = $res['answer'];
+            }else if($res['question_id'] == 4){
+                $data['store_environment'] = $res['answer'];
+            }
+        }
 
         $data['more_job_info']=$this->Job_model->get_more_job_info($job_id);
         $data['signature_and_comment']=$this->Job_model->get_signature_and_comment($job_id);
-        //echo "<pre>";
-        //print_r($data['more_job_info']);die;
+
         $data['question_answers']=$this->Job_model->get_question_answers_for_job($job_id);
         $data['job_id']=$job_id;
         $html = $this->load->view('billing/Sample_invoice',$data, true);
@@ -525,18 +525,6 @@ class Billing extends Application_Controller {
         //$content = $this->m_pdf->pdf->Output('', 'S'); // Saving pdf to attach to email 
         //$content = chunk_split(base64_encode($content));
     }
-
-    public function open_invoice(){
-        $job_id=$this->input->post('job_id');
-        // Open Invoice status
-       $open_status = $this->Job_model->open_invoice($job_id);
-       if($open_status){
-           return true;
-       }else{
-           return false;
-       }
-    }
-
     public function get_expenses_with_brand()
     {
         $this->load->model('Job_model');
@@ -588,18 +576,18 @@ class Billing extends Application_Controller {
         // Create Size array..
         $size_array = array("ML", "L", "GAL", "OZ");
 
-       
+
         // Get users Brand Name and Wine Type for Report section..
         if ($this->session->userdata('role')=='brand_wise_users'){
             $userMeta = $this->Users_model->get_user_meta($user_Id);
-          
+        
             $brand_name_array = explode(",",$userMeta[0]->meta_value);
             $sales_rep_id = explode(",",$userMeta[1]->meta_value);
             $sales_rep_name = $this->Job_model->getTasterName($user_Id);
             $selected_brand =$this->Users_model->get_selected_brand($brand_name_array);
             $data['wine_type'] = $this->Users_model->get_selected_brand_wine($selected_brand);
             $data['brand']=$selected_brand;
-           
+   
             if(!empty($sales_rep_id[0])){
                 $data['sales_rep_selected'] = 1;
                 $data['sales_rep']=$this->Users_model->get_sales_rep($sales_rep_id);
@@ -607,8 +595,6 @@ class Billing extends Application_Controller {
                 $data['sales_rep']=$this->Job_model->get_sales_rep();
                 $data['sales_rep_selected'] = 0;
             }
-            // $data['sales_rep']=$sales_rep_name;
-            
 
         }else{
             $data['brand']=$this->Job_model->get_brand();
@@ -621,10 +607,10 @@ class Billing extends Application_Controller {
         $data['wine_size'] = $this->Wine_model->getAll_WineUOM();
         $data['taster']=$this->Job_model->get_taster_for_report();
         $data['agency']=$this->Job_model->get_agency_for_report();
-     
+
         $data['filter']=$this->input->post();
         $data['main_content'] ='billing/filter_expenses_brandwise';
-        
+     
         $this->load->view(TEMPLATE_PATH, $data);
     }
 
@@ -634,7 +620,7 @@ class Billing extends Application_Controller {
         $currenttab=$this->input->post('currenttab');
         $operation=$this->input->post('operation');
 
-    //    echo 'current tab:: '.$currenttab." Operation:: ".$operation.' ';die;
+    //    echo 'current tab:: '.$currenttab." Operation:: ".$operation.' ';
         if($operation=='delete'){
             //echo 'current tab:: '.$currenttab." Operation:: ".$operation.' '; die;
             $count = 0;
@@ -713,7 +699,8 @@ class Billing extends Application_Controller {
             $data['expense_details']=$this->Job_model->get_expense_details($job_id);
              $data['general_note']=$this->Job_model->get_general_note($job_id);
              $data['sales_rep']=$this->Job_model->get_sales_rep();
-             $tastingWine=$this->Job_model->get_wines_sampled_sold_details($job_id);
+             $data['salesrep_name'] = $this->Job_model->get_salesrep_name($sales_rep_id);
+             $data['get_wine_info']=$this->Job_model->get_wines_sampled_sold_details($job_id);
              $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_wine($data['job']->store_id)), true);
              $data['expence_amount']=$this->Job_model->get_expense_amount($job_id);
              $data['manager_verification_details']=$this->Job_model->get_manager_verification_details($job_id);
@@ -724,25 +711,19 @@ class Billing extends Application_Controller {
                  array_push($wineList_array,$wine['id']);
              }
  
-            //  $tastingWine = $data['complete_wine_info'];
+             $tastingWine = $data['get_wine_info'];
  
-            //  echo "<pre>";
-            //  print_r($wineList_array);
              $storeTypeChange = 0;
-             $data['get_wine_info'] = array();
              foreach($tastingWine as $wine){ 
-            //    print_r($wine['id']);
-            //    echo " WineID ";
+               
                  if (in_array($wine['id'], $wineList_array)){
-                    array_push($data['get_wine_info'], $wine);
                      ++$storeTypeChange;
                  }
              }
  
-            //  print_r($data['get_wine_info']);die;
-            //  if(count($tastingWine) != $storeTypeChange) {
-            //      $data['get_wine_info'] = array();
-            //  }
+             if(count($tastingWine) != $storeTypeChange) {
+                 $data['get_wine_info'] = array();
+             }
     
             $this->load->view('billing/completed_edit_job_modal',$data);
         }
@@ -889,160 +870,159 @@ class Billing extends Application_Controller {
         
     }
 
-
-     // New Task Archive job Info email.
-     public function archiveJobMailTemplate($job_id, $manager_name, $samplingDate, $tasterName, $startTime, $finish_time, $wineNames, $salesrep_name, $store_name, $store_address, $taster_feedBack)
-     {
- 
-        if (empty($taster_feedBack)){
-             $taster_feedBack = 'N/A';
-        }
- 
-        $data='';
-        $data.='<!DOCTYPE html>
-        <html lang="en">
-            <head>
-                <title></title>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                
-                <style>
-                    .container{border: 5px solid #c48f29;width:70%;}
-                    .logo{width:100px;}
-                    .time{width:35%;}
-                    .staricon{width:45%; display:block; margin-left:25%;}
-                    .small{
-                        font-size: 59%;
-                        font-weight: 400;
-                    }
-                    .img-thumbnail {
-                        padding: .25rem;
-                        background-color: #fff;
-                        border: 1px solid #dee2e6;
-                        border-radius: .25rem;
-                        max-width: 100%;
-                        height: auto;
-                    }
-                    .size{
-                        width:50px;
-                    }
-                    .size:hover {
-                      color: white;
-                    }
-                    .wine{margin-left: 15px;
-                        font-size: 16px;}
+         // New Task Archive job Info email.
+         public function archiveJobMailTemplate($job_id, $manager_name, $samplingDate, $tasterName, $startTime, $finish_time, $wineNames, $salesrep_name, $store_name, $store_address, $taster_feedBack)
+         {
+     
+            if (empty($taster_feedBack)){
+                 $taster_feedBack = 'N/A';
+            }
+     
+            $data='';
+            $data.='<!DOCTYPE html>
+            <html lang="en">
+                <head>
+                    <title></title>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1">
                     
-                    
-                    @media screen and (max-width: 600px) {
-                        
-                        .container{border: 5px solid #c48f29;width:100%;}
-                        .logo{width:30%;}
+                    <style>
+                        .container{border: 5px solid #c48f29;width:70%;}
+                        .logo{width:100px;}
+                        .time{width:35%;}
+                        .staricon{width:45%; display:block; margin-left:25%;}
+                        .small{
+                            font-size: 59%;
+                            font-weight: 400;
+                        }
+                        .img-thumbnail {
+                            padding: .25rem;
+                            background-color: #fff;
+                            border: 1px solid #dee2e6;
+                            border-radius: .25rem;
+                            max-width: 100%;
+                            height: auto;
+                        }
+                        .size{
+                            width:50px;
+                        }
+                        .size:hover {
+                          color: white;
+                        }
                         .wine{margin-left: 15px;
-                        font-size: 12px;}
-                        .tim{font-size:14px;}
-                    }
-                </style>
-            </head>
-            <body>
-                <center>
-                    <div>
-                        <table class="container">
-                            <tr>
-                                <td colspan="3" style="text-align:center;">
-                                     <center>
-                                         <img src="'.BASE_URL.'assets/wine/thumb/Wine_Logo.png" width="100">
-                                     </center>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="3" style="text-align:center;">
-                                    <h1 style="margin-top:auto;">Tasting Information</h1>
-                                </td>
-                            </tr>
-                          <tr>
-                             <td colspan="3">
-                                 <h3 style="margin-top:auto;">Tasting Date - '.$samplingDate.'</h3>
-                             </td>
-                        </tr>
-                            <tr>
+                            font-size: 16px;}
+                        
+                        
+                        @media screen and (max-width: 600px) {
+                            
+                            .container{border: 5px solid #c48f29;width:100%;}
+                            .logo{width:30%;}
+                            .wine{margin-left: 15px;
+                            font-size: 12px;}
+                            .tim{font-size:14px;}
+                        }
+                    </style>
+                </head>
+                <body>
+                    <center>
+                        <div>
+                            <table class="container">
+                                <tr>
+                                    <td colspan="3" style="text-align:center;">
+                                         <center>
+                                             <img src="'.BASE_URL.'assets/wine/thumb/Wine_Logo.png" width="100">
+                                         </center>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" style="text-align:center;">
+                                        <h1 style="margin-top:auto;">Tasting Information</h1>
+                                    </td>
+                                </tr>
+                              <tr>
                                  <td colspan="3">
-                                     <h3 style="margin-top:auto;">Store name & address - '.$store_name.', '.$store_address.'</h3>
+                                     <h3 style="margin-top:auto;">Tasting Date - '.$samplingDate.'</h3>
                                  </td>
-                          </tr>
-                          <tr>
-                                 <td colspan="3">
-                                     <h3 style="margin-top:auto;">Sales Rep - '.$salesrep_name.'</h3>
-                                 </td>
-                          </tr>
-                            <tr>
-                                <td colspan="3">
-                                    <h3 style="margin-top:auto;">Taster - '.$tasterName.'</h3>
-                                </td>
                             </tr>
-                            <tr>
-                                 <td colspan="3">
-                                     <h3 style="margin-top:auto;">Taster Feedback: - '.$taster_feedBack.'</h3>
-                                 </td>
-                             </tr>
-                            <tr>
-                                <td width="100">
-                                    <h3 style="margin-top:auto;" class="tim">Job Start Time - '.date("g:i a", strtotime($startTime)).'</h3>
-                                </td>
-                                <td width="100">
-                                    <h3 style="margin-top:auto;" class="tim">Job End Time - '.date("g:i a", strtotime($finish_time)).'</h3>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="3">
-                                    <h3 style="margin-top:auto;">Wines Sold : </h3>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="3">
-                                    <table>';
-                                 if (!empty($wineNames)) {
-                                     foreach ($wineNames as $wine) {
- 
-                                         if($wine["soldwine"] > 1){
-                                             $bottle_sold ='Bottles sold';
-                                         }else{
-                                             $bottle_sold = 'Bottle sold';
+                                <tr>
+                                     <td colspan="3">
+                                         <h3 style="margin-top:auto;">Store name & address - '.$store_name.', '.$store_address.'</h3>
+                                     </td>
+                              </tr>
+                              <tr>
+                                     <td colspan="3">
+                                         <h3 style="margin-top:auto;">Sales Rep - '.$salesrep_name.'</h3>
+                                     </td>
+                              </tr>
+                                <tr>
+                                    <td colspan="3">
+                                        <h3 style="margin-top:auto;">Taster - '.$tasterName.'</h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                     <td colspan="3">
+                                         <h3 style="margin-top:auto;">Taster Feedback: - '.$taster_feedBack.'</h3>
+                                     </td>
+                                 </tr>
+                                <tr>
+                                    <td width="100">
+                                        <h3 style="margin-top:auto;" class="tim">Job Start Time - '.date("g:i a", strtotime($startTime)).'</h3>
+                                    </td>
+                                    <td width="100">
+                                        <h3 style="margin-top:auto;" class="tim">Job End Time - '.date("g:i a", strtotime($finish_time)).'</h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">
+                                        <h3 style="margin-top:auto;">Wine Info : </h3>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">
+                                        <table>';
+                                     if (!empty($wineNames)) {
+                                         foreach ($wineNames as $wine) {
+     
+                                             if($wine["soldwine"] > 1){
+                                                 $bottle_sold ='Bottles sold';
+                                             }else{
+                                                 $bottle_sold = 'Bottle sold';
+                                             }
+                                             if($wine["usedwine"] > 1){
+                                                 $bottle_used ='Bottles used';
+                                             }else{
+                                                 $bottle_used = 'Bottle used';
+                                             }
+                                             if($wine["open_bottles_sampled"] > 1){
+                                                 $bottle_sampled ='Opened bottles sampled';
+                                             }else{
+                                                 $bottle_sampled = 'Opened bottle sampled';
+                                             }
+                                         $data.='<tr>
+                                                <td style="width:10%;">
+                                                    <img style="max-width:100px;" src="'.$wine["image"].'" width="75">
+                                                </td>
+                                                <td>
+                                                <p  class="wine">'. $wine["name"] .' - ' . $wine["soldwine"] . ' '.$bottle_sold.',  ' . $wine["usedwine"] . ' '.$bottle_used.',  ' . $wine["open_bottles_sampled"] . ' '.$bottle_sampled.'</p>
+                                                </td>
+                                            </tr>';
                                          }
-                                         if($wine["usedwine"] > 1){
-                                             $bottle_used ='Bottles used';
-                                         }else{
-                                             $bottle_used = 'Bottle used';
-                                         }
-                                         if($wine["open_bottles_sampled"] > 1){
-                                             $bottle_sampled ='Opened bottles sampled';
-                                         }else{
-                                             $bottle_sampled = 'Opened bottle sampled';
-                                         }
-                                     $data.='<tr>
-                                            <td style="width:10%;">
-                                                <img style="max-width:100px;" src="'.$wine["image"].'" width="75">
-                                            </td>
-                                            <td>
-                                            <p  class="wine">'. $wine["name"] .' - ' . $wine["soldwine"] . ' '.$bottle_sold.',  ' . $wine["usedwine"] . ' '.$bottle_used.',  ' . $wine["open_bottles_sampled"] . ' '.$bottle_sampled.'</p>
-                                            </td>
-                                        </tr>';
                                      }
-                                 }
-                                 $data.='</table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td colspan="3">
-                                    <hr style="border-top: 2px solid rgba(0,0,0,.1);">
-                                </td>
-                            </tr>
-                           
-                        </table>
-                    </div>
-                </center>
-            </body>
-        </html>';
-        return $data;
-     }
+                                     $data.='</table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">
+                                        <hr style="border-top: 2px solid rgba(0,0,0,.1);">
+                                    </td>
+                                </tr>
+                               
+                            </table>
+                        </div>
+                    </center>
+                </body>
+            </html>';
+            return $data;
+         }
 
 }

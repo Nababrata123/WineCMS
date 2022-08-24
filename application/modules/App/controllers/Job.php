@@ -1,5 +1,8 @@
+
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
+// error_reporting(0); //   12/05/2022
 class Job extends Application_Controller {
+    
     /**
      * Index Page for this controller.
      *
@@ -40,34 +43,28 @@ class Job extends Application_Controller {
         $this->load->library('user_agent');
         $this->load->model('store_model');
     }
-
     public function index() {
     // Permission Checking
         parent::checkMethodPermission($this->permissionValues[$this->router->method]);
         
-        // echo "hi";die;
-        // $this->session->unset_userdata('wine_ids');
-        // $this->session->unset_userdata('inputdata');
+        add_js('assets/modules/'.$this->router->fetch_module().'/js/'.$this->router->fetch_module().'.js');
+        add_js('assets/js/plugins/colResizable-1.6.min.js');
 
-        // if(isset($_SESSION['error'])){
-        //     unset($_SESSION['error']);
-        // }
-
-        $default_uri = array( 'page','status','tasting_date','taster','store', 'search_by_status', 'sort_by_date', 'entry_date','sales_rep','search_text', 'search_by_rating');
+        $default_uri = array( 'page','status','tasting_date','taster','store', 'search_by_status', 'sort_by_date', 'entry_date','sales_rep','search_text', 'search_by_rating', 'from_date', 'to_date','view');
         $uri = $this->uri->uri_to_assoc(4, $default_uri);
 
-        // echo "<pre>";
-      
-        // print_r($uri);
+        // echo 'Welcome';die;
+
         $status = $uri['status'];
         $pegination_uri = array();
         $pegination_uri['status'] = $uri['status'];
         $filter=array();
+        // echo "<pre>";
+        // print_r($uri);die;
          if (isset($uri['tasting_date']) && trim(urldecode($uri['tasting_date'])) <> "") {
            
             $filter['tasting_date'] = $uri['tasting_date'];
             $pegination_uri['tasting_date'] = $uri['tasting_date'];
-            
         } 
         else
         {
@@ -137,7 +134,6 @@ class Job extends Application_Controller {
             $filter['search_by_status'] = "";
             $pegination_uri['search_by_status'] = "~";
         }
-
         if (isset($uri['sort_by_date']) && trim(urldecode($uri['sort_by_date'])) <> "") {
             
             $filter['sort_by_date'] = $uri['sort_by_date'];
@@ -149,7 +145,6 @@ class Job extends Application_Controller {
             $filter['sort_by_date'] = "";
             $pegination_uri['sort_by_date'] = "~";
         }
-
         if (isset($uri['search_by_rating']) && trim(urldecode($uri['search_by_rating'])) <> "") {
             //pegination_uri['status'] = $uri['status'];
             $filter['search_by_rating'] = $uri['search_by_rating'];
@@ -160,6 +155,28 @@ class Job extends Application_Controller {
         {
             $filter['search_by_rating'] = "";
             $pegination_uri['search_by_rating'] = "~";
+        }
+
+        if (isset($uri['from_date']) && trim(urldecode($uri['from_date'])) <> "") {
+           
+            $filter['from_date'] = $uri['from_date'];
+            $pegination_uri['from_date'] = $uri['from_date'];
+        } 
+        else
+        {
+            $filter['from_date'] = "";
+            $pegination_uri['from_date'] = "~";
+        }
+
+        if (isset($uri['to_date']) && trim(urldecode($uri['to_date'])) <> "") {
+           
+            $filter['to_date'] = $uri['to_date'];
+            $pegination_uri['to_date'] = $uri['to_date'];
+        } 
+        else
+        {
+            $filter['to_date'] = "";
+            $pegination_uri['to_date'] = "~";
         }
 
         if ($uri['page'] > 0) {
@@ -176,42 +193,61 @@ class Job extends Application_Controller {
             $filter['status'] = $status;
             $pegination_uri['status'] = $status;
         }
-;
+        if ($uri['view'] <> "") {
+            $filter['view'] 		= $uri['view'];
+			$pegination_uri['view'] = $uri['view'];
+        } else {
+			$filter['view'] 		= 10;
+			$pegination_uri['view'] = 10;
+		}
+
+        $currentURL = current_url();
+        $urlCount = (substr_count($currentURL, '/') - 3);
+        // print_r($urlCount);die;
+
         // Get the total rows without limit
         $total_rows = $this->Job_model->get_job_list($filter, null, null, true);
-     
-       $config = $this->init_pagination('App/Job/index/'.$this->uri->assoc_to_uri($pegination_uri).'/page/' ,25, $total_rows); 
-      
+        // $pegination_uri = \array_diff($pegination_uri, ["~"]);
+    //    $config = $this->init_pagination('App/Job/index/'.$this->uri->assoc_to_uri($pegination_uri).'/page/' ,29,$total_rows,$filter['view']);
+
+        $pegination_uri = \array_diff($pegination_uri, ["~"]);
+        $config = $this->init_pagination('App/job/index/'.$this->uri->assoc_to_uri($pegination_uri).'/page/',$urlCount,$total_rows,$filter['view']); 
+
+       /* if ($filter['status'] =='problems'){
+            $config = $this->init_pagination('App/Job/index/'.$this->uri->assoc_to_uri($pegination_uri).'/page/' ,$urlCount, $total_rows, $filter['view']);
+        }else{
+            $config = $this->init_pagination('App/Job/index/'.$this->uri->assoc_to_uri($pegination_uri).'/page/' ,$urlCount, $total_rows, $filter['view']);
+        }*/
+
         $limit_end = ($page * $config['per_page']) - $config['per_page'];
+        $limit_end  = ($page * $filter['view']) - $filter['view'];
         if ($limit_end < 0){
             $limit_end = 0;
         }
         $filter['limit'] = $config['per_page'];
         $filter['offset'] = $limit_end;
  
-        // print_r($filter['offset']);die;
         // Get the jobs List
         $data['jobs'] = $this->Job_model->get_job_list($filter, '', '');
-
+        // print_r($pegination_uri);die;
         /* Pre assigned jobs */
-        // $data['count_pre_assigned']=$this->Job_model->count_job('job',1);
+        $data['count_pre_assigned']=$this->Job_model->count_job('job',1);
         /* assigned jobs */
-        // $data['count_assigned']=$this->Job_model->count_job('job',2);
+        $data['count_assigned']=$this->Job_model->count_job('job',2);
         /* accepted jobs */
-        // $data['count_accepted']=$this->Job_model->count_job('job',3);
+        $data['count_accepted']=$this->Job_model->count_job('job',3);
         /* problems jobs */
         $data['count_problems']=$this->Job_model->count_job('job',4);
 
-        // $data['jobs_count']= $data['count_pre_assigned']+ $data['count_assigned']+$data['count_accepted'];
-        $data['jobs_count'] = $total_rows;
-       
+        $data['jobs_count']= $data['count_pre_assigned']+ $data['count_assigned']+$data['count_accepted'];
         //Get tester according to zone for 
 		
         $data['taster']=$this->Job_model->get_taster();
         $data['store']=$this->Job_model->get_store();
         $data['sales_rep']=$this->Job_model->get_sales_rep();
-        
         $data['filters'] = $uri;
+    //    echo "<pre>";
+    //    print_r($uri);die;
         $data['page'] = 'Job';
         $data['page_title'] = SITE_NAME.' :: Job Management';
         $data['main_content'] ='job/list';
@@ -291,11 +327,8 @@ class Job extends Application_Controller {
         $this->load->view(TEMPLATE_PATH, $data);
     }
 
- 
-
     //Create job from admin pannel
     public function add($id = 0) {
-
 
 		// Permission Checking
 		parent::checkMethodPermission($this->permissionValues[$this->router->method]);
@@ -321,10 +354,8 @@ class Job extends Application_Controller {
             //Set input data to session
 			
 			$tid = $this->input->post('taster_id');
-            // print_r($tid);die;
-
             $newdata = array(
-					'user_id'  => $this->input->post('user_id'),
+					'user_id'  => $this->input->post('user_id[]'),
 					'tasting_date'  => $td,
 					'start_time_hour'=>$this->input->post('start_time_hour'),					
 					'start_time_minute'=>$this->input->post('start_time_minute'),
@@ -336,7 +367,7 @@ class Job extends Application_Controller {
 					'admin_note'  => $this->input->post('admin_note'),
 					'taster_note'  => $this->input->post('taster_note'),
 					'wine_id'  => $this->input->post('wine_id'),
-					'taster_id'  => $tid[0],
+					// 'taster_id'  => $tid[0],
 
                     'actual_time_one' => $this->input->post('actual_time_one'),
                     'actual_start_hour' => $this->input->post('actual_start_hour'),
@@ -350,7 +381,7 @@ class Job extends Application_Controller {
 
             $this->session->set_userdata('inputdata',$newdata);
 
-    		// $this->form_validation->set_rules('user_id', 'Sales representative', 'trim|required');
+    		$this->form_validation->set_rules('user_id[]', 'Sales representative', 'trim|required');
 			$this->form_validation->set_rules('tasting_date', 'Tasting date', 'trim|required');
             $this->form_validation->set_rules('start_time_hour', 'Start time', 'trim|required');
 	    	$this->form_validation->set_rules('end_time_hour', 'End time', 'trim|required');
@@ -364,8 +395,48 @@ class Job extends Application_Controller {
             $date=date_create($this->input->post('tasting_date'));
             $tastingDate = date_format($date, "Y-m-d");
 
-            $exp_amount=$this->input->post('exp_amount');
+         /*   $exp_amount=$this->input->post('exp_amount');
             $exp_reason=$this->input->post('exp_reason');
+   
+            if($tastingDate < $to_date && $tastingDate!=''){
+                
+                $this->form_validation->set_rules('actual_start_hour', 'Actual Start time', 'trim|required');
+                $this->form_validation->set_rules('actual_start_minute', 'Actual End time', 'trim|required');
+                $this->form_validation->set_rules('actual_end_hour', 'Actual End time', 'trim|required');
+                $this->form_validation->set_rules('actual_end_minute', 'Actual End time', 'trim|required');
+                if(!empty($exp_amount)){
+                    $this->form_validation->set_rules('exp_reason', 'Expense reason', 'trim|required');
+                }
+
+                //Get tester or agency
+                $tester_array=$this->input->post('taster_id[]');
+                $agency_tasters = $this->input->post('agency_taster_id[]');
+                $taster_id = '';
+                foreach($tester_array as $val)
+                {
+                    $taster_id.=$val.',';
+                }
+                $taster_id = rtrim($taster_id,',');
+
+                $agency_taster_id = '';
+                foreach($agency_tasters as $val)
+                {
+                    $agency_taster_id.=$val.',';
+                }
+                $agency_taster_id = rtrim($agency_taster_id,',');
+
+                //Get user role
+                $user_role=$this->Job_model->get_user_role('users',$taster_id);
+
+                if($user_role == 5 && $agency_taster_id ==''){
+                    $this->form_validation->set_rules('hidden_agency_tester_id', 'Agency taster', 'trim|required');
+                }
+            
+            }else{
+        
+                $this->form_validation->set_rules('wine_id[]', 'At least one wine', 'trim|required');
+            }*/
+
 
     		$this->form_validation->set_error_delimiters('<div class="alert alert-danger alert-dismissable"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>', '</div>');
     		//if the form has passed through the validation
@@ -374,9 +445,7 @@ class Job extends Application_Controller {
     		{
                 
     			$user_id = $this->input->post('user_id');
-                
                 $tasting_date = date("Y-m-d",strtotime($this->input->post('tasting_date')));
-
                 if($this->input->post('start_time_hour')!='')
                 {
                     $first_time=$this->input->post('time_one');
@@ -416,7 +485,6 @@ class Job extends Application_Controller {
                     $job_start_time='';
                 }
 
-
                 if($this->input->post('actual_end_hour')!='')
                 {
                     $actual_second_time=$this->input->post('actual_time_two');
@@ -435,6 +503,7 @@ class Job extends Application_Controller {
                 $check_store=$this->Job_model->check_store('job',$store_id,$start_time,$end_time,$tasting_date,0);
 
                 $admin_note = $this->input->post('admin_note');
+               
 
                 $datetime1 = strtotime($start_time);
                 $datetime2 = strtotime($end_time);
@@ -452,82 +521,81 @@ class Job extends Application_Controller {
                 $exp_amount="$".$this->input->post('exp_amount');
                 $exp_reason=$this->input->post('exp_reason');
                 $taster_note = $this->input->post('taster_note');
-              
-                  //Make user_Id array to string
-                  $userId='';
-                  if(!empty($user_id))
-                  {
-                      for($i=0;$i<count($user_id);$i++)
-                      {
-                          $userId.=$user_id[$i].",";
-                      }
-                      $userId=rtrim($userId,",");
-                  } 
-         
+
+                 //Make user_Id array to string
+                 $userId='';
+                 if(!empty($user_id))
+                 {
+                     for($i=0;$i<count($user_id);$i++)
+                     {
+                         $userId.=$user_id[$i].",";
+                     }
+                     $userId=rtrim($userId,",");
+                 } 
+                      
                 $job['user_id']=$userId;
                 $job['tasting_date']=$tasting_date;
                 $job['start_time']=$start_time;
                 $job['end_time']=$end_time;
                 $job['store_id']=$store_id;
                 $job['admin_note']=$admin_note;
-                $job['taster_note']=$taster_note;  
+                $job['taster_note']=$taster_note;                
           
                 // New Task Previous date checking..
                 if($tastingDate < $to_date && $tastingDate!=''){
 
-
-                //Get tester or agency
-                $tester_array=$this->input->post('taster_id[]');
-         
-                $taster_id = '';
-                foreach($tester_array as $val)
-                {
-                    $taster_id.=$val.',';
-                }
-                $taster_id = rtrim($taster_id,',');
-
-                //Get agency taster.
-                $agency_testers = $this->input->post('agency_taster_id[]');
+                    //Get tester or agency
+                    $tester_array=$this->input->post('taster_id[]');
             
-                $agency_taster_id='';
-               
-                foreach($agency_testers as $val)
-                {
-                    $agency_taster_id.=$val.',';
-                }
-                $agency_taster_id=rtrim($agency_taster_id,',');
-                
-                
-                $job['taster_id']=$taster_id;
-                $job['agency_taster_id']=$agency_taster_id;
-
-                //Get user role
-                $user_role=$this->Job_model->get_user_role_new('users',$user_id);
-              /*  if($user_role==3)
-                {
-                    $job['confirm_status']=1;
-                }*/
-
-                //Get user role
-                $user_role=$this->Job_model->get_user_role('users',$taster_id);
-                if($user_role==5)
-                {
-                    //Check the tester is available or not for the job
-                    if($agency_taster_id!=''){
-                        $count_job=$this->Job_model->check_agency_tester_availablity('job',$agency_taster_id,$tasting_date,$start_time,$end_time);
-                    }else{
-                        $count_job=0;
+                    $taster_id = '';
+                    foreach($tester_array as $val)
+                    {
+                        $taster_id.=$val.',';
                     }
-                    $taster_rate = $this->Job_model->get_taster_rate($agency_taster_id);
-                }else{
-                    //Check the tester is available or not for the job
-                    if($taster_id!=''){
-                        $count_job=$this->Job_model->check_tester_availablity('job',$taster_id,$tasting_date,$start_time,$end_time);
-                    }else{
-                        $count_job=0;
+                    $taster_id = rtrim($taster_id,',');
+
+                    //Get agency taster.
+                    $agency_testers = $this->input->post('agency_taster_id[]');
+                
+                    $agency_taster_id='';
+                
+                    foreach($agency_testers as $val)
+                    {
+                        $agency_taster_id.=$val.',';
                     }
-                    $taster_rate = $this->Job_model->get_taster_rate($taster_id);
-                }
+                    $agency_taster_id=rtrim($agency_taster_id,',');
+                    
+                    
+                    $job['taster_id']=$taster_id;
+                    $job['agency_taster_id']=$agency_taster_id;
+
+                    //Get user role
+                    $user_role=$this->Job_model->get_user_role('users',$userId);
+                   /* if($user_role==3)
+                    {
+                        $job['confirm_status']=1;
+                    }*/
+
+                    //Get user role
+                    $user_role=$this->Job_model->get_user_role('users',$taster_id);
+                    if($user_role==5)
+                    {
+                        //Check the tester is available or not for the job
+                        if($agency_taster_id!=''){
+                            $count_job=$this->Job_model->check_agency_tester_availablity('job',$agency_taster_id,$tasting_date,$start_time,$end_time);
+                        }else{
+                            $count_job=0;
+                        }
+                        // $taster_rate = $this->Job_model->get_taster_rate($agency_taster_id);
+                    }else{
+                        //Check the tester is available or not for the job
+                        if($taster_id!=''){
+                            $count_job=$this->Job_model->check_tester_availablity('job',$taster_id,$tasting_date,$start_time,$end_time);
+                        }else{
+                            $count_job=0;
+                        }
+                        // $taster_rate = $this->Job_model->get_taster_rate($taster_id);
+                    }
               
                     if($taster_id!='')
                     {
@@ -556,8 +624,17 @@ class Job extends Application_Controller {
                     $job['job_start_time']=$job_start_time;
                     $job['finish_time']=$finish_time;
                     $job['endtime_state']=4;
-                    $job['taster_rate']=$taster_rate;
-               
+                    // $job['taster_rate']=$taster_rate;
+                    // $job['current_taster_rate']=$taster_rate;
+                
+                      //Get user role
+                    // $user_role=$this->Job_model->get_user_role('users',$userId);
+                   /* if($user_role==3)
+                    {
+                        $job['confirm_status']=1;
+                    }*/
+
+
                     if (!empty($job))
                     {
     
@@ -567,7 +644,7 @@ class Job extends Application_Controller {
                             $job_id=$this->Job_model->create_job('job',$job);
                             if($job_id)
                             {
-
+         
                             $wine=$this->input->post('wine');
                             $bottles_sampled=$this->input->post('bottles_sampled');
                             $open_bottles_sampled=$this->input->post('open_bottles_sampled');
@@ -603,17 +680,18 @@ class Job extends Application_Controller {
                             if($exp_amount!='' || $exp_reason!=''){
                                 $expense_id=$this->Job_model->submit_expense_details_from_cms($expense_array);
                             }
-                            // Taster Feedback Insert.
-                            $general_note=$this->input->post('general_note');
-                           
-                            $general_note_array=array(
-                                'user_id'=>$taster_id,
-                                'job_id'=>$job_id,
-                                'general_note'=>$general_note
-                            );
-                
-                            $general_note=$this->Job_model->submit_general_notes('general_notes',$general_note_array);
 
+                             // Taster Feedback Insert.
+                             $general_note=$this->input->post('general_note');
+                           
+                             $general_note_array=array(
+                                 'user_id'=>$taster_id,
+                                 'job_id'=>$job_id,
+                                 'general_note'=>$general_note
+                             );
+                 
+                             $general_note=$this->Job_model->submit_general_notes('general_notes',$general_note_array);
+ 
                             
                             //Submit expense details images
                             $supported_imgs=$_FILES['expense_images'];
@@ -665,7 +743,7 @@ class Job extends Application_Controller {
                                 //Set Invoice Number..
                                 $this->Job_model->setInvoiceNumber($job_id);
 
-                                                                //Set job to ready for billing
+                                //Set job to ready for billing
                                 $difference=strtotime($finish_time)-strtotime($job_start_time);
                                 //Calculate total pause time
                         
@@ -676,8 +754,9 @@ class Job extends Application_Controller {
                                 $this->session->unset_userdata('wine_ids');
                                 $this->session->unset_userdata('inputdata');
                                 
-                                $this->session->set_flashdata('job_create_complete', 'yes');
+                                // $this->session->set_flashdata('message_type', 'success');
                                 // $this->session->set_flashdata('message', 'Job has been created and completed successfully.');
+                                $this->session->set_flashdata('job_create_complete', 'yes');
                                 redirect('/App/job');
                             }
                         }
@@ -685,8 +764,8 @@ class Job extends Application_Controller {
                         {
                             //echo "v";die;
                             // $this->session->set_flashdata('message_type', 'danger');
-                            $this->session->set_flashdata('taster_assigned_other', 'yes');
                             // $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster has been assigned with other job.');
+                            $this->session->set_flashdata('taster_assigned_other', 'yes');
                             redirect('/App/job/add/');
                         }
                         
@@ -702,7 +781,7 @@ class Job extends Application_Controller {
 
                     //Get tester or agency
                     $tester_array=$this->input->post('taster_id[]');
-            
+
                     $taster_id = '';
                     foreach($tester_array as $val)
                     {
@@ -712,6 +791,12 @@ class Job extends Application_Controller {
 
                     $job['taster_id']=$taster_id;
 
+                    if($taster_id!='')
+                    {
+                        $check_tester=1;
+                    }else{
+                        $check_tester=1;
+                    }
 
                     //Check the tester is available or not for the job
                     if($taster_id!=''){
@@ -719,7 +804,7 @@ class Job extends Application_Controller {
                     }else{
                         $count_job=0;
                     }
-  
+
                     $wine_details_array=$this->input->post('wine_id');
 
                     //Make wine id array to string
@@ -748,13 +833,10 @@ class Job extends Application_Controller {
                     }
                     $job['job_status']=$job_status;
                     $job['status']=$status;
-                    
+                  
                     //Get user role
-                    $user_role=$this->Job_model->get_user_role_new('users',$user_id);
-                    // echo "<pre>";
-                    // print_r($user_role);die;
+                    // $user_role=$this->Job_model->get_user_role('users',$taster_id);
 
-                    // If it is needed then open. 23-02-2022
                    /* if($user_role==3)
                     {
                         $job['confirm_status']=1;
@@ -762,96 +844,104 @@ class Job extends Application_Controller {
     
                     if (!empty($job))
                     {
-                        if($count_job == 0)
-                        {
-                            //echo "u";die;
-                            // echo "<pre>";
-                            // print_r($job);die;
-
-                            $insert_id=$this->Job_model->create_job('job',$job);
-                            if($insert_id)
+    
+                            if($check_tester==1)
                             {
-                                $this->load->library('push_notifications');
-                                $this->load->model('Notifications_model');
-                                $this->load->library('mail_template');
-                                $taster_id_array=explode(",",$taster_id);
-                                foreach($taster_id_array as $id)
+                                if($count_job == 0)
                                 {
-                                    $notifications = $this->Notifications_model->send_notifications_for_republish_job($id,$insert_id);
+                                    //echo "u";die;
+                                    $insert_id=$this->Job_model->create_job('job',$job);
+                                    if($insert_id)
+                                    {
+                                        $this->load->library('push_notifications');
+                                        $this->load->model('Notifications_model');
+                                        $this->load->library('mail_template');
+                                        $taster_id_array=explode(",",$taster_id);
+                                       
+                                      /*  foreach($taster_id_array as $id)
+                                        {
+                                            $notifications = $this->Notifications_model->send_notifications_for_republish_job($id,$insert_id);
+                                        }*/
+                                        foreach($tester_array as $taster_id)
+                                        {
+     
+                                            $samplingDate = date("F d, Y", strtotime($tasting_date));
+                                            $startTime = date("h:i a",strtotime($start_time));
+                                            $finish_time = date("h:i a",strtotime($end_time));
+        
+                                            $wineNames=$this->Job_model->get_assign_mail_wine_names($wine_details_array);
+                            
+                                            $store = $this->Job_model->get_store_name($store_id);
+                                            $store_name = $store->name;
+                                            $store_address = $store->adress;
+                                            
+                                           /* $salesrep = $this->Job_model->get_mail_selsrep_name($insert_id);
+                                            $salesrep_name = $salesrep->sales_rep_name;
+                                            */
+                                            $salesrep_name = $this->Job_model->get_salesrep_name($userId);
+
+                                            //get tester id and name
+                                            $result['tester_info']=$this->Job_model->get_tester_details($taster_id);
+                                            $name=$result['tester_info']->first_name;
+                                            $email=$result['tester_info']->email;
+                                            //echo $email;die;
+                                            
+                                            // $this->mail_template->assigned_job_email($name,$email,$samplingDate,$startTime,$finish_time,$wineNames,$store_name,$store_address,$salesrep_name);
+    
+                                        }
+                                        $this->session->unset_userdata('wine_ids');
+                                        $this->session->unset_userdata('inputdata');
+                                        
+                                        // $this->session->set_flashdata('message_type', 'success');
+                                        // $this->session->set_flashdata('message', 'Job has been created successfully.');
+
+                                        // $this->session->set_flashdata('job_create', 'yes');
+                                        redirect('/App/job/index/job_create_success');
+                                    }
                                 }
-                                foreach($tester_array as $taster_id)
+                                else
                                 {
-
-                                    $samplingDate = date("F d, Y", strtotime($tasting_date));
-                                    $startTime = date("h:i a",strtotime($start_time));
-                                    $finish_time = date("h:i a",strtotime($end_time));
-
-                                    $wineNames=$this->Job_model->get_assign_mail_wine_names($wine_details_array);
-                    
-                                    $store = $this->Job_model->get_store_name($store_id);
-                                    $store_name = $store->name;
-                                    $store_address = $store->adress;
-                                    
-                                    $salesrep = $this->Job_model->get_mail_selsrep_name($insert_id);
-                                    $salesrep_name = $salesrep->sales_rep_name;
-                                    
-                                    //get tester id and name
-                                    $result['tester_info']=$this->Job_model->get_tester_details($taster_id);
-                                    $name=$result['tester_info']->first_name;
-                                    $email=$result['tester_info']->email;
-                                    //echo $email;die;
-                                    
-                                    $this->mail_template->assigned_job_email($name,$email,$samplingDate,$startTime,$finish_time,$wineNames,$store_name,$store_address,$salesrep_name);
-
+                                    // $this->session->set_flashdata('message_type', 'danger');
+                                    // $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster has been assigned with other job.');
+                                    $this->session->set_flashdata('taster_assigned_other', 'yes');
+                                    redirect('/App/job/add/');
                                 }
-                                $this->session->unset_userdata('wine_ids');
-                                $this->session->unset_userdata('inputdata');
-                                
-                                $this->session->set_flashdata('job_create', 'yes');
-                                // $this->session->set_flashdata('message', 'Job has been created successfully.');
-                                redirect('/App/job');
                             }
-                        }
-                        else
-                        {
-                            //echo "v";die;
-                            // $this->session->set_flashdata('message_type', 'danger');
-                            // $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster has been assigned with other job.');
-                            $this->session->set_flashdata('taster_assigned_other', 'yes');
-                            redirect('/App/job/add/');
-                        }
-                      
+                            else
+                            {
+                                
+                                $this->session->set_flashdata('message_type', 'danger');
+                                $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster you want to assign does not belong to the zone.');
+                                redirect('/App/job/add/');     
+                            }
                     }
                     else
                     {
-                        // $this->session->set_flashdata('message_type', 'danger');
-                        // $this->session->set_flashdata('message', '<strong>Oh snap!</strong> Job not created.');
-                        $this->session->set_flashdata('job_not_create', 'yes');
+                        $this->session->set_flashdata('message_type', 'danger');
+                        $this->session->set_flashdata('message', '<strong>Oh snap!</strong> Job not created.');
                         redirect('/App/job/');
                     }
                 }	
     		} 
 
-            // print_r('Validation not');die;
     	}
 
     	$data['page'] = 'add_job';
     	$data['page_title'] = SITE_NAME.' :: Job Management &raquo; Add Job';
         //Get sales representative
-        $data['sales_rep']=$this->Job_model->get_sales_rep();
+        // $data['sales_rep']=$this->Job_model->get_sales_rep();
         //get store
-        // $data['store']=$this->Job_model->get_store();
+        $data['store']=$this->Job_model->get_store();
         //get wine
-        
         $data['wine']=$this->Job_model->get_all_wine();
+
         //get tester or agency
         $data['tester']=$this->Job_model->get_taster();
-
         $data['id'] = $id;
         $data['page'] = 'add_job';
         $data['page_title'] = SITE_NAME.' :: Job Management &raquo; Add Job';
+        
         //Get sales representative
-        // print_r($id);die;
         if($id!=0){
             $data['sales_rep']=$this->Job_model->get_sales_rep_by_store_id($id);
         }else{
@@ -865,9 +955,9 @@ class Job extends Application_Controller {
         }
         //get wine
         if($id!=0){
-            // $data['wine']=$this->Job_model->get_wine($id);
+            // echo 'store_id';die;
+            $data['wine']=$this->Job_model->get_wine($id);
             $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_wine($id)), true);
-  
         }else{
             $wine_list = $this->Job_model->get_all_wine();
             $data['get_wine_list']=$wine_list;
@@ -885,9 +975,6 @@ class Job extends Application_Controller {
         $data['get_wine_info']=$this->Job_model->get_wines_sampled_sold_details(0);
         // $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_all_wine()), true);
 
-        // echo "<pre>";
-        // print_r($data['store']);die;
-
 		$data['main_content'] = 'job/addjob';
     	$this->load->view(TEMPLATE_PATH, $data);
     }
@@ -897,7 +984,6 @@ class Job extends Application_Controller {
     public function publish_job($job_id=0,$assign_status=0) 
     {
         
-        // echo "Publish";
         // Permission Checking
         parent::checkMethodPermission($this->permissionValues[$this->router->method]);
         //if save button was clicked, get the data sent via post
@@ -1161,8 +1247,10 @@ class Job extends Application_Controller {
                         $store = $this->Job_model->get_store_name($store_id);
                         $store_name = $store->name;
                         $store_address = $store->adress;
-                        $salesrep = $this->Job_model->get_mail_selsrep_name($job_id);
-                        $salesrep_name = $salesrep->sales_rep_name;
+                        $jobInfo = $this->Job_model->get_completed_job_info($job_id);
+                        $salesrep_name = $this->Job_model->get_salesrep_name($jobInfo->user_id);
+                        // $salesrep = $this->Job_model->get_mail_selsrep_name($job_id);
+                        // $salesrep_name = $salesrep->sales_rep_name;
                       
                         //get tester id and name
                         $result['tester_info']=$this->Job_model->get_tester_details($taster_id);
@@ -1188,7 +1276,7 @@ class Job extends Application_Controller {
                 else
                 {
                     $this->session->set_flashdata('message_type', 'danger');
-                    $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster has been assigned with other job.');
+                        $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster has been assigned with other job.');
                     redirect('/App/job/publish_job/'.$job_id);
                 }
             } //validation run
@@ -1196,9 +1284,15 @@ class Job extends Application_Controller {
 
         $data['assign_status']=$assign_status;
         //get details of job
-        $data['job'] = $this->Job_model->job_details($job_id);
-        $sales_rep_id=$data['job']->user_id;
-        $data['store']=$this->Job_model->get_store_for_sales_rep($sales_rep_id);
+
+         //get details of job
+         $data['job'] = $this->Job_model->job_details($job_id);
+         $sales_rep_id=$data['job']->user_id;
+         $data['sales_rep_id']=explode(',', $sales_rep_id);
+         $data['store']=$this->Job_model->get_store_name($data['job']->store_id);
+         $data['store_id']=$data['job']->store_id;
+        // $data['store']=$this->Job_model->get_store_for_sales_rep($sales_rep_id);
+
         //get wine
         $store_id=$data['job']->store_id;
         $data['wine']=$this->Job_model->get_wine($store_id);
@@ -1207,7 +1301,9 @@ class Job extends Application_Controller {
         //get question answers
         $data['question_answers']=$this->Job_model->get_question_answers();
         //Get sales representaive name
-        $data['sales_rep']=$this->Job_model->get_user_name($data['job']->user_id);
+        // $data['sales_rep']=$this->Job_model->get_user_name($data['job']->user_id);
+        $data['sales_rep']=$this->Job_model->get_sales_rep_by_store_id($data['job']->store_id);
+        
         if (!is_numeric($job_id) || $job_id == 0 || empty($data['job'])) {
             redirect('/App/job');
         }        
@@ -1225,21 +1321,31 @@ class Job extends Application_Controller {
         $this->load->model('Notifications_model');
         $data['job_info']  = $this->Job_model->job_info($job_id);
         $pre_tasting_date=$data['job_info']->tasting_date;
-        $pre_taster=$data['job_info']->taster_id;
+        $pre_taster_id=$data['job_info']->taster_id;
         $pre_store=$data['job_info']->store_id;
         $pre_start_time=$data['job_info']->start_time;
         $pre_end_time=$data['job_info']->end_time;
         $job_state = $data['job_info']->job_state;
         $job_actual_start_time = $data['job_info']->job_start_time;
-        
+        $agency_taster = $data['job_info']->agency_taster_id;
+
 
         $pre_store_data = $this->Job_model->get_store_name($pre_store);
 
         $selectWine=$this->input->post('wine');
         $wineList = implode(',', $selectWine);
 
-        $agency_taster = $data['job_info']->agency_taster_id;
+        $pre_wine_id_array = explode(',', $data['job_info']->wine_id);
+        $wine_list_array = explode(',', $wineList);  
+       
+        $wine_id_dif=array_diff($wine_list_array,$pre_wine_id_array);
 
+        $pre_start_time = date('h:i:a', strtotime($pre_start_time));
+        $pre_end_time = date('h:i:a', strtotime($pre_end_time));
+
+        // print_r($pre_wine_id_array);
+        // print_r($wine_list_array);
+        // print_r($wine_id_dif);die;
         //if save button was clicked, get the data sent via post
         if ($this->input->server('REQUEST_METHOD') === 'POST')
         {
@@ -1276,7 +1382,6 @@ class Job extends Application_Controller {
                     $end_minute=$this->input->post('end_time_minute');
                     $actual_end_time=$end_hour.":".$end_minute;
                     $end_time = date("H:i", strtotime($actual_end_time.$second_time));
-
                 }
                 else
                 {
@@ -1286,13 +1391,12 @@ class Job extends Application_Controller {
                 //Get tester or agency
                 $taster_id=$this->input->post('taster_id');
                 $store_id=$this->input->post('store_id');
-
+               
                 if($store_id == ''){
                     $store_id = $pre_store;
                 }
 
                 if($taster_id != ''){
-
                     if($job_actual_start_time != '' && $job_state == 1){
                         $status=$data['job_info']->status;
                         $job_status=$data['job_info']->job_status;
@@ -1307,7 +1411,7 @@ class Job extends Application_Controller {
         
                 $user_info=$this->Job_model->get_user_type('users',$taster_id);
                 $user_type=$user_info[0]->user_type;
-                
+
                 $previous_taster_id = 0;
                 $agency_taster_id = 0;
                 if($user_type == 'agency'){
@@ -1317,27 +1421,17 @@ class Job extends Application_Controller {
                         $previous_taster_id = $agency_taster;
                     }  
                 }else{
-                    $user_info=$this->Job_model->get_user_type('users',$pre_taster);
+                    $user_info=$this->Job_model->get_user_type('users',$pre_taster_id);
                     $user_type=$user_info[0]->user_type;
                     if($user_type == 'agency'){
                         $previous_taster_id = $agency_taster;
                     }else{
-                        if($pre_taster != $taster_id){
-                            $previous_taster_id = $pre_taster;
+                        if($pre_taster_id != $taster_id){
+                            $previous_taster_id = $pre_taster_id;
                         }
-                    }
-                    
+                    }   
                 }
-               /*
-                if($pre_taster != $taster_id) {
-                    $status='assigned';
-                    $job_status='2';  
-                }else{
-                    $status=$data['job_info']->status;
-                    $job_status=$data['job_info']->job_status;
-                }*/
 
-               
                 $job = array(
                     'tasting_date' => htmlspecialchars($tasting_date, ENT_QUOTES, 'utf-8'),
                     'start_time' => htmlspecialchars($start_time, ENT_QUOTES, 'utf-8'),
@@ -1347,12 +1441,24 @@ class Job extends Application_Controller {
                     'taster_note' => htmlspecialchars($this->input->post('taster_note'), ENT_QUOTES, 'utf-8'),
                     'taster_id' => $taster_id,
                     'previous_taster_id'=>$previous_taster_id,
-                    'agency_taster_id'=>0,
+                    'agency_taster_id'=>$agency_taster_id,
                     'status'=>$status,
                     'job_status'=>$job_status,
                     'wine_id'=>$wineList
                 );
- 
+            
+              /*
+                if($end_time < $start_time && $data['job_info']->state!=1)
+                {
+                    $this->session->set_flashdata('message_type', 'danger');
+                    $this->session->set_flashdata('message', '<strong>Oh snap!</strong> End time should be greater that start time.');
+                    if($data['job_info']->job_status== 4){
+                        redirect('App/Job/index/status/problems');
+                    }else{
+                        redirect('App/Job');
+                    }
+                }*/
+
                 $datetime1 = strtotime($start_time);
                 $datetime2 = strtotime($end_time);
                 $interval  = abs($datetime2 - $datetime1);
@@ -1363,7 +1469,7 @@ class Job extends Application_Controller {
                     $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The start time and the end time should not be same. There should be a gap of minimum 30 min between start and end time.');
                     if($data['job_info']->job_status== 4){
                         redirect('App/Job/index/status/problems');
-                    }else{  
+                    }else{
                         redirect('App/Job');
                     }
                 }
@@ -1377,7 +1483,6 @@ class Job extends Application_Controller {
                 
                 if($count_job == 0)
                 {
-                    
                     //Delete accept and reject data
                     if($data['job_info']->job_state < 1){
                         $this->Job_model->delete_accept_reject_data('job_accept_reject',$job_id);
@@ -1423,12 +1528,13 @@ class Job extends Application_Controller {
                         $wine_id_array = explode(',', $jobInfo->wine_id);
                         $wineNames=$this->Job_model->get_assign_mail_wine_names($wine_id_array);
                         $store = $this->Job_model->get_store_name($store_id);
-                        // print_r($store);die;
                         $store_name = $store->name;
                         $store_address = $store->adress;
                         
-                        $salesrep = $this->Job_model->get_mail_selsrep_name($job_id);
-                        $salesrep_name = $salesrep->sales_rep_name;
+                        // $salesrep = $this->Job_model->get_mail_selsrep_name($job_id);
+                        // $salesrep_name = $salesrep->sales_rep_name;
+
+                        $salesrep_name = $this->Job_model->get_salesrep_name($jobInfo->user_id);
                         
                         if(($tasting_date!=$pre_tasting_date) || ($pre_store!=$store_id))
                         {
@@ -1442,34 +1548,41 @@ class Job extends Application_Controller {
                             $email=$result['tester_info']->email;
                             // $this->mail_template->job_change_email($name,$email,$tasting_date);
                             //send notification for change information
-                            $notifications = $this->Notifications_model->send_notifications_for_change_info($pre_taster,$job_id);
+                            $notifications = $this->Notifications_model->send_notifications_for_change_info($pre_taster_id,$job_id);
                         }
-                        if($taster_id!=$pre_taster)
+                        if($taster_id!=$pre_taster_id)
                         {
                             // $this->mail_template->assigned_job_email($name,$email);
 
                             $this->mail_template->assigned_job_email($name,$email,$samplingDate,$startTime,$finish_time,$wineNames,$store_name,$store_address,$salesrep_name);
 
-                            $result['pre_tester_info']=$this->Job_model->get_tester_details($pre_taster);
+                            $result['pre_tester_info']=$this->Job_model->get_tester_details($pre_taster_id);
                             $name=$result['pre_tester_info']->first_name;
                             $email=$result['pre_tester_info']->email;
                             //echo $email;die;
                             $this->mail_template->cancelled_job_email($name,$email);
-                            $notifications = $this->Notifications_model->send_notifications_for_cancelled_job($pre_taster,$job_id);
+                            $notifications = $this->Notifications_model->send_notifications_for_cancelled_job($pre_taster_id,$job_id);
 
                         }
                         $currentjobData=$this->Job_model->job_info($job_id);
                             // Previous checking for Job update mail.
                       
-                        if($taster_id==$pre_taster){
-                            $result['pre_tester_info']=$this->Job_model->get_tester_details($pre_taster);
+                        if($taster_id==$pre_taster_id){
+                            $result['pre_tester_info']=$this->Job_model->get_tester_details($pre_taster_id);
                         
                             $name=$result['pre_tester_info']->first_name;
                             $email=$result['pre_tester_info']->email;
                             
                             $currentStoreData = $this->Job_model->get_store_name($currentjobData->store_id);
-                            $this->mail_template->update_job_email($name,$email, $samplingDate, $startTime, $finish_time, $store, $currentjobData, $currentStoreData, $wineNames, $salesrep_name);
-                            $notifications = $this->Notifications_model->send_notifications_for_change_info($pre_taster,$job_id);
+
+                            $current_start_time = date('h:i:a', strtotime($start_time));
+                            $current_end_time = date('h:i:a', strtotime($end_time));
+        
+                            if (($current_start_time != $pre_start_time) || ($current_end_time != $pre_end_time) || ($taster_id != $pre_taster_id) || ($pre_tasting_date != $tasting_date) || !empty($wine_id_dif)){
+                                $this->mail_template->update_job_email($name,$email, $samplingDate, $startTime, $finish_time, $store, $currentjobData, $currentStoreData, $wineNames, $salesrep_name);
+                            }
+
+                            $notifications = $this->Notifications_model->send_notifications_for_change_info($pre_taster_id,$job_id);
                             if($currentjobData->agency_taster_id!=0){
                                 $result['pre_tester_info']=$this->Job_model->get_tester_details($currentjobData->agency_taster_id);
                                 $name=$result['pre_tester_info']->first_name;
@@ -1481,9 +1594,12 @@ class Job extends Application_Controller {
                             }
                         }
                     }
+
+                    
                         // $this->session->set_flashdata('message_type', 'success');
                         // $this->session->set_flashdata('message', '<strong>Well done!</strong> Job successfully updated.');
                         $this->session->set_flashdata('job_update_success', 'yes');
+
                     } else{
                         $this->session->set_flashdata('message_type', 'danger');
                         $this->session->set_flashdata('message', '<strong>Oh snap!</strong> Change something and try again.');
@@ -1498,7 +1614,7 @@ class Job extends Application_Controller {
                 else
                 {
                     $this->session->set_flashdata('message_type', 'danger');
-                     $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster has been assigned with other job.');
+                        $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster has been assigned with other job.');
                    
                     if($data['job_info']->job_status== 4){
                         redirect('App/Job/index/status/problems');
@@ -1506,8 +1622,7 @@ class Job extends Application_Controller {
                         redirect('App/Job');
                     }
                 }
-            }
-             //validation run
+            } //validation run
         }
     }
     
@@ -1628,7 +1743,6 @@ class Job extends Application_Controller {
         $job_id=$this->input->post('job_id');
         //Get setup id
         $setup_id=$this->Job_model->get_tasting_setup_id('tasting_setup',$job_id);
-
         //Get setup images
         $id_container=array();
         if(!empty($setup_id))
@@ -1644,41 +1758,37 @@ class Job extends Application_Controller {
         }
         // $data['images']=$this->Job_model->get_setup_image('tasting_setup_images',$id_container);
         $images=$this->Job_model->get_setup_image('tasting_setup_images',$id_container);
-
+       
         $tasting_image=array();
         $store_image=array();
-        $uploaded_time = "";
+        // print_r($images);
         foreach($images as $imageType){
-           
             if($imageType['tasting_type'] == 'tasting'){
                 array_push($tasting_image,$imageType);
             }else{
                 array_push($store_image,$imageType);
             }
         }
-      
         $data['store_images'] = $store_image;
         $data['tasting_images'] = $tasting_image;
-
         $data['tasting_setup_time'] = '';
         $data['store_setup_time'] = '';
 
         if (count($tasting_image)>0){
-
-            if($imageType['tasting_type'] == 'tasting'){
-                if ($tasting_image[0]['tasting_pic_time'] != '00:00:00'){
-                    $data['tasting_setup_time'] = $tasting_image[0]['tasting_pic_time'];
-                }
-            }else{
-                if ($tasting_image[0]['tasting_pic_time'] != '00:00:00'){
-                    $data['store_setup_time'] = $tasting_image[0]['tasting_pic_time'];
-                } 
+            if ($tasting_image[0]['tasting_pic_time'] != '00:00:00'){
+                $data['tasting_setup_time'] = $tasting_image[0]['tasting_pic_time'];
             }
         }
+
+        if (count($store_image)>0){
+            if ($store_image[0]['tasting_pic_time'] != '00:00:00'){
+                $data['store_setup_time'] = $store_image[0]['tasting_pic_time'];
+            }
+        }
+
         $this->load->view('job/show_tasting_setup',$data);
         
     }
-
     public function open_problem_one_modal_old()
     {
         $job_id=$this->input->post('job_id');
@@ -1707,6 +1817,7 @@ class Job extends Application_Controller {
 
         $data['job_details']=$this->Job_model->job_details_for_problem($job_id);
         $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_wine($data['job_details']->store_id)), true);
+        // $data['get_wine_list']=$this->Job_model->get_wine($data['job_details']->store_id);
      
         $data['expense_details'] = $data['job_details']->expense_details;
         $data['manager_verification_details'] = $data['job_details']->manager_details;
@@ -1716,7 +1827,8 @@ class Job extends Application_Controller {
         $data['admin_note'] = $data['job_details']->admin_note;
         $data['job_id']=$job_id;
         $data['taster_id']=$taster_id;
-      
+    //   echo "<pre>";
+    //   print_r($data['manager_verification_details']);die;
         $this->load->view('job/problem_one_modal',$data);
     }
 
@@ -1746,8 +1858,6 @@ class Job extends Application_Controller {
         $taster_id=$this->input->post('taster_id');
 
         $data['job_details']=$this->Job_model->job_details_for_problem($job_id);
-
-
         $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_wine($data['job_details']->store_id)), true);
      
         $data['expense_details'] = $data['job_details']->expense_details;
@@ -1787,36 +1897,40 @@ class Job extends Application_Controller {
         if($data['job']->job_state==2){
             $data['store']=json_decode(json_encode($this->Job_model->get_store()), true);
             $data['expense_details']=$this->Job_model->get_expense_details($job_id);
-             $data['general_note']=$this->Job_model->get_general_note($job_id);
-             $data['sales_rep']=$this->Job_model->get_sales_rep();
-             $tastingWine=$this->Job_model->get_wines_sampled_sold_details($job_id);
+            $data['general_note']=$this->Job_model->get_general_note($job_id);
+            //  $data['sales_rep']=$this->Job_model->get_sales_rep();
+            $data['get_wine_info']=$this->Job_model->get_wines_sampled_sold_details($job_id);
             //  $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_all_wine()), true);
             $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_wine($storeId)), true);
             $data['expence_amount']=$this->Job_model->get_expense_amount($job_id);
             $data['manager_verification_details']=$this->Job_model->get_manager_verification_details($job_id);
            
             $wineList = $data['get_wine_list'];
+            $data['sales_rep_name']=$this->Job_model->get_salesrep_name($sales_rep_id);
             $wineList_array = array();
             foreach($wineList as $wine){
                 array_push($wineList_array,$wine['id']);
             }
 
-            // $tastingWine = $data['complete_wine_info'];
+            $tastingWine = $data['get_wine_info'];
 
             $storeTypeChange = 0;
-            $data['get_wine_info'] = array();
-
             foreach($tastingWine as $wine){ 
               
                 if (in_array($wine['id'], $wineList_array)){
-                    array_push($data['get_wine_info'], $wine);
                     ++$storeTypeChange;
                 }
             }
 
+           /* if(count($tastingWine) != $storeTypeChange) {
+                $data['get_wine_info'] = array();
+            } */
+
+            // echo "<pre>";
+            // print_r($data['tester']);die;
             $this->load->view('job/completed_edit_job_modal',$data);
 
-        }else if($data['job']->job_state==1){
+        }else if($data['job']->job_state==1 || $data['job']->job_state==4){
     
             $data['store']=$this->Job_model->get_store_for_wine_tpye($sales_rep_id, $data['job']->wine_id);
             $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_wine($storeId)), true);
@@ -1837,7 +1951,6 @@ class Job extends Application_Controller {
 
             $this->load->view('job/job_start_edit_job_modal',$data);
         }else{
-            // echo $sales_rep_id;die;
             $data['store']=$this->Job_model->get_store_for_wine_tpye($sales_rep_id, $data['job']->wine_id);
             $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_wine($storeId)), true);
             $wineList=json_decode(json_encode($this->Job_model->get_wine_names($wineIdArray)), true);
@@ -1854,8 +1967,7 @@ class Job extends Application_Controller {
             }
            
            $data['get_wine_info'] =  $wineInfo;
-        //    echo "<pre>";
-        //    print_r($job->store_id);die;
+
             $this->load->view('job/edit_job_modal',$data);
         }
     }
@@ -1878,8 +1990,6 @@ class Job extends Application_Controller {
         $general_notes=$this->input->post('general_note');
         $exp_amount="$".$this->input->post('exp_amount');
 
-        // echo $general_notes;
-        // echo "<pre>";
         $wine=$this->input->post('wine');
         $bottles_sampled=$this->input->post('bottles_sampled');
         $open_bottles_sampled=$this->input->post('open_bottles_sampled');
@@ -1923,6 +2033,7 @@ class Job extends Application_Controller {
 
         }
        
+
         $mtasting_date = date("Y-m-d",strtotime($this->input->post('tasting_date')));
             $job = array(
         'tasting_date' => $mtasting_date,
@@ -1930,7 +2041,7 @@ class Job extends Application_Controller {
         'finish_time' => htmlspecialchars($actual_end_time, ENT_QUOTES, 'utf-8'),
         'working_hour' => $working_hour,
         );
-       // print_r( $job);die;
+       
         $this->Job_model->update_job($this->tablename, 'id', $job_id, $job);
 
         $note = $this->Job_model->get_general_note($job_id);
@@ -1949,6 +2060,23 @@ class Job extends Application_Controller {
             $this->db->update('general_notes',$general_note_array);
         }
 
+        // $manager_verification_array=array(
+        //     'comment'=>$Comments
+        // );
+        // $this->db->where('job_id',$job_id);
+        // $this->db->update('manager_verification_details',$manager_verification_array);
+
+        // $testerFeedback=array(
+        //     'general_note'=>$Comments
+        // );
+        // $this->db->where('job_id',$job_id);
+        // $this->db->update('general_notes',$testerFeedback);
+        // $expense_array=array(
+        //     'exp_amount'=>$exp_amount,
+        //     'exp_reason'=>$exp_reason
+        // );
+        // $this->db->where('job_id',$job_id);
+        // $this->db->update('expense_details',$expense_array);
         $date=date("Y-m-d");
         $expense_array=array(
             'taster_id'=>$taster_id,
@@ -1980,6 +2108,8 @@ class Job extends Application_Controller {
         $i=0;
         foreach($wine as $w){
             $data=array('wine_id'=>$w, 'bottles_sampled'=> $bottles_sampled[$i], 'open_bottles_sampled'=>$open_bottles_sampled[$i], 'bottles_sold'=>$bottles_sold[$i], 'job_id'=> $job_id, 'taster_id'=> $taster_id );
+            // echo "<pre>";
+            // print_r($data);die;
             $this->db->insert('completed_job_wine_details',$data);
                 ++$i;
         }
@@ -1988,6 +2118,7 @@ class Job extends Application_Controller {
      redirect('/App/Job');
         
     }
+
 
     public function update_status() {
         
@@ -2003,7 +2134,8 @@ class Job extends Application_Controller {
             //if the form has passed through the validation
             if ($this->form_validation->run())
             {
-
+                //echo $this->tablename;
+                // print "<pre>"; print_r($_POST);die;
                 $count = 0;
                 $items = $this->input->post('item_id');
                 $currenttab = $this->input->post('currenttab');
@@ -2037,10 +2169,300 @@ class Job extends Application_Controller {
                 redirect('/App/job/index/status/'.$currenttab.'');
         }
     }
+
+    public function create_billing_one_old()
+    {
+        $this->load->model('Job_model');
+        $job_id=$this->input->post('job_id');
+        $taster_id=$this->input->post('taster_id');
+        $first_time=$this->input->post('time_one');
+        $second_time=$this->input->post('time_two');
+        //$job_start_time=date("H:i", strtotime($this->input->post('job_start_time').$first_time));
+       // $job_end_time=date("H:i", strtotime($this->input->post('finish_time').$second_time));
+        $start_hour=$this->input->post('start_time_hour');
+        $start_minute=$this->input->post('start_time_minute');
+        $actual_start_time=$start_hour.":".$start_minute;
+        $job_start_time = date("H:i", strtotime($actual_start_time.$first_time));
+        
+        $end_hour=$this->input->post('end_time_hour');
+        $end_minute=$this->input->post('end_time_minute');
+        $actual_end_time=$end_hour.":".$end_minute;
+        $job_end_time = date("H:i", strtotime($actual_end_time.$second_time));
+
+        $exp_amount="$".$this->input->post('exp_amount');
+        $exp_reason=$this->input->post('exp_reason');
+        $comment=$this->input->post('comment');
+        $signature_img=$_FILES['signature_img']['name'];
+        $date=date("Y-m-d");
+        //get user details
+        $user=$this->Job_model->get_user_details($taster_id);
+        $user_meta=$this->Job_model->get_user_meta($taster_id);
+       
+        $name=$this->input->post('name');
+        if ($name == trim($name) && strpos($name, ' ') !== false) {
+            
+            $v=explode(" ",$name);
+            $first_name=$v[0];
+            $last_name=$v[1];
+        }
+        else
+        {
+            $first_name=$name;
+            $last_name='';
+        }
+        $first_name=$first_name;
+        $last_name=$last_name;
+        
+        //Create expense details array
+        $expense_array=array(
+            'taster_id'=>$taster_id,
+            'job_id'=>$job_id,
+            'exp_amount'=>$exp_amount,
+            'exp_reason'=>$exp_reason,
+            'date'=>$date
+        );
+        if($job_end_time < $job_start_time)
+        {
+            $this->session->set_flashdata('message_type', 'danger');
+            $this->session->set_flashdata('message', '<strong>Oh snap!</strong> End time should be greater that start time.');
+           redirect($this->agent->referrer());
+                    
+        }
+     
+        //Start signature image upload to directory
+        if (!empty($_FILES['signature_img']['name'])) {
+            // Update Product Image
+            $config['upload_path'] = DIR_SIGNATURE_IMAGE;
+            $config['max_size'] = '10000';
+            $config['allowed_types'] = 'jpg|png|jpeg';
+            $config['overwrite'] = FALSE;
+            $config['remove_spaces'] = TRUE;
+            $this->load->library('upload', $config);
+            $images = array();
+                $_FILES['images']['name']= $_FILES['signature_img']['name'];
+                $_FILES['images']['type']= $_FILES['signature_img']['type'];
+                $_FILES['images']['tmp_name'] = $_FILES['signature_img']['tmp_name'];
+                $_FILES['images']['error']= $_FILES['signature_img']['error'];
+                $_FILES['images']['size']= $_FILES['signature_img']['size'];
+                $config['file_name'] = 'signature-'.rand().date('YmdHis');
+                $images = $config['file_name'];
+                $this->upload->initialize($config);
+                if ($this->upload->do_upload('images')) {
+                    $config_thumb['image_library'] = 'gd2';
+                    $config_thumb['source_image'] = DIR_SIGNATURE_IMAGE.$this->upload->file_name;
+                    $config_thumb['create_thumb'] = FALSE;
+                    $config_thumb['maintain_ratio'] = TRUE;
+                    $config_thumb['master_dim'] = 'auto';
+                    $config_thumb['width'] = DIR_SIGNATURE_IMAGE_SIZE; // image re-size  properties
+                    $config_thumb['height'] = DIR_SIGNATURE_IMAGE_SIZE; // image re-size  properties
+                    $this->load->library('image_lib', $config_thumb); //codeigniter default function
+                    $this->image_lib->initialize($config_thumb);
+                    if (!$this->image_lib->resize()) {
+                         echo $this->image_lib->display_errors();
+                    }
+                    $this->image_lib->clear();
+                    $upload_data =  $this->upload->data();
+                    $uploaded_pics = array();
+                    $uploaded_pics = $upload_data['file_name'];
+                } else {
+                   echo  $this->upload->display_errors(); die;
+                }
+        }
+        else
+        {
+            $uploaded_pics=$this->input->post('old_image');
+        }
+        
+        //Create manager verification 
+        $manager_verification_array=array(
+            'taster_id'=>$taster_id,
+            'job_id'=>$job_id,
+            'first_name'=>$first_name,
+            'last_name'=>$last_name,
+           // 'cell_number'=>$cell_number,
+            'comment'=>$comment,
+            'signature_img'=>$uploaded_pics,
+            'date'=>$date
+        );
+        $admin_note=$this->input->post('admin_note');
+        $general_note=$this->input->post('general_note');
+        $admin_note_array=array(
+            'job_id'=>$job_id,
+            'admin_note'=>$admin_note
+        );
+        $general_note_array=array(
+            'user_id'=>$taster_id,
+            'job_id'=>$job_id,
+            'general_note'=>$general_note
+        );
+        //Delete old expense data
+        $data['expense_details']=$this->Job_model->get_expense_details($job_id);
+       
+        $data['manager_verification_details']=$this->Job_model->get_manager_verification_details($job_id);
+       // print_r($data['manager_verification_details']);die;
+        $this->Job_model->setInvoiceNumber($job_id);
+        if(isset($data['expense_details'][0]['job_id']) && isset($data['expense_details'][0]['exp_amount']) && isset($data['expense_details'][0]['exp_reason']))
+        {
+            //Update expense data
+           
+            $expense_id=$this->Job_model->update_data('expense_details','id', $data['expense_details'][0]['exp_id'], $expense_array);
+        }
+        else
+        {
+           
+            $expense_id=$this->Job_model->submit_expense_details_from_cms($expense_array);
+        }
+      
+        //Submit expense details images
+        $supported_imgs=$_FILES['expense_images'];
+        if (!empty($supported_imgs['name'][0])) {
+                        // Update Product Image
+                        $config['upload_path'] = DIR_EXPENSE_IMAGE;
+                        $config['max_size'] = '10000';
+                        $config['allowed_types'] = 'jpg|png|jpeg';
+                        $config['overwrite'] = FALSE;
+                        $config['remove_spaces'] = TRUE;
+                        $this->load->library('upload', $config);
+                        $images = array();
+                        foreach ($supported_imgs['name'] as $key => $image) {
+                            $_FILES['images[]']['name']= $supported_imgs['name'][$key];
+                            $_FILES['images[]']['type']= $supported_imgs['type'][$key];
+                            $_FILES['images[]']['tmp_name'] = $supported_imgs['tmp_name'][$key];
+                            $_FILES['images[]']['error']= $supported_imgs['error'][$key];
+                            $_FILES['images[]']['size']= $supported_imgs['size'][$key];
+                            $config['file_name'] = 'expense-'.rand().date('YmdHis');
+                            $images[] = $config['file_name'];
+                            $this->upload->initialize($config);
+
+                            if ($this->upload->do_upload('images[]')) {
+                                $config_thumb['image_library'] = 'gd2';
+                                $config_thumb['source_image'] = DIR_EXPENSE_IMAGE.$this->upload->file_name;
+                                $config_thumb['create_thumb'] = FALSE;
+                                $config_thumb['maintain_ratio'] = TRUE;
+                                $config_thumb['master_dim'] = 'auto';
+                                $config_thumb['width'] = DIR_EXPENSE_IMAGE_SIZE; // image re-size  properties
+                                $config_thumb['height'] = DIR_EXPENSE_IMAGE_SIZE; // image re-size  properties
+                                $this->load->library('image_lib', $config_thumb); //codeigniter default function
+                                $this->image_lib->initialize($config_thumb);
+                                if (!$this->image_lib->resize()) {
+                                     echo $this->image_lib->display_errors();
+                                }
+                                $this->image_lib->clear();
+                                $upload_data =  $this->upload->data();
+                                $uploaded_pics = array();
+                                $uploaded_pics = $upload_data['file_name'];
+                                // Update database here
+                                $image_id=$this->Job_model->insert_expense_supported_images($expense_id, $uploaded_pics);
+                            } else {
+                                $this->upload->display_errors(); die;
+                            }
+                        }
+        }
+        else
+        {
+            //echo $expense_id;die;
+            $old_exp_images=$this->input->post('old_exp_image[]');
+            if(empty($old_exp_images))
+            {
+                foreach($old_exp_images as $val)
+                {
+                    $image_id=$this->Job_model->insert_expense_supported_images($expense_id,$val);
+                }
+            }
+            else
+            {
+                //Delete old expense images
+                $this->Job_model->delete_old_expense_images('expense_details_images',$expense_id);
+                foreach($old_exp_images as $val)
+                {
+                    $image_id=$this->Job_model->insert_expense_supported_images($expense_id,$val);
+                }
+            }
+            
+            
+        }
+
+        //End to sumit expense details images
+        if($expense_id)
+        {
+            //Delete old manager verification data
+            if(!empty($data['manager_verification_details'][0]))
+            {
+                //Update
+                $verifiction=$this->Job_model->update_data('manager_verification_details','id', $data['manager_verification_details'][0]['id'], $manager_verification_array);
+
+            }
+            else
+            {
+                $verifiction=$this->Job_model->submit_manager_verification_details($manager_verification_array);
+            }
+            
+            if($verifiction)
+            {
+                $admin_note=$this->Job_model->submit_admin_note($job_id,$admin_note_array);
+                $general_note=$this->Job_model->submit_general_notes('general_notes',$general_note_array);
+                if($general_note)
+                {
+                    //Set job to ready for billing
+                    $difference=strtotime($job_end_time)-strtotime($job_start_time);
+                    //Calculate total pause time
+                    $time_array=$this->Job_model->calculate_pause_time($job_id);
+                    $total_pause_time=0;
+                    if(!empty($time_array))
+                    {
+                        foreach($time_array as $value)
+                        {
+                            $pause_time=strtotime($value['resume_time'])-strtotime($value['pause_time']);
+                            $total_pause_time=$total_pause_time+$pause_time;
+                        }
+                     
+                    }
+                    else
+                    {
+                        $total_pause_time=0;
+                    }
+                    $working_hour=gmdate("H:i", ($difference - $total_pause_time));
+                    $billing_status=$this->Job_model->move_to_billing($job_id,$job_start_time,$job_end_time,$working_hour);
+                    
+                        $wine=$this->input->post('wine');
+                        $bottles_sampled=$this->input->post('bottles_sampled');
+                        $open_bottles_sampled=$this->input->post('open_bottles_sampled');
+                        $bottles_sold=$this->input->post('bottles_sold');
+                        $this->db->select('wine_id, job_id');
+                        $this->db->from('completed_job_wine_details');
+                        $this->db->where('job_id',$job_id);
+                        $result=$this->db->get();
+                        $final_result=$result->result_array();
+                        //print_r($final_result);die;
+                        foreach($final_result as $fr){
+                            $this -> db -> where('job_id', $fr['job_id']);
+                            $this -> db -> where('wine_id', $fr['wine_id']);
+                            $this -> db -> delete('completed_job_wine_details');
+                        }
+                        $i=0;
+                        foreach($wine as $w){
+                            $data=array('wine_id'=>$w, 'bottles_sampled'=> $bottles_sampled[$i], 'open_bottles_sampled'=> $open_bottles_sampled[$i], 'bottles_sold'=>$bottles_sold[$i], 'job_id'=> $job_id, 'taster_id'=> $taster_id );
+                            $this->db->insert('completed_job_wine_details',$data);
+                                ++$i;
+                        }
+
+                    if($billing_status)
+                    {
+                        // $this->session->set_flashdata('message_type', 'success');
+                        // $this->session->set_flashdata('message', '<strong>Well done!</strong> Job has been moved to billing successfully.');
+                    }
+                }
+            }
+            
+            
+        }
+        redirect('/App/Job/index/status/problems');
+    }
+
+
     
     public function create_billing_one()
     {
-    //    echo "create billing";die;
         $this->load->model('Job_model');
         $job_id=$this->input->post('job_id');
         $taster_id=$this->input->post('taster_id');
@@ -2066,8 +2488,6 @@ class Job extends Application_Controller {
         $user=$this->Job_model->get_user_details($taster_id);
         $user_meta=$this->Job_model->get_user_meta($taster_id);
         
-
-        // echo $actual_link;die;
 
         $name=$this->input->post('name');
         if ($name == trim($name) && strpos($name, ' ') !== false) {
@@ -2138,7 +2558,7 @@ class Job extends Application_Controller {
                     $uploaded_pics = array();
                     $uploaded_pics = $upload_data['file_name'];
                 } else {
-                   echo  $this->upload->display_errors();
+                   echo  $this->upload->display_errors(); die;
                 }
         }
         else
@@ -2228,7 +2648,7 @@ class Job extends Application_Controller {
                                 // Update database here
                                 $image_id=$this->Job_model->insert_expense_supported_images($expense_id, $uploaded_pics);
                             } else {
-                                $this->upload->display_errors();
+                                $this->upload->display_errors(); die;
                             }
                         }
         }
@@ -2253,7 +2673,8 @@ class Job extends Application_Controller {
                     $image_id=$this->Job_model->insert_expense_supported_images($expense_id,$val);
                 }
             }
-                
+            
+            
         }
 
         //End to sumit expense details images
@@ -2338,18 +2759,15 @@ class Job extends Application_Controller {
 
                     if($billing_status)
                     {
-                        redirect('/App/Job/index/status/problems/billing_success');
-                        //  $this->load->view('commonview/common_alert_view');
-                        // $this->session->set_flashdata('message_type', 'success');
-                        // $this->session->set_flashdata('message', '<strong>Well done!</strong> Job has been moved to billing successfully.');
-                        // redirect('/App/job/index/status/problems','refresh');
+                        $this->session->set_flashdata('message_type', 'success');
+                        $this->session->set_flashdata('message', '<strong>Well done!</strong> Job has been moved to billing successfully.');
                     }
                 }
-            }  
+            }
+            
             
         }
         redirect('/App/Job/index/status/problems');
-
     }
 
 
@@ -2371,7 +2789,6 @@ class Job extends Application_Controller {
         }
         redirect('/App/Job/index/status/problems');
     }
-
     public function open_activity_modal()
     {
         $job_id=$this->input->post('job_id');
@@ -2419,7 +2836,6 @@ class Job extends Application_Controller {
         $data['taster_id']=$taster_id;
         $this->load->view('job/display_tester',$data);
     }
-    
     public function approve_job($job_id)
     {
         $input_taster_id=$this->input->post('taster_id[]');
@@ -2534,7 +2950,6 @@ class Job extends Application_Controller {
         }
                 redirect('/App/Job/index/status/accepted');
     }
-
     public function approve_request()
     {
         $job_id=$this->input->post('job_id');
@@ -2550,8 +2965,6 @@ class Job extends Application_Controller {
         $hidden_store_id=$this->input->post('hidden_store_id');
         $data['hidden_store']=$hidden_store_id;
         $data['store']=$this->Job_model->get_store_for_sales_rep($sales_rep_id);
-        // $data['store']=$this->Job_model->get_sales_rep_by_store_id(5328);
-       
         $this->load->view('job/get_store', $data);
     }
     /**
@@ -2565,7 +2978,107 @@ class Job extends Application_Controller {
     /**
      *
      */
- 
+    // public function search_submit() {
+    //     if ($this->input->server('REQUEST_METHOD') === 'POST')
+    //     {
+    //         $sampling_date = $this->clean_value($this->input->post('sampling_date'));
+           
+    //         $search_text = base64_encode($this->input->post('search_text'));
+            
+    //         // if (strpos($search_text, '/') !== false) {
+    //         //     $search_text = substr($search_text, 0, strpos($search_text, '/'));
+    //         // }
+    //         // if (strpos($search_text, '\'') !== false) {
+    //         //     $search_text = substr($search_text, 0, strpos($search_text, '\''));
+    //         // }
+    //         // if (strpos($search_text, '%') !== false) {
+    //         //     $search_text = substr($search_text, 0, strpos($search_text, '%'));
+    //         // }
+           
+    //         $taster=$this->input->post('search_by_taster');
+    //         $sales_rep=$this->input->post('sales_rep');
+    //         $tasterarray = array();
+            
+
+    //         if ($taster)
+    //         {
+    //             foreach ($taster as $value)
+    //             {
+    //                 array_push($tasterarray,$value);
+    //             }
+    //         }
+    //         $st='';
+    //         foreach($tasterarray as $i)
+    //         {
+    //             $st.=$i."@";
+    //         }
+    //         $st=rtrim($st,"@");
+    //         //echo $st;die;
+    //        $store = $this->input->post('search_by_store');
+    //        $search_by_rating = $this->input->post('search_by_rating');
+    //        $search_by_status = $this->input->post('search_by_status');
+    //        $sort_by_date = $this->input->post('sort_by_date');
+    //        $entry_date = $this->clean_value($this->input->post('entry_date'));
+    //        $status=$this->input->post('status');
+    //        //print_r($this->input->post());die;
+    //         $url = "App/Job/index/";
+    //         if ($status != '') {
+    //             $url .= "status/". urlencode($status)."/";
+    //         }else{
+    //             $url .= "status/". urlencode('pre_assigned')."/";
+    //         }
+    //         if ($sampling_date != '') {
+    //             $url .= "tasting_date/". urlencode($sampling_date)."/";
+    //         }
+    //         if ($taster != '') {
+    //             $url .= "taster/".$st."/";
+    //         }
+            
+    //         if ($sales_rep != '') {
+    //         $url .= "sales_rep/".$sales_rep."/";
+    //         }
+    //         if ($store != '') {
+    //             $url .= "store/".$store."/";
+    //         }
+    //         if ($entry_date != '') {
+    //             $url .= "entry_date/". urlencode($entry_date)."/";
+    //         }
+    //         if ($search_text != '') {
+    //             $url .= "search_text/".$search_text."/";
+    //         }
+    //         if ($search_by_rating != '') {
+    //             $url .= "search_by_rating/".$search_by_rating."/";
+    //         }
+    //         if ($search_by_status != '') {
+    //             $url .= "search_by_status/".$search_by_status."/";
+    //         }
+    //         if ($sort_by_date != '') {
+    //             $url .= "sort_by_date/".$sort_by_date."/";
+    //         }
+    //         redirect($url);
+    //     }
+    // }
+    /*public function search_submit() {
+        if ($this->input->server('REQUEST_METHOD') === 'POST')
+        {
+           $sampling_date = $this->clean_value($this->input->post('sampling_date'));
+           $taster=$this->input->post('search_by_taster');
+           $status = $this->clean_value($this->input->post('status'));
+
+           //print_r($this->input->post());die;
+            $url = "App/Job/index/";
+            if ($status != '') {
+                $url .= "status/". urlencode($status)."/";
+            }
+            if ($sampling_date != '') {
+                $url .= "tasting_date/". urlencode($sampling_date)."/";
+            }
+            if ($taster != '') {
+                $url .= "taster/".$taster."/";
+            }
+            redirect($url);
+        }
+    }*/
     public function search_submit() {
         if ($this->input->server('REQUEST_METHOD') === 'POST')
         {
@@ -2584,10 +3097,9 @@ class Job extends Application_Controller {
             // }
            
             $taster=$this->input->post('search_by_taster');
-            $sales_rep=$this->input->post('sales_rep');
-            $tasterarray = array();
+            // print_r($taster);die;
             
-
+            $tasterarray = array();
             if ($taster)
             {
                 foreach ($taster as $value)
@@ -2601,7 +3113,10 @@ class Job extends Application_Controller {
                 $st.=$i."@";
             }
             $st=rtrim($st,"@");
+          
             //echo $st;die;
+
+           $sales_rep=$this->input->post('sales_rep');
            $store = $this->input->post('search_by_store');
            $search_by_rating = $this->input->post('search_by_rating');
            $search_by_status = $this->input->post('search_by_status');
@@ -2609,8 +3124,13 @@ class Job extends Application_Controller {
            $entry_date = $this->clean_value($this->input->post('entry_date'));
            $status = $this->input->post('status');
 
-        //    echo $search_by_status;die;
-        //    echo $status;die;
+           $from_date = $this->input->post('from_date');
+           $to_date = $this->input->post('to_date');
+
+        //    if ($to_date != '' && $from_date == ''){
+        //      redirect("/App/Job/index/status/problems/billing_success");
+        //    }
+
             $url = "App/Job/index/";
 
             if ($status == "problems"){
@@ -2657,6 +3177,16 @@ class Job extends Application_Controller {
             if ($sort_by_date != '') {
                 $url .= "sort_by_date/".$sort_by_date."/";
             }
+
+            if ($from_date != '') {
+                $url .= "from_date/".$from_date."/";
+            }
+             
+            if ($to_date != '') {
+                $url .= "to_date/".$to_date."/";
+            }
+
+            $url = $url."page";
           
             redirect($url);
         }
@@ -2799,7 +3329,7 @@ class Job extends Application_Controller {
      * @param unknown_type $total_rows
      * @param unknown_type $segment
      */
-    private function init_pagination($uri, $segment=4, $total_rows) {
+    private function init_pagination($uri, $segment=4, $total_rows,$view=NULL) {
         $this->config->load('pagination');
         $this->load->library('pagination');
         $config = $this->config->item('pagination');
@@ -2807,6 +3337,7 @@ class Job extends Application_Controller {
         $config['uri_segment']       = $segment;
         $config['base_url']          = base_url().$uri;
         $config['total_rows']        = $total_rows;
+        $config['per_page']        		= $view;
         $ci->pagination->initialize($config);
         return $config;
    }
@@ -2972,22 +3503,20 @@ class Job extends Application_Controller {
             //if the form has passed through the validation
             if ($this->form_validation->run())
             {
-                
                 $user_id=$this->input->post('user_id');
                 $tasting_date = date("Y-m-d",strtotime($this->input->post('tasting_date')));
                 $store_id=$this->input->post('store_id');
 
-                // print_r($store_id);die;
-                //Make user_Id array to string
-                $userId='';
-                if(!empty($user_id))
-                {
-                    for($i=0;$i<count($user_id);$i++)
-                    {
-                        $userId.=$user_id[$i].",";
-                    }
-                    $userId=rtrim($userId,",");
-                } 
+                 //Make user_Id array to string
+                 $userId='';
+                 if(!empty($user_id))
+                 {
+                     for($i=0;$i<count($user_id);$i++)
+                     {
+                         $userId.=$user_id[$i].",";
+                     }
+                     $userId=rtrim($userId,",");
+                 } 
 
                 if($this->input->post('start_time_hour')!='')
                 {
@@ -3025,12 +3554,12 @@ class Job extends Application_Controller {
                 $interval  = abs($datetime2 - $datetime1);
                 $minutes   = round($interval / 60);
                 
-              /*  if($minutes<30)
+                if($minutes<30)
                 {
                     $this->session->set_flashdata('message_type', 'danger');
                     $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The start time and the end time should not be same. There should be a gap of minimum 30 min between start and end time.');
                     redirect('App/job/clone_job/'.$job_id);
-                }*/
+                }
            
                 $wine_id='';
                 foreach($wine_array as $val)
@@ -3054,6 +3583,7 @@ class Job extends Application_Controller {
                     $question_id='';
                 }
 
+               
                 if($taster_id!=''){
                     $status='assigned';
                     $job_status=2;
@@ -3062,8 +3592,19 @@ class Job extends Application_Controller {
                     $job_status=1;
                 }
 
+                  //Make user_Id array to string
+                  $userId='';
+                  if(!empty($user_id))
+                  {
+                      for($i=0;$i<count($user_id);$i++)
+                      {
+                          $userId.=$user_id[$i].",";
+                      }
+                      $userId=rtrim($userId,",");
+                  } 
+
                 $job = array(
-                    'user_id' => $userId,
+                    'user_id' => htmlspecialchars($userId, ENT_QUOTES, 'utf-8'),
                     'tasting_date' => htmlspecialchars($tasting_date, ENT_QUOTES, 'utf-8'),
                     'start_time' => htmlspecialchars($start_time, ENT_QUOTES, 'utf-8'),
                     'end_time' => htmlspecialchars($end_time, ENT_QUOTES, 'utf-8'),
@@ -3074,12 +3615,21 @@ class Job extends Application_Controller {
                     'wine_id' => $wine_id,
                     'question_id'=>$question_id,
                     'status'=> $status,
-                    'job_status'=>$job_status,
+                    'job_status'=>$job_status
                 );
+
+                /*
+                if($end_time < $start_time)
+                {
+                    $this->session->set_flashdata('message_type', 'danger');
+                    $this->session->set_flashdata('message', '<strong>Oh snap!</strong> End time should be greater that start time.');
+                    redirect('/App/job/clone_job/'.$job_id);
+                }*/
 
                 //if the insert has returned true then we show the flash message
                 //Check job for same store and same time
 				$count_job=$this->Job_model->check_tester_availablity('job',$taster_id,$tasting_date,$start_time,$end_time);
+
                 if($count_job == 0)
                 {
                     
@@ -3087,7 +3637,7 @@ class Job extends Application_Controller {
                     $this->load->model('Notifications_model');
         
                     $notifications = $this->Notifications_model->send_notifications_for_republish_job($taster_id,$job_id);
-                if ($this->Job_model->create_job($this->tablename,$job)) {
+                    if ($this->Job_model->create_job($this->tablename,$job)) {
 
                         //Send Email to testers/agency who are assigned
                     $this->load->library('mail_template');
@@ -3101,8 +3651,13 @@ class Job extends Application_Controller {
                     $store = $this->Job_model->get_store_name($store_id);
                     $store_name = $store->name;
                     $store_address = $store->adress;
-                    $salesrep = $this->Job_model->get_mail_selsrep_name($job_id);
-                    $salesrep_name = $salesrep->sales_rep_name;
+
+                    // $salesrep = $this->Job_model->get_mail_selsrep_name($job_id);
+                    // $salesrep_name = $salesrep->sales_rep_name;
+
+                    // $jobInfo = $this->Job_model->get_completed_job_info($job_id);
+                    $salesrep_name = $this->Job_model->get_salesrep_name($userId);
+
                        
                     //get tester id and name
                     $result['tester_info']=$this->Job_model->get_tester_details($taster_id);
@@ -3126,10 +3681,8 @@ class Job extends Application_Controller {
                 }
                 else
                 {
-                    // $this->session->set_flashdata('message_type', 'danger');
-                    // $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster has been assigned with other job.');
-                    $this->session->set_flashdata('taster_assigned_other', 'yes');
-
+                    $this->session->set_flashdata('message_type', 'danger');
+                        $this->session->set_flashdata('message', '<strong>Oh snap!</strong> The taster has been assigned with other job.');
                     redirect('/App/job/clone_job/'.$job_id);
                 }
             } //validation run
@@ -3137,22 +3690,25 @@ class Job extends Application_Controller {
 
         //get details of job
         $data['job']  = $this->Job_model->job_details($job_id);
+        // echo "<pre>";
+        // print_r($data['job']);
         $sales_rep_id=$data['job']->user_id;
         $data['sales_rep_id']=explode(',', $sales_rep_id);
+
+        // print_r($data['sales_rep_id']);die;
         // $data['store']=$this->Job_model->get_store_for_sales_rep($sales_rep_id);
         $data['store']=$this->Job_model->get_store_name($data['job']->store_id);
-
         //get wine
-        // $store_id=$data['job']->store_id;
         $data['store_id']=$data['job']->store_id;
+        //get wine
         $data['wine']=$this->Job_model->get_wine($data['job']->store_id);
+        // print_r($data['wine']);die;
         //get tester or agency
         $data['tester']=$this->Job_model->get_tester_or_agency($job_id);
         //get question answers
         $data['question_answers']=$this->Job_model->get_question_answers();
-        //Get sales representaive name
-        $data['sales_rep']=$this->Job_model->get_sales_rep_by_store_id($data['job']->store_id);
-        // $data['sales_rep']=$this->Job_model->get_user_name($data['job']->user_id);
+       //Get sales representaive name
+       $data['sales_rep']=$this->Job_model->get_sales_rep_by_store_id($data['job']->store_id);
 
         if (!is_numeric($job_id) || $job_id == 0 || empty($data['job'])) {
             redirect('/App/job');
@@ -3213,36 +3769,24 @@ class Job extends Application_Controller {
 		foreach($data['wine'] as $win){
 			$html['wineHtml'].='<option value="'.$win->id.'">'.$win->name.'</option>';
 		}
-
-        //Sales Rep
-        $data['sales_rep']=$this->Job_model->get_sales_rep_by_store_id($store_id);
-        // echo "<pre>";
-        // print_r($data['sales_rep']);die;
-         //Sales html
-            // foreach($data['sales_rep'] as $sales){
-            //     $name = $sales['last_name']." ".$sales['first_name'];
-            //     $html['salesHtml'].='<option value="'.$sales['id'].'">'.$name.'</option>';
-            // }
-        
 		echo json_encode($html);
     }
-    
     public function completed_job_details_view_modal()
     {
         $job_id=$this->input->post('job_id');
         //Get job details
         
         $data['job']  = $this->Job_model->job_details($job_id);
-        
+        // echo "<pre>";
+        // print_r($data['job']);die;
         $sales_rep_id=$data['job']->user_id;
-        // print_r($sales_rep_id);die;
 
         $taster_id=$data['job']->taster_id;
         $agency_taster_id=$data['job']->agency_taster_id;
 
         $user_info=$this->Job_model->get_user_type('users',$taster_id);
         $user_type=$user_info[0]->user_type;
-        
+    
         $data['taster_name'] = 'N/A';
         $data['agency_name'] = 'N/A';
 
@@ -3258,18 +3802,17 @@ class Job extends Application_Controller {
         }else{
             $tasterName = $this->Job_model->getTasterName($taster_id);
             if($tasterName != ''){
-                $data['taster_name'] = $tasterName->taster_name;
+                $data['taster_name'] = $tasterName->taster_name;;
             } 
         }
-    
-      
-        // if($agency_taster_id>0){
-        //     $data['taster_name'] = $this->Job_model->getTasterName($agency_taster_id);
-        //     $data['agency_name'] = $this->Job_model->get_agency_name('user_meta',$taster_id);
-        // }else{
-        //     $data['taster_name'] = $this->Job_model->getTasterName($taster_id);
-        // }
-  
+
+       /* if($agency_taster_id>0){
+            $data['taster_name'] = $this->Job_model->getTasterName($agency_taster_id);
+            $data['agency_name'] = $this->Job_model->get_agency_name('user_meta',$taster_id);
+        }else{
+            $data['taster_name'] = $this->Job_model->getTasterName($taster_id);
+        }*/
+
         //get tester or agency
         $data['tester']=$this->Job_model->get_tester_or_agency($job_id);
         //$data['tester_rate']=$this->Job_model->get_tester_rate($job_id);
@@ -3304,39 +3847,135 @@ class Job extends Application_Controller {
         $data['store_images'] = $store_image;
         $data['tasting_images'] = $tasting_image;
 
-// echo "<pre>";
-        $data['manager_verification_details']=$this->Job_model->get_manager_verification_details($job_id);
+
+        // $data['manager_verification_details']=$this->Job_model->get_manager_verification_details($job_id);
        
         if($data['job']->job_state==2){
             $data['store']=json_decode(json_encode($this->Job_model->get_store()), true);
             $data['expense_details']=$this->Job_model->get_expense_details($job_id);
              $data['general_note']=$this->Job_model->get_general_note($job_id);
-            //  $data['sales_rep']=$this->Job_model->get_sales_rep();
-
+             $data['sales_rep']=$this->Job_model->get_sales_rep();
              $data['get_wine_info']=$this->Job_model->get_wines_sampled_sold_details($job_id);
-        
              $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_all_wine()), true);
              $data['expence_amount']=$this->Job_model->get_expense_amount($job_id);
              $data['manager_verification_details']=$this->Job_model->get_manager_verification_details($job_id);
-            //  $data['sales_rep_details']=$this->Job_model->get_salesrep_phone($job_id);
-            echo "<pre>";
-            print_r($data['manager_verification_details']);die;
-            $data['sales_rep_details']=$this->Job_model->get_salesrep_phone_new($job_id,$sales_rep_id);
+             if($data['general_note'] ==''){
+                $data['general_note'] = 'N/A'; 
+             }
+             $data['sales_rep_details']=$this->Job_model->get_salesrep_phone_new($job_id,$sales_rep_id);
              $data['sales_rep_name']=$this->Job_model->get_salesrep_name($sales_rep_id);
-
+         
             $this->load->view('billing/completed_view_details_modal',$data);
         }else{
             $data['store']=$this->Job_model->get_store_for_sales_rep($sales_rep_id);
-            // print_r($data);die;
             $this->load->view('billing/completed_view_details_modal',$data);
         }
         
     }
 
 
+    public function completed_billing_details_view_modal()
+    {
+        $job_id=$this->input->post('job_id');
+        //Get job details
+        
+        $data['job']  = $this->Job_model->job_details($job_id);
+        $sales_rep_id=$data['job']->user_id;
+
+        $taster_id=$data['job']->taster_id;
+        $agency_taster_id=$data['job']->agency_taster_id;
+    
+        $user_info=$this->Job_model->get_user_type('users',$taster_id);
+        $user_type=$user_info[0]->user_type;
+    
+        $data['taster_name'] = 'N/A';
+        $data['agency_name'] = 'N/A';
+
+        if($user_type == 'agency'){
+            $agencyTasterName = $this->Job_model->getTasterName($agency_taster_id);
+            if ($agencyTasterName != ''){
+                $data['taster_name'] = $agencyTasterName->taster_name;
+            }
+            $agencyName = $this->Job_model->get_agency_name('user_meta',$taster_id);
+            if ($agencyName != ''){
+                $data['agency_name'] = $agencyName;
+            }  
+        }else{
+            $tasterName = $this->Job_model->getTasterName($taster_id);
+            if($tasterName != ''){
+                $data['taster_name'] = $tasterName->taster_name;;
+            } 
+        }
+        /*
+        if($agency_taster_id>0){
+            $data['taster_name'] = $this->Job_model->getTasterName($agency_taster_id);
+            $data['agency_name'] = $this->Job_model->get_agency_name('user_meta',$taster_id);
+        }else{
+            $data['taster_name'] = $this->Job_model->getTasterName($taster_id);
+        }*/
+
+        //get tester or agency
+        $data['tester']=$this->Job_model->get_tester_or_agency($job_id);
+        //$data['tester_rate']=$this->Job_model->get_tester_rate($job_id);
+
+        $setup_id=$this->Job_model->get_tasting_setup_id('tasting_setup',$job_id);
+        //Get setup images
+        $id_container=array();
+        if(!empty($setup_id))
+        {
+            foreach($setup_id as $val)
+            {
+                array_push($id_container,$val['id']);
+            }
+        }
+        else
+        {
+            $id_container='';
+        }
+        // $data['images']=$this->Job_model->get_setup_image('tasting_setup_images',$id_container);
+
+        $images=$this->Job_model->get_setup_image('tasting_setup_images',$id_container);
+
+        $tasting_image=array();
+        $store_image=array();
+        foreach($images as $imageType){
+            if($imageType['tasting_type'] == 'tasting'){
+                array_push($tasting_image,$imageType);
+            }else{
+                array_push($store_image,$imageType);
+            }
+        }
+        $data['store_images'] = $store_image;
+        $data['tasting_images'] = $tasting_image;
+
+
+        $data['manager_verification_details']=$this->Job_model->get_manager_verification_details($job_id);
+       
+        if($data['job']->job_state==2){
+            $data['store']=json_decode(json_encode($this->Job_model->get_store()), true);
+            $data['expense_details']=$this->Job_model->get_expense_details($job_id);
+             $data['general_note']=$this->Job_model->get_general_note($job_id);
+             $data['sales_rep']=$this->Job_model->get_sales_rep();
+             $data['get_wine_info']=$this->Job_model->get_wines_sampled_sold_details($job_id);
+             $data['get_wine_list']=json_decode(json_encode($this->Job_model->get_all_wine()), true);
+             $data['expence_amount']=$this->Job_model->get_expense_amount($job_id);
+             $data['manager_verification_details']=$this->Job_model->get_manager_verification_details($job_id);
+             if($data['general_note'] ==''){
+                $data['general_note'] = 'N/A'; 
+             }
+             $data['sales_rep_details']=$this->Job_model->get_salesrep_phone_new($job_id,$sales_rep_id);
+             $data['sales_rep_name']=$this->Job_model->get_salesrep_name($sales_rep_id);
+           
+            $this->load->view('billing/completed_view_details_modal',$data);
+        }else{
+            $data['store']=$this->Job_model->get_store_for_sales_rep($sales_rep_id);
+            $this->load->view('billing/completed_view_details_modal',$data);
+        }
+        
+    }
+
     public function create_billing_three()
     {
-        // echo 'Hi';die;
         $this->load->model('Job_model');
         $job_id=$this->input->post('job_id');
         $taster_id=$this->input->post('taster_id');
@@ -3357,7 +3996,9 @@ class Job extends Application_Controller {
         $exp_amount="$".$this->input->post('exp_amount');
         $exp_reason=$this->input->post('exp_reason');
         $comment=$this->input->post('comment');
-        $signature_img=$_FILES['signature_img']['name'];
+
+        // print_r($_FILES['signature_img']['name']);die;
+        // $signature_img=$_FILES['signature_img']['name'];
         $date=date("Y-m-d");
         //get user details
         $user=$this->Job_model->get_user_details($taster_id);
@@ -3406,6 +4047,7 @@ class Job extends Application_Controller {
             'job_id'=>$job_id,
             'general_note'=>$general_note
         );
+
         //Delete old expense data
         $data['expense_details']=$this->Job_model->get_expense_details($job_id);
     
@@ -3565,19 +4207,16 @@ class Job extends Application_Controller {
 
                     if($billing_status)
                     {
-                        $this->session->set_flashdata('billing','Yes');
-                        //Redirect to the desired view file
-                        redirect("/App/Job/index/status/problems");
-
-                        // $this->load->view('commonview/common_alert_view');
-                        // redirect('/App/Job/index/status/problems/billing_success');
                         // $this->session->set_flashdata('message_type', 'success');
                         // $this->session->set_flashdata('message', '<strong>Well done!</strong> Job has been moved to billing successfully.');
+
+                        // $this->session->set_userdata('move_to_billing',1);
+                        // redirect($this->agent->referrer());
+                        // $this->session->set_flashdata('billing','Yes');
+                        // redirect('/App/Job/index/status/problems');
+                        redirect("/App/Job/index/status/problems/billing_success");
                     }
-             
             }
-            
-            
         }
         redirect('/App/Job/index/status/problems');
     }
@@ -3612,24 +4251,7 @@ class Job extends Application_Controller {
         }else{
             echo 0;
         }
-        
-        // $this->load->view('job/assign_tester_modal',$data);
-    }
 
-
-    public function writeFiles($job_id) // define writeFiles() function that call on the url
-    {  
-
-        // $file = $_SERVER['DOCUMENT_ROOT'] . "/wine/assets/log_file/firstTest.txt";
-  
-        // $txt = fopen($file, "w") or die("Unable to open file!");
-        // fwrite($txt, "Naba first ");
-        // fclose($txt);
-     
-        // $emailFPay = 'ns.avalgate@gmail.com';
-        // $content = file_get_contents($file);
-        // $content .= "\r\n" .$emailFPay;
-        // file_put_contents($file, $content);
     }
 
     public function get_sales_rep_for_store()
@@ -3646,6 +4268,7 @@ class Job extends Application_Controller {
 
         $data['tester']=$this->Job_model->get_tester_or_agency_ajax($store_id);
 		$data['wine']=$this->Job_model->get_wine($store_id);
+
 		// create dynamic taster and wine html
 		$html['tasHtml']='<option value="">Select a taster</option>';
 		$html['wineHtml']='';
@@ -3664,6 +4287,7 @@ class Job extends Application_Controller {
 			$html['wineHtml'].='<option value="'.$win->id.'">'.$win->name.'</option>';
 		}
        
-		echo json_encode($html);
+		// echo json_encode($html);
     }
+
 }

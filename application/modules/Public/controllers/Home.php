@@ -472,16 +472,19 @@ class Home extends Front_Controller {
     //    $salesrep_name = $salesrep->sales_rep_name;
 	   
 	    $salesIdArray = explode(',', $completedJobData->user_id);
+		$salesrep_name = $this->Job_model->get_salesrep_name($completedJobData->user_id);
+
 		$this->db->select("email, first_name, last_name");
 		$this->db->from('users');
 		$this->db->where_in('id',$salesIdArray);
 		$m_result=$this->db->get()->result_array();
 		
-		$salesrep_name='';
+	/*	$salesrep_name='';
 		foreach ($m_result as $res){
 			$salesrep_name.=$res['first_name']." ".$res['last_name'].", ";
 		}
 		$salesrep_name=rtrim($salesrep_name,", ");
+		*/
 
 			$stars = $this->input->post('rating');
 			$feedback = $this->input->post('feedback');
@@ -508,7 +511,7 @@ class Home extends Front_Controller {
 					$salesFirstName = $res['first_name'];
 					$salesrepName.=$res['first_name']." ".$res['last_name'];
 
-					$dataforsalesrep = $this->jobRatingMailTemplate($job_id, $salesFirstName, $tastingDate, $data['tasterName'], $data['job_start_time'], $data['finish_time'], $data['wineNames'], $store_name, $store_address, $salesrepName, $stars, $feedback);
+					$dataforsalesrep = $this->jobRatingMailTemplate($job_id, $salesFirstName, $tastingDate, $data['tasterName'], $data['job_start_time'], $data['finish_time'], $data['wineNames'], $store_name, $store_address, $salesrep_name, $stars, $feedback);
 
 					$this->email_to_user($res['email'], 'Wine Sampling - '.$tastingDate, $dataforsalesrep);
 				}

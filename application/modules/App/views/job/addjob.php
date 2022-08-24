@@ -50,7 +50,6 @@
 		{
 			$allinput=$this->session->userdata('inputdata');
 			$this->session->unset_userdata('inputdata');
-			//print_r($allinput);
 		}
 		if($this->session->userdata('wine_ids')){
 			$this->session->unset_userdata('wine_ids');
@@ -71,7 +70,6 @@
                 }  
             ?>
     		<input type="hidden" id="hidden_wine_session_id" value="<?php echo $names;?>">
-
 
 			<div class="form-group">
 		  		<label for="inputPhone" class="col-sm-3 control-label">Store*</label>
@@ -95,7 +93,44 @@
 			  	</div>
 		  	</div>
 
-			  <!-- job date -->
+		 <!--<input type="hidden" id="hidden_store_id" value="">-->
+			<div class="form-group">
+		  		<label for="inputFirstName" class="col-sm-3 control-label">Sales Rep*</label>
+                <input type="hidden" id="hidden_sales_rep_id" value="<?php if(empty($allinput['user_id']))
+				{ }?>">
+		  		<div class="col-sm-9">
+					  <?php if($id==0){ ?> 
+			  				<select name="user_id[]" required class="form-control chosen-select"  multiple="multiple" data-placeholder="Select Sales Rep" id="sales_Rep">
+						  <?php }else{ ?> 
+							<!-- <select name="user_id[]" required class="form-control"> -->
+							<select name="user_id[]" required class="form-control chosen-select"  multiple="multiple" data-placeholder="Select Sales Rep" id="sales_Rep">	
+						  <?php }?>
+			  			<?php
+			  				foreach($sales_rep as $value){
+							
+			  			?>
+			  			<?php
+			  				if(isset($allinput['user_id']))
+			  				{
+			  			?>
+						  <option value="<?php echo $value['id'];?>" <?php if(isset($allinput['id']) && in_array($value['id'],$allinput['user_id'])){echo "selected";}?>><?php echo $value['last_name']." ".$value['first_name'];;?></option>
+
+			  			<?php
+			  				}
+			  				else
+			  				{
+			  			?>
+			  			<option value="<?php echo $value['id'];?>"><?php echo $value['last_name']." ".$value['first_name'];?></option>
+						 
+			  			<?php
+			  				}
+			  			?>
+			  			<?php } ?>
+			  		</select>
+			  		<div class="help-block with-errors"></div>
+			  	</div>
+		  	</div>
+
 		  	<div class="form-group">
 		  		<label for="inputFirstName" class="col-sm-3 control-label">Job Date*</label>
 		  		<div class="col-sm-9">
@@ -203,46 +238,6 @@
 					<!-- </div> -->
 				</div>
 			</div>
-
-            <!--<input type="hidden" id="hidden_store_id" value="">-->
-		  <div class="form-group">
-		  		<label for="inputFirstName" class="col-sm-3 control-label">Sales Rep*</label>
-                <input type="hidden" id="hidden_sales_rep_id" value="<?php if(isset($allinput['user_id']))
-				{ echo $allinput['user_id'];}?>">
-		  		<div class="col-sm-9">
-					  <?php if($id==0){ ?> 
-			  				<select name="user_id[]" required class="form-control chosen-select"  multiple="multiple" data-placeholder="Select Sales Rep" id="sales_Rep">
-						  <?php }else{ ?> 
-							<select name="user_id[]" required class="form-control">
-						  <?php }?>
-			  			<?php
-			  				foreach($sales_rep as $value){
-							
-			  			?>
-			  			<?php
-			  				if(isset($allinput['user_id']))
-			  				{
-			  			?>
-                        
-			  			<!-- <option value="<?php echo $value['id'];?>" <?php if($value['id']==$allinput['user_id']){echo "selected";}?>><?php echo $value['last_name']." ".$value['first_name'];?></option> -->
-
-						  <option value="<?php echo $value['id'];?>" <?php if(isset($allinput['id']) && in_array($value['id'],$allinput['user_id'])){echo "selected";}?>><?php echo $value['last_name']." ".$value['first_name'];?></option>
-
-			  			<?php
-			  				}
-			  				else
-			  				{
-			  			?>
-			  			<option value="<?php echo $value['id'];?>"><?php echo $value['id'];?></option>
-			  			<?php
-			  				}
-			  			?>
-			  			<?php } ?>
-			  		</select>
-			  		<div class="help-block with-errors"></div>
-			  	</div>
-		  	</div>
-
 			
 	  	</fieldset>
 	</div>
@@ -800,6 +795,10 @@ function validate(){
 						$('#store').focus();
 						swal("Oops!", "Select a store.", "warning");
 						return false;
+					}else if($('#sales_Rep').val()==''){
+						$('#sales_Rep').trigger('chosen:activate');
+						swal("Oops!", "Please select a sales representative!", "warning");
+						return false;
 					}else if($('#wines').val()==''){
 						//$('#wines').focus();
 						$('#wines').trigger('chosen:activate');
@@ -894,6 +893,10 @@ function validate(){
 					$('#store').focus();
 					swal("Oops!", "Select a store.", "warning");
 					return false;
+				}else if($('#sales_Rep').val()==''){
+					$('#sales_Rep').trigger('chosen:activate');
+					swal("Oops!", "Please select a sales representative!", "warning");
+					return false;
 				}else if (($('#agency_taster_div').css('display') != 'none') && ($('#agency_testers').val()=='')){
 						$('#agency_testers').focus();
 						swal("Oops!", "Please select a taster under agency.", "warning");
@@ -977,7 +980,7 @@ $(document).ready(function(){
     var hidden_sales_rep_id=$("#hidden_sales_rep_id").val();
     var hidden_store_id=$("#hidden_store_id").val();
 	var hidden_tester_id=$('#hidden_tester_id').val();
-
+	
     if(hidden_sales_rep_id)
     {
 		$.ajax({
@@ -989,8 +992,8 @@ $(document).ready(function(){
 			   }
 		});
 	}
+
 	if(hidden_store_id){
-	
 		$.ajax({
 			type:'POST',
 			url:"<?php echo base_url(); ?>App/job/get_my_tester_wine/",
@@ -999,9 +1002,9 @@ $(document).ready(function(){
 				var html=JSON.parse(data);
 				console.log(html.wineHtml);
 				$("#testers").html(html.tasHtml);
-				// $("#wines").html(html.wineHtml);
+				$("#wines").html(html.wineHtml);
 				$('.winess').html(html.wineHtml);
-				// $('.chosen-select').trigger("chosen:updated");
+				$('.chosen-select').trigger("chosen:updated");
 				// alert();
 			}
 		});
@@ -1039,9 +1042,8 @@ $(document).ready(function(){
 
 }
 
-/*	function get_tester_wine(store_id){
+	function get_tester_wine(store_id){
 		$("#hidden_store_id").val(store_id);
-		// alert('abc');
 		if(store_id !=''){
 			$.ajax({
 				type:'POST',
@@ -1054,34 +1056,10 @@ $(document).ready(function(){
 					$("#wines").html(html.wineHtml);
 					$('.winess').html(html.wineHtml);
 					$('.chosen-select').trigger("chosen:updated");
-					
-				}
-			});
-		}
-	}*/
-
-	function get_tester_wine(){
-	
-		var hidden_store_id=$("#hidden_store_id").val();
-	
-		if(store_id !=''){
-			$.ajax({
-				type:'POST',
-				url:"<?php echo base_url(); ?>App/job/get_my_tester_wine/",
-				data: {store_id:hidden_store_id},
-				success:function(data){
-					var html=JSON.parse(data);
-					console.log(html.wineHtml);
-					$("#testers").html(html.tasHtml);
-					$("#wines").html(html.wineHtml);
-					$('.winess').html(html.wineHtml);
-					$('.chosen-select').trigger("chosen:updated");
-					
 				}
 			});
 		}
 	}
-
 
 function get_store(id)
 {
@@ -1100,7 +1078,6 @@ function get_store(id)
 function get_sales_rep_for_store(store_id){
 	// alert('ghk');
 	var hidden_store_id=$("#hidden_store_id").val();
-	
 	$.ajax({
 		   type:'POST',
 		   url:"<?php echo base_url(); ?>App/job/get_sales_rep_for_store/",

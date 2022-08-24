@@ -10,10 +10,7 @@ class Job_model extends CI_Model {
     }
     function update_job($tablename, $field_name, $field_value, $data) 
     {
-        //echo "<pre>";
-        //echo $tablename.$field_name."<br>".$field_value;
-
-       // print_r($data);die;
+ 
         $this->db->where($field_name, $field_value);
         if($this->db->update($tablename, $data)) {
             return true;
@@ -23,10 +20,7 @@ class Job_model extends CI_Model {
     }
     function update_data($tablename, $field_name, $field_value, $data) 
     {
-        //echo "<pre>";
-        //echo $tablename.$field_name."<br>".$field_value;
 
-       // print_r($data);die;
         $this->db->where($field_name, $field_value);
         if($this->db->update($tablename, $data)) {
             return $field_value;
@@ -51,8 +45,11 @@ class Job_model extends CI_Model {
                'is_deleted' => 1,
             );
              $this->db->where('id',$job_id);
-             $this->db->where('user_id',$user_id);
-            $this->db->update($tablename,$data);
+            //  $this->db->where('user_id',$user_id);
+            //  $this->db->where("FIND_IN_SET(".$user_id.",job.user_id) !=", 0);
+             $qr = "CONCAT(',', job.user_id, ',') LIKE '%,".(int)$user_id.",%'";
+             $this->db->where($qr);
+             $this->db->update($tablename,$data);
             return $this->db->affected_rows();;
         } else {
             return false;
@@ -98,8 +95,7 @@ class Job_model extends CI_Model {
     {
         //Check taster is agencies taster or not
         $record=$this->get_user_type('users',$taster_id);
-        //echo "<pre>";
-        //print_r($record);die;
+    
         $created_by=$record[0]->created_by;
         $this->db->select("job.id as job_id,job.working_hour,job.taster_rate,job.start_time as job_scheduled_start_time,job.end_time as job_scheduled_end_time,job.job_start_time as job_actual_start_time,job.finish_time as job_actual_end_time,DATE_FORMAT(job.tasting_date,'%d-%m-%Y') as tasting_date,job.store_id as store_id,store.name as store_name");
         $this->db->from('job');
@@ -173,9 +169,9 @@ class Job_model extends CI_Model {
 
     }
 
-    function get_joblist($user_id,$serverTime=NULL)
+    function get_joblist($user_id, $serverTime=NULL)
     {
-        //check user type
+         //check user type
         $user_info=$this->get_user_type('users',$user_id);
         $user_type=$user_info[0]->user_type;
         $user_created_by=$user_info[0]->created_by;
@@ -185,16 +181,18 @@ class Job_model extends CI_Model {
         if($user_type=='sales_rep')
         {
             // $this->db->where('job.user_id',$user_id);
-            $this->db->where("FIND_IN_SET(".$user_id.",job.user_id) !=", 0);
+            // $this->db->where("FIND_IN_SET(".$user_id.",job.user_id) !=", 0);
+            $qr = "CONCAT(',', job.user_id, ',') LIKE '%,".(int)$user_id.",%'";
+            $this->db->where($qr);
         }
         else 
         {
 
             if($user_created_by==7)
             {
+                $this->db->where("(job.taster_id = $user_id OR job.previous_taster_id = $user_id)");
                 // $this->db->where('job.taster_id',$user_id);
                 //$this->db->where('job.job_status <>',1);
-                $this->db->where("(job.taster_id = $user_id OR job.previous_taster_id = $user_id)");
                 if ($serverTime !=''){
                     $this->db->where('job.updated_on >=', $serverTime);
                     // $this->db->or_where('job.created_on >=', $serverTime); 
@@ -212,14 +210,14 @@ class Job_model extends CI_Model {
             }
             
         }
-
        
-
         // $this->db->where('job.is_deleted',0);
         // $this->db->where('job.is_archived',0);
 
-        //$qr="(job.status='assigned' OR job.status='accepted')";
-        //$this->db->where($qr);
+        if($user_type=='sales_rep'){
+            $this->db->where('job.is_deleted',0);
+        }
+
         $result=$this->db->get();
         //  echo $this->db->last_query();die;
         $value=$result->result_array();
@@ -229,7 +227,6 @@ class Job_model extends CI_Model {
 
             $job_id=$value[$i]['job_id'];
 
-            // print_r($user_type);die;
             if($user_type=='sales_rep')
             {
                 $value[$i]['rejected_by_taster']='no';
@@ -237,7 +234,6 @@ class Job_model extends CI_Model {
             else
             {
                 $job_id=$value[$i]['job_id'];
-
                 //check the job is rejected by tsater or not
                 $this->db->select('*');
                 $this->db->from('job_accept_reject');
@@ -258,11 +254,9 @@ class Job_model extends CI_Model {
                 $value[$i]['job_details'] = $jobDetails;
             }
         }
-        // $this->db->join('users as u1','find_in_set(u1.id,job.user_id)<> 0','left',false);
-        // $this->db->where("FIND_IN_SET(".$filter['sales_rep'].",job.user_id) !=", 0);
-        // print_r($value);die;
         return $value;
     }
+
 
     function get_user_details($id)
     {
@@ -315,17 +309,15 @@ class Job_model extends CI_Model {
 
         return $created_by;
     }*/
-
     function get_jobdetails($user_id,$job_id)
     {
-       
-        if($user_id!='')
+      /*  if($user_id!='')
         {
-            $this->db->select("job.id as job_id, job.taster_id as taster_id, job.agency_taster_id as agency_tester_id,job.endtime_state as is_job_start, job.status,DATE_FORMAT(job.tasting_date, '%d-%m-%Y') as job_date,TIME_FORMAT(start_time, '%h:%i%p') as start_time,TIME_FORMAT(end_time, '%h:%i%p') as end_time,store.id as store_id,store.name as store_name,store.adress as address,store.suite_number as suite_and_apt,store.phone as store_phone,store.latitude as store_latitude,store.longitude as store_longitude,zone.id as zone_id,CONCAT(last_name, ' ',first_name) as sales_rep_name,users.email as sales_rep_email, user_meta.meta_value as sales_rep_phone,job.taster_note, store.wine_sell_type");
+            $this->db->select("job.id as job_id, job.taster_id as taster_id, job.agency_taster_id as agency_tester_id,job.endtime_state as is_job_start, job.status,DATE_FORMAT(job.tasting_date, '%d-%m-%Y') as job_date,TIME_FORMAT(start_time, '%h:%i%p') as start_time,TIME_FORMAT(end_time, '%h:%i%p') as end_time,store.id as store_id,store.name as store_name,store.adress as address,store.suite_number as suite_and_apt,store.phone as store_phone,store.latitude as store_latitude,store.longitude as store_longitude,zone.id as zone_id,CONCAT(last_name, ' ',first_name) as sales_rep_name,users.email as sales_rep_email, user_meta.meta_value as sales_rep_phone,job.taster_note, store.wine_sell_type, job.user_id");
         }
         else
         {
-            $this->db->select("job.id as job_id, job.taster_id as taster_id, job.agency_taster_id as agency_tester_id, job.endtime_state as is_job_start, job.status,DATE_FORMAT(job.tasting_date, '%d-%m-%Y') as job_date,TIME_FORMAT(start_time, '%h:%i%p') as start_time,TIME_FORMAT(end_time, '%h:%i%p') as end_time,store.id as store_id,store.name as store_name,store.adress as address,store.suite_number as suite_and_apt,store.phone as store_phone,store.latitude as store_latitude,store.longitude as store_longitude,zone.id as zone_id,job.admin_note,job.taster_id,CONCAT(last_name, ' ',first_name) as taster_name,job.taster_note, job.job_state as job_state, store.wine_sell_type ");
+            $this->db->select("job.id as job_id, job.taster_id as taster_id, job.agency_taster_id as agency_tester_id, job.endtime_state as is_job_start, job.status,DATE_FORMAT(job.tasting_date, '%d-%m-%Y') as job_date,TIME_FORMAT(start_time, '%h:%i%p') as start_time,TIME_FORMAT(end_time, '%h:%i%p') as end_time,store.id as store_id,store.name as store_name,store.adress as address,store.suite_number as suite_and_apt,store.phone as store_phone,store.latitude as store_latitude,store.longitude as store_longitude,zone.id as zone_id,job.admin_note,job.taster_id,CONCAT(last_name, ' ',first_name) as taster_name,job.taster_note, job.job_state as job_state, store.wine_sell_type, job.user_id");
         }
         $this->db->from('job');
         $this->db->join('store','job.store_id=store.id');
@@ -339,7 +331,31 @@ class Job_model extends CI_Model {
         else
         {
             $this->db->join('users','job.taster_id=users.id');
+        }*/
+
+        if($user_id!='')
+        {
+            $this->db->select("job.id as job_id, job.taster_id as taster_id, job.agency_taster_id as agency_tester_id,job.endtime_state as is_job_start, job.status,DATE_FORMAT(job.tasting_date, '%d-%m-%Y') as job_date,TIME_FORMAT(start_time, '%h:%i%p') as start_time,TIME_FORMAT(end_time, '%h:%i%p') as end_time,store.id as store_id,store.name as store_name,store.adress as address,store.suite_number as suite_and_apt,store.phone as store_phone,store.latitude as store_latitude,store.longitude as store_longitude,zone.id as zone_id,CONCAT(u2.last_name, ' ',u2.first_name) as sales_rep_name,u2.email as sales_rep_email, user_meta.meta_value as sales_rep_phone,job.taster_note, store.wine_sell_type, CONCAT(u1.last_name, ' ',u1.first_name) as taster_name,job.user_id");
         }
+        else
+        {
+            $this->db->select("job.id as job_id, job.taster_id as taster_id, job.agency_taster_id as agency_tester_id, job.endtime_state as is_job_start, job.status,DATE_FORMAT(job.tasting_date, '%d-%m-%Y') as job_date,TIME_FORMAT(start_time, '%h:%i%p') as start_time,TIME_FORMAT(end_time, '%h:%i%p') as end_time,store.id as store_id,store.name as store_name,store.adress as address,store.suite_number as suite_and_apt,store.phone as store_phone,store.latitude as store_latitude,store.longitude as store_longitude,zone.id as zone_id,job.admin_note,job.taster_id,CONCAT(last_name, ' ',first_name) as taster_name,job.taster_note, job.job_state as job_state, store.wine_sell_type,job.user_id");
+        }
+        $this->db->from('job');
+        $this->db->join('store','job.store_id=store.id');
+        $this->db->join('zone','store.zone=zone.id');
+        if($user_id!='')
+        {
+            $this->db->join('users as u2','job.user_id=u2.id');
+            $this->db->join('user_meta','job.user_id=user_meta.user_id');
+            $this->db->where('user_meta.meta_key','phone');
+            $this->db->join('users as u1', 'u1.id=job.taster_id', 'left');
+        }
+        else
+        {
+            $this->db->join('users','job.taster_id=users.id');
+        }
+
         //$this->db->join('users','job.taster_id=users.id');
         $this->db->where('job.id',$job_id);
         $this->db->where('job.is_deleted',0);
@@ -347,6 +363,15 @@ class Job_model extends CI_Model {
         $this->db->where($qr);
         $result=$this->db->get();
         $jobdetails=$result->result_array();
+
+        if (count($jobdetails)>0){
+            $sales_details=$this->get_multiple_selsrep_name_email($jobdetails[0]['user_id']);
+            $sales_phone = $this->get_multiple_salesrep_phone($jobdetails[0]['user_id']);
+
+            $jobdetails[0]['sales_rep_name'] = $sales_details['sales_rep_name'];
+            $jobdetails[0]['sales_rep_email'] = $sales_details['sales_rep_email'];
+            $jobdetails[0]['sales_rep_phone'] = $sales_phone['phone'];
+        }
 
        // For Agency Taster Name..
        if (count($jobdetails)>0){
@@ -356,14 +381,11 @@ class Job_model extends CI_Model {
                 $this->db->select("CONCAT(users.last_name, ' ',users.first_name) as agency_taster_name");
                 $this->db->from('users');
                 $this->db->where('users.id',$agencyId);
+                $this->db->where('users.is_deleted',0);
                 $agencyName=$this->db->get()->row();
-                // print_r($agencyName->agency_taster_name);die;
-                if($agencyName->agency_taster_name !=''){
+                if(!empty($agencyName)){
                     $job['agency_taster_name'] = $agencyName->agency_taster_name;
-                }else{
-                    $job['agency_taster_name'] = '';
                 }
-                
                 $jobdetails[0] = $job;
             }
         }  
@@ -392,16 +414,14 @@ class Job_model extends CI_Model {
             $this->db->where('wine_id',$wine_array[$i]['id']);
             $query_image=$this->db->get();
             $wine_image_array=$query_image->result_array();
-            // echo "<pre>";
-            // print_r($wine_image_array);die;
+      
             $image_name='';
             for($j=0;$j<count($wine_image_array);$j++)
             {
                 $image_name.=$wine_image_array[$j]['image'].",";
             }
             $image_name=rtrim($image_name,",");
-            //echo "<pre>";
-            //print_r($wine_image_array);die;
+   
             $wine_array[$i]['images']=$image_name;
             $image_name='';
             if($user_id!='')
@@ -423,11 +443,8 @@ class Job_model extends CI_Model {
             }
         }
         $jobdetails[0]['wine_details']=$wine_array;
-        // echo "<pre>";
-        // print_r($jobdetails);die;
         return $jobdetails;
     }
-
     function get_confirm_status($tablename,$user_id,$job_id,$wine_id)
     {
         $this->db->select('confirm_status');
@@ -508,31 +525,57 @@ class Job_model extends CI_Model {
     //Get all Jobs from admin end
     public function get_job_list($filter = array(), $order = null, $dir = null, $count = false) {
        
-  
-        // echo "<pre>";
-        // print_r($filter);die;
-        $this->db->select("job.*,store.name as store_name, store.adress as address, store.state as state, store.city as city, store.zipcode as zipcode,  CONCAT(u1.last_name,' ',u1.first_name) as SalesRepName, CONCAT(u2.last_name,' ',u2.first_name) as TasterName, CONCAT(u3.last_name,' ',u3.first_name) as AgencyTasterName, job_rating.rating as rating");
-        // $this->db->select("job.*,store.name as store_name, store.adress as address, store.state as state, store.city as city, store.zipcode as zipcode, CONCAT(u2.last_name,' ',u2.first_name) as TasterName, CONCAT(u3.last_name,' ',u3.first_name) as AgencyTasterName, job_rating.rating as rating");
+        if ($count) {
+            $this->db->select("job.id");
+        }else{
+            if (isset($filter['search_by_rating']) && $filter['search_by_rating'] != "~" && $filter['search_by_rating'] != "") {
+                $this->db->select("job.*,store.name as store_name, store.adress as address, store.state as state, store.city as city, store.zipcode as zipcode,  CONCAT(u1.last_name,' ',u1.first_name) as SalesRepName, CONCAT(u2.last_name,' ',u2.first_name) as TasterName, CONCAT(u3.last_name,' ',u3.first_name) as AgencyTasterName, job_rating.rating as rating");
+            }else{
+                $this->db->select("job.*,store.name as store_name, store.adress as address, store.state as state, store.city as city, store.zipcode as zipcode,  CONCAT(u1.last_name,' ',u1.first_name) as SalesRepName, CONCAT(u2.last_name,' ',u2.first_name) as TasterName, CONCAT(u3.last_name,' ',u3.first_name) as AgencyTasterName");
+            }
+        }
+
         $this->db->from('job');
         $this->db->join('store','job.store_id=store.id','left');
-        // $this->db->join('users as u1', 'u1.id = job.user_id', 'left');
-        $this->db->join('users as u1','find_in_set(u1.id,job.user_id)<> 0','left',false);
+        $this->db->join('users as u1', 'u1.id = job.user_id', 'left');
+        // $this->db->join('users as u1','find_in_set(u1.id,job.user_id)<> 0','left',false);
         $this->db->join('users as u2', 'u2.id = job.taster_id', 'left');
         $this->db->join('users as u3', 'u3.id = job.agency_taster_id', 'left');
-        $this->db->join('job_rating', 'job_rating.job_id = job.id', 'left');
+        // $this->db->join('job_rating', 'job_rating.job_id = job.id', 'left');
+        if (isset($filter['search_by_rating']) && $filter['search_by_rating'] != "~" && $filter['search_by_rating'] != "") {
+            $this->db->join('job_rating', 'job_rating.job_id = job.id');
+        }
         if (isset($filter['search_text']) && $filter['search_text'] != "~" && $filter['search_text'] != "") {
             $this->db->join('user_meta agency_name','u2.id=agency_name.user_id', 'left outer');
         }
-
+        
         //$this->db->order_by('job.id','DESC');
         // $this->db->order_by('job.tasting_date','DESC');
         
         $this->db->where('job.is_deleted',0);
-        // $this->db->where('job.is_archived',0);
        // $this->db->where('job.job_status',1);
-        if (isset($filter['tasting_date']) && $filter['tasting_date'] != "~" && $filter['tasting_date']!="") {
-            $this->db->where('job.tasting_date', $filter['tasting_date']);
-        }
+       
+        // if (isset($filter['tasting_date']) && $filter['tasting_date'] != "~" && $filter['tasting_date']!="") {
+        //     $this->db->where('job.tasting_date', $filter['tasting_date']);
+        // }
+
+        if (($filter['from_date']!= '' || $filter['from_date'] != "~") && ($filter['to_date'] != "~" && $filter['to_date']!="")){
+
+            // From date To date....
+            if (isset($filter['from_date']) && $filter['from_date'] != "~" && $filter['from_date']!="") {
+              $this->db->where('job.tasting_date >=', $filter['from_date']);
+          }
+            if (isset($filter['to_date']) && $filter['to_date'] != "~" && $filter['to_date']!="") {
+            
+                $this->db->where('job.tasting_date <=', $filter['to_date']);
+            }
+         }else{
+            if (isset($filter['from_date']) && $filter['from_date'] != "~" && $filter['from_date']!="") {
+                // $this->db->where('job.tasting_date', $filter['from_date']);
+                $this->db->where('job.tasting_date >=', $filter['from_date']);
+            }
+    }
+
         if (isset($filter['taster']) && $filter['taster'] != "~" && $filter['taster'] !="") {
             $taster_id=$filter['taster'];
             $taster_id_array=explode("@",$taster_id);
@@ -545,9 +588,11 @@ class Job_model extends CI_Model {
             
         }
         if (isset($filter['sales_rep']) && $filter['sales_rep'] != "~" && $filter['sales_rep'] != "") {
+            
             // $this->db->where('job.user_id', $filter['sales_rep']);
-            // $this->db->where("FIND_IN_SET('job.user_id','2606')",null,false);
-            $this->db->where("FIND_IN_SET(".$filter['sales_rep'].",job.user_id) !=", 0);
+            // $this->db->where("FIND_IN_SET(".$filter['sales_rep'].",job.user_id) !=", 0);
+            $qr = "CONCAT(',', job.user_id, ',') LIKE '%,".(int)$filter['sales_rep'].",%'";
+             $this->db->where($qr);
             
         }
         if (isset($filter['search_by_rating']) && $filter['search_by_rating'] != "~" && $filter['search_by_rating'] != "") {
@@ -612,15 +657,12 @@ class Job_model extends CI_Model {
 
            if($filter['search_by_status']=="outOfRangeStart")
            {
-               $outofRange = array(1,3);
+                $outofRange = array(1,3);
                 $this->db->where('job.job_status',4);
                 $this->db->where('job.accept_status',1);
                 $this->db->where('job.status','problems');
                 // $this->db->where('job.is_out_of_range',1);
-                // $this->db->where('job.is_out_of_range',3);
-                
                 $this->db->where_in('job.is_out_of_range',$outofRange);
-                // $this->db->where('job.is_out_of_range <>',3);
                 $this->db->where('job.job_state <>','0');
            }
 
@@ -678,11 +720,11 @@ class Job_model extends CI_Model {
         if (isset($filter['entry_date']) && $filter['entry_date'] != "~" && $filter['entry_date'] != "") {
             $this->db->where("DATE_FORMAT(job.created_on,'%Y-%m-%d')", $filter['entry_date']);
         }
-        
         if (isset($filter['search_text']) && $filter['search_text'] != "~" && $filter['search_text'] != "") {
+            // $searchText=base64_decode($filter['search_text']);
             $search_value=base64_decode($filter['search_text']);
-            $searchText = str_replace("'","\'", $search_value); 
-
+            $searchText = str_replace("'","\'", $search_value);
+            
             if($searchText=="n/a" || $searchText=="n/" || $searchText=="N/A" || $searchText=="N/" )
             {
                 $this->db->where('job.agency_taster_id','');
@@ -718,227 +760,35 @@ class Job_model extends CI_Model {
  
         $this->db->group_by("job.id");
         $query = $this->db->get();
-        // print_r($this->db->last_query());die;
-        $arr=$query->result();
-     
-        return $arr;
-    }
+        $job_arr=$query->result();
 
+        $job_list = array();
 
-    /*
-    //Get all Jobs from admin end
-    public function get_job_list($filter = array(), $order = null, $dir = null, $count = false) {
-        // echo "<pre>";
-        // print_r($filter);die;
-        $this->db->select("job.*,store.name as store_name, store.adress as address, store.state as state, store.city as city, store.zipcode as zipcode,  CONCAT(u1.last_name,' ',u1.first_name) as SalesRepName, CONCAT(u2.last_name,' ',u2.first_name) as TasterName, CONCAT(u3.last_name,' ',u3.first_name) as AgencyTasterName, job_rating.rating as rating");
-        $this->db->from('job');
-        $this->db->join('store','job.store_id=store.id','left');
-        $this->db->join('users as u1', 'u1.id = job.user_id', 'left');
-        $this->db->join('users as u2', 'u2.id = job.taster_id', 'left');
-        $this->db->join('users as u3', 'u3.id = job.agency_taster_id', 'left');
-        $this->db->join('job_rating', 'job_rating.job_id = job.id', 'left');
-        if (isset($filter['search_text']) && $filter['search_text'] != "~" && $filter['search_text'] != "") {
-            $this->db->join('user_meta agency_name','u2.id=agency_name.user_id', 'left outer');
-        }
-        
-        
-        
-        //$this->db->order_by('job.id','DESC');
-        // $this->db->order_by('job.tasting_date','DESC');
-        
-        $this->db->where('job.is_deleted',0);
-       // $this->db->where('job.job_status',1);
-        if (isset($filter['tasting_date']) && $filter['tasting_date'] != "~" && $filter['tasting_date']!="") {
-            $this->db->where('job.tasting_date', $filter['tasting_date']);
-        }
-        if (isset($filter['taster']) && $filter['taster'] != "~" && $filter['taster'] !="") {
-            $taster_id=$filter['taster'];
-            $taster_id_array=explode("@",$taster_id);
-           
-            $this->db->where_in('job.taster_id', $taster_id_array);
-        }
-        if (isset($filter['store']) && $filter['store'] != "~" && $filter['store'] != "") {
+        foreach ($job_arr as $key => $value){
             
-            $this->db->where('job.store_id', $filter['store']);
-            
-        }
-        if (isset($filter['sales_rep']) && $filter['sales_rep'] != "~" && $filter['sales_rep'] != "") {
-            
-            $this->db->where('job.user_id', $filter['sales_rep']);
-            
-        }
-        if (isset($filter['search_by_rating']) && $filter['search_by_rating'] != "~" && $filter['search_by_rating'] != "") {
-            
-            $this->db->where('job_rating.rating', $filter['search_by_rating']);
-            
-        }
-        if (isset($filter['search_by_status']) && $filter['search_by_status'] != "~" && $filter['search_by_status'] != "") {
-            
-            if($filter['search_by_status']=="pre_assigned" || $filter['search_by_status']=="")
-           {
-                $this->db->where('job.job_status',1);
-           }
-           if($filter['search_by_status']=="assigned")
-           {
-                $this->db->where('job.job_status',2);
-                $this->db->where('job.status <>','rejected');
-                // $this->db->order_by('job.updated_on','DESC');
-           }
-           if($filter['search_by_status']=="accepted")
-           {
-            if (isset($filter['status'])) {
- 
-                $job_status=$filter['status'];
-                 if($job_status=="problems"){
-                   $this->db->where('job.job_status',4);
-                   $this->db->where('job.accept_status',1);
-                   $this->db->where('job.status','problems');
-                   $this->db->where('job.job_state','0');
-                   $this->db->where('job.is_out_of_range <>',2);
-                   $this->db->where('job.is_out_of_range <>',1);
-                 }else{
-                   $this->db->where('job.job_status',3);
-                   $this->db->where('job.accept_status',1);
-                   $this->db->where('job.status <>','completed');
-                   $this->db->where('job.status <>','cancelled');
-                 }
-            } 
-           }
-
-           if($filter['search_by_status']=="canceled")
-           {
-                $this->db->where('job.job_status',3);
-                $this->db->where('job.accept_status',1);
-                $this->db->where('job.status','cancelled');
-                // $this->db->order_by('job.updated_on','DESC');
-           }
-
-           if($filter['search_by_status']=="completed")
-           {
-                $this->db->where('job.job_status',3);
-                $this->db->where('job.accept_status',1);
-                $this->db->where('job.status','completed');
-                // $this->db->order_by('job.updated_on','DESC');
-           }
-
-           if($filter['search_by_status']=="rejected")
-           {
-                $this->db->where('job.job_status',2);
-                $this->db->where('job.accept_status',0);
-                $this->db->where('job.status','rejected');
-                // $this->db->order_by('job.updated_on','DESC');
-           }
-
-           if($filter['search_by_status']=="outOfRangeStart")
-           {
-                $this->db->where('job.job_status',4);
-                $this->db->where('job.accept_status',1);
-                $this->db->where('job.status','problems');
-                $this->db->where('job.is_out_of_range',1);
-                $this->db->where('job.job_state <>','0');
-                // $this->db->order_by('job.updated_on','DESC');
-           }
-
-           if($filter['search_by_status']=="outOfRangeEnd")
-           {
-                $this->db->where('job.job_status',4);
-                $this->db->where('job.accept_status',1);
-                $this->db->where('job.status','problems');
-                $this->db->where('job.is_out_of_range',2);
-                // $this->db->order_by('job.updated_on','DESC');
-                $this->db->where('job.job_state <>','0');
-           }
-
-           if($filter['search_by_status']=="notCompleted")
-           {
-                $this->db->where('job.job_status',4);
-                $this->db->where('job.accept_status',1);
-                $this->db->where('job.status','problems');
-                $this->db->where('job.is_out_of_range <>',2);
-                $this->db->where('job.is_out_of_range <>',1);
-                // $this->db->order_by('job.updated_on','DESC');
-                $this->db->where('job.job_state <>','0');
-           }
-            
-        }
-
-        if (isset($filter['sort_by_date']) && $filter['sort_by_date'] != "~" && $filter['sort_by_date']!="") {
-        
-            if($filter['sort_by_date']=='entryDate'){
-                $this->db->order_by('job.created_on','DESC');
-
-            }else{
-                $this->db->order_by('job.tasting_date','DESC');
+            if (!(isset($filter['search_by_rating']) && $filter['search_by_rating'] != "~" && $filter['search_by_rating'] != ""))
+            {
+                $this->db->select("job_rating.rating as rating");
+                $this->db->from('job_rating');
+    
+                $this->db->where('job_rating.job_id',$value->id);
+                $this->db->where('job_rating.is_deleted',0);
+                $this->db->order_by('job_rating.id','DESC');
+                $rating = $this->db->get();
                 
+                $result_rating = $rating->row();
+                if (isset($result_rating->rating)) {
+                    $value->rating = $result_rating->rating;
+                }else{
+                    $value->rating = 'N/A'; 
+                }
             }
-        }else{
-            $this->db->order_by('job.created_on','DESC');
+  
+            array_push($job_list,$value);
+     
         }
-
-
-        if (isset($filter['entry_date']) && $filter['entry_date'] != "~" && $filter['entry_date'] != "") {
-            $this->db->where("DATE_FORMAT(job.created_on,'%Y-%m-%d')", $filter['entry_date']);
-        }
-        if (isset($filter['search_text']) && $filter['search_text'] != "~" && $filter['search_text'] != "") {
-            $searchText=base64_decode($filter['search_text']);
-            //$searchText=$filter['search_text'];
-            if($searchText=="n/a" || $searchText=="n/" || $searchText=="N/A" || $searchText=="N/" )
-            {
-                $this->db->where('job.agency_taster_id','');
-            }else{
-                $this->db->where("( (store.name LIKE '%$searchText%') OR (store.adress LIKE '%$searchText%') OR (store.state LIKE '%$searchText%') OR (store.city LIKE '%$searchText%') OR (store.zipcode LIKE '%$searchText%') OR (CONCAT(u1.last_name,' ',u1.first_name) LIKE '%$searchText%') OR (CONCAT(u2.last_name,' ',u2.first_name) LIKE '%$searchText%') OR (CONCAT(u3.last_name,' ',u3.first_name) LIKE '%$searchText%') OR (agency_name.meta_value LIKE '%$searchText%'))");
-            }
-        }
-
-        if (isset($filter['status'])) {
-            $job_status=$filter['status'];
-            if($job_status=="problems")
-            {
-                 $this->db->where('job.job_status',4);
-            }else{
-                 $this->db->where('job.job_status <>',4);
-            }
-         }
-         else
-         {
-             $this->db->where('job.job_status <>',4);
-         }
-         
-        if ($count) {
-            $this->db->group_by("job.id");
-            return $this->db->count_all_results();
-        }
-        if ( (isset($filter['limit']) && $filter['limit'] > 0) && (isset($filter['offset']) ) ) {
-            $this->db->limit($filter['limit'], $filter['offset']);
-        }
-        if ($order <> null) {
-            $this->db->order_by($order, $dir);
-        } 
-       
-
-        $this->db->group_by("job.id");
-        $query = $this->db->get();
-        //print_r($this->db->last_query());
-        $arr=$query->result();
-        //reconstruct array for rejected job
-        // $reconstruct_array=array();
-        // foreach($arr as $v)
-        // {
-        //     if($v->status=='rejected')
-        //     {
-        //         array_push($reconstruct_array,$v);
-        //     }
-        // }
-        // foreach($arr as $m)
-        // {
-        //     if($m->status!='rejected')
-        //     {
-        //         array_push($reconstruct_array,$m);
-        //     }
-        // }
-        // return $reconstruct_array;
-        return $arr;
-    }*/
+        return $job_list;
+    }
     
     //Get all Billing from admin end
 
@@ -1009,7 +859,6 @@ class Job_model extends CI_Model {
             return $this->db->count_all_results();
         }
     
-        // print_r($filter['limit']);die;
         if ( (isset($filter['limit']) && $filter['limit'] > 0) && (isset($filter['offset']) ) ) {
             $this->db->limit($filter['limit'], $filter['offset']);
         }
@@ -1025,55 +874,10 @@ class Job_model extends CI_Model {
         return $query->result();
     }
 
-//     public function get_billing_list($filter = array(), $order = null, $dir = null, $count = false) {
-//         //print_r($filter);die;
-//         $this->db->select("job.*,expense_details.date as billing_date,expense_details.exp_amount,CONCAT(last_name, ' ',first_name) as taster_name,user_meta.meta_value as account_no,store.name as store_name");
-//         $this->db->from('job');
-//         $this->db->join('expense_details','job.id=expense_details.job_id');
-//         $this->db->join('users','expense_details.taster_id=users.id');
-//         $this->db->join('user_meta','expense_details.taster_id=user_meta.user_id');
-// 		$this->db->join('store','job.store_id=store.id','left');
-//         if ( isset($filter['field']) && $filter['field'] <> "" ) {
-//             //Search using wine flavour
-            
-//             /*$this->db->where('store.wine_sell_type',$filter['field']);*/
-//             $this->db->join('completed_job_wine_details','job.id=completed_job_wine_details.job_id','left');
-//             $this->db->join('wine','completed_job_wine_details.wine_id=wine.id','left');
-//             $this->db->where('wine.flavour',$filter['field']);
 
-//         }
-//         $this->db->order_by('job.id','DESC');
-        
-//         $this->db->where('job.is_deleted',0);
-//         $this->db->where('job.ready_for_billing',1);
-//         $this->db->where('job.is_archived',0);
-//         $this->db->where('user_meta.meta_key','manual_account_number');
-//         if ($count) {
-//             $this->db->order_by('updated_on ASC');
-//             $this->db->group_by("job.id");
-//             return $this->db->count_all_results();
-//         }
-//         if ( (isset($filter['limit']) && $filter['limit'] > 0) && (isset($filter['offset']) ) ) {
-//             $this->db->limit($filter['limit'], $filter['offset']);
-//         }
-//         if ($order <> null) {
-//             $this->db->order_by($order, $dir);
-//         } else {
-//             $this->db->order_by('updated_on ASC');
-//         }
-//         $this->db->group_by("job.id");
-//         $query = $this->db->get();
-//        // echo $this->db->last_query()."<br>";die;
-// //echo "<pre>";
-//         //print_r($query->result());die;
-//         return $query->result();
-//     }
-    
     //Get all archive
     public function get_archive_list($filter = array(), $order = null, $dir = null, $count = false) {
-        //print_r($filter);die;
-        //$this->db->select("job.*,expense_details.date as billing_date,expense_details.exp_amount,CONCAT(last_name, ' ',first_name) as taster_name,user_meta.meta_value as account_no,store.name as store_name");
-        
+ 
         $this->db->select("job.*,expense_details.date as billing_date,expense_details.exp_amount, CONCAT(u1.last_name,' ',u1.first_name) as seleRepName, CONCAT(u2.last_name,' ',u2.first_name) as taster_name, CONCAT(u3.last_name,' ',u3.first_name) as agency_taster_name ,user_meta.meta_value as account_no,store.name as store_name");
         $this->db->from('job');
         $this->db->join('expense_details','job.id=expense_details.job_id');
@@ -1128,52 +932,11 @@ class Job_model extends CI_Model {
         $this->db->group_by("job.id");
         $query = $this->db->get();
        //echo $this->db->last_query()."<br>";die;
-        
+        // echo "<pre>";
+        // print_r($query->result());die;
         return $query->result();
     }
-    // public function get_archive_list($filter = array(), $order = null, $dir = null, $count = false) {
-    //     //print_r($filter);die;
-    //     $this->db->select("job.*,expense_details.date as billing_date,expense_details.exp_amount,CONCAT(last_name, ' ',first_name) as taster_name,user_meta.meta_value as account_no,store.name as store_name");
-    //     $this->db->from('job');
-    //     $this->db->join('expense_details','job.id=expense_details.job_id');
-    //     $this->db->join('users','expense_details.taster_id=users.id');
-    //     $this->db->join('user_meta','expense_details.taster_id=user_meta.user_id');
-	// 	$this->db->join('store','job.store_id=store.id','left');
-    //     if ( isset($filter['field']) && $filter['field'] <> "" ) {
-    //         //Search using wine flavour
-    //         /*$this->db->join('store','job.store_id=store.id','left');
-    //         $this->db->where('store.wine_sell_type',$filter['field']);*/
-    //         $this->db->join('completed_job_wine_details','job.id=completed_job_wine_details.job_id','left');
-    //         $this->db->join('wine','completed_job_wine_details.wine_id=wine.id','left');
-    //         $this->db->where('wine.flavour',$filter['field']);
-
-    //     }
-
-    //     $this->db->order_by('job.id','DESC');
-        
-    //     $this->db->where('job.is_deleted',0);
-        
-    //     $this->db->where('job.is_archived',1);
-    //     $this->db->where('user_meta.meta_key','manual_account_number');
-    //     if ($count) {
-    //         $this->db->order_by('updated_on ASC');
-    //         $this->db->group_by("job.id");
-    //         return $this->db->count_all_results();
-    //     }
-    //     if ( (isset($filter['limit']) && $filter['limit'] > 0) && (isset($filter['offset']) ) ) {
-    //         $this->db->limit($filter['limit'], $filter['offset']);
-    //     }
-    //     if ($order <> null) {
-    //         $this->db->order_by($order, $dir);
-    //     } else {
-    //         $this->db->order_by('updated_on ASC');
-    //     }
-    //     $this->db->group_by("job.id");
-    //     $query = $this->db->get();
-    //    //echo $this->db->last_query()."<br>";die;
-        
-    //     return $query->result();
-    // }
+    
     
     public function get_csv($checked_id=array(),$filter = array(), $order = null, $dir = null, $count = false) {
         //Need to get an array of id's
@@ -1181,8 +944,7 @@ class Job_model extends CI_Model {
           foreach($checked_id as $val) {
              array_push($ids, $val);
           }
-          //print_r($ids);die;
-       // $this->db->select("job.*, expense_details.date as billing_date, expense_details.exp_amount,completed_job_wine_details.wine_id as sampled_and_sold_wine, CONCAT(first_name, ' ',last_name) as taster_name, user_meta.meta_value as account_no");
+      
         $this->db->select("job.id,job.store_id,job.wine_id,job.user_id,job.taster_id,job.agency_taster_id,job.updated_on,job.tasting_date, expense_details.date as billing_date, expense_details.exp_amount,completed_job_wine_details.wine_id as sampled_and_sold_wine, CONCAT(first_name, ' ',last_name) as taster_name, user_meta.meta_value as account_no");
         $this->db->from('job');
         $this->db->join('completed_job_wine_details','job.id=completed_job_wine_details.job_id');
@@ -1192,8 +954,7 @@ class Job_model extends CI_Model {
         $this->db->join('user_meta','expense_details.taster_id=user_meta.user_id');
         $this->db->order_by('job.id','DESC');
         $this->db->where_in('job.id', $ids);
-        //$this->db->where('job.is_deleted',0);
-        //$this->db->where('job.ready_for_billing',1);
+
         $this->db->where('user_meta.meta_key','manual_account_number');
         if ($count) {
             return $this->db->count_all_results();
@@ -1293,17 +1054,7 @@ class Job_model extends CI_Model {
             array_push($new_data_array,$arr);
 
         }
-        //echo "<pre>";
-        //print_r($result);die;
-        /*foreach($result as $key => $value)
-        {
-            if($result[$key]=='user_id')
-            {
-                $result[$key]='user';
-            }
-            
-            unset($result[$key]);
-        }*/
+    
         
         return $new_data_array;
     }
@@ -1311,13 +1062,7 @@ class Job_model extends CI_Model {
     {
         $id_array=explode(",",$checked_id);
 		$data = array('is_archived'=>1);
-       
-        /* foreach($id_array as $id)
-        {
-            $this->db->where('id', $id);
-            $this->db->update('job', $data); 
-        } */
-		
+  
         $this->db->where_in('id', $id_array);
         $this->db->update('job', $data);
         return $this->db->affected_rows();
@@ -1326,14 +1071,9 @@ class Job_model extends CI_Model {
     public function moved_to_billing($checked_id)
     {
         $id_array=explode(",",$checked_id);
+        $this->archive_to_billing_job_update($id_array);
+
 		$data = array('is_archived'=>0);
-       
-        /* foreach($id_array as $id)
-        {
-            $this->db->where('id', $id);
-            $this->db->update('job', $data); 
-        } */
-		
         $this->db->where_in('id', $id_array);
         $this->db->update('job', $data);
         return $this->db->affected_rows();
@@ -1388,26 +1128,6 @@ class Job_model extends CI_Model {
         $result=$this->db->get();
         return $result->row();
     }
-
-    function job_details_for_problem($id)
-    {
-     
-        $this->db->select("job.*,store.name as store_name, store.adress as store_address, general_notes.general_note, manager_verification_details.first_name, manager_verification_details.last_name, manager_verification_details.comment, manager_verification_details.signature_img");
-        $this->db->from('job');
-        $this->db->join('store','job.store_id=store.id','left');
-        $this->db->join('general_notes','job.id=general_notes.job_id','left');
-        $this->db->join('manager_verification_details','job.id=manager_verification_details.job_id','left');
-        $this->db->where('job.id',$id);
-        $result=$this->db->get()->row();
-        
-        $expenseDetails = $this->get_expense_details($id);
-        $result->expense_details = $expenseDetails; 
-        $result->manager_details = $this->get_manager_verification_details($id);
-        $result->completed_wine_details = $this->get_wines_sampled_sold_details($id);
-
-        return $result;
-    }
-
     function get_user_name($id)
     {
         $this->db->select("CONCAT(last_name, ' ',first_name) as sales_rep_name");
@@ -1553,17 +1273,13 @@ class Job_model extends CI_Model {
             //$id_string.=$id['user_id'].",";
             array_push($id_string,$id);
         }
-        //echo "<pre>";
-       //print_r($id_string);die;
-        //$id_string=rtrim($id_string,",");
+
         $this->db->select('users.*');
         $this->db->from('users');
-        //$this->db->join('user_meta','users.id=user_meta.user_id');
-        //$this->db->where('user_meta.meta_key','agency_name');
+
         if(!empty($id_string))
             $this->db->where_in('users.id',$id_string);
-        //$this->db->where('user_type','tester');
-        //$this->db->or_where('user_type','agency');
+  
         $this->db->where('users.status','active');
         $this->db->where('users.is_deleted',0);
         $this->db->where('users.created_by',7);
@@ -1582,8 +1298,7 @@ class Job_model extends CI_Model {
                 $details['agency_name']=$agency_name;
             }
         }
-        //echo "<pre>";
-        //print_r($user_details);die;
+
         return $user_details;
     }
     function get_tester_or_agency_ajax($store_id)
@@ -1597,12 +1312,12 @@ class Job_model extends CI_Model {
             $zone_id=$obj->zone;
         else
             $zone_id=0;
-        //echo $zone_id;die;
+       
         //get tester or agency id from user meta
         $this->db->select('user_id,meta_value');
         $this->db->from('user_meta');
         $this->db->where('meta_key','zone');
-        //$this->db->like('meta_value', $zone_id,'before');
+    
         $this->db->where("(meta_value LIKE '%$zone_id%')");
         $result3 = $this->db->get();
         //echo $this->db->last_query();die;
@@ -1622,15 +1337,12 @@ class Job_model extends CI_Model {
             //$id_string.=$id['user_id'].",";
             array_push($id_string,$id);
         }
-        //echo "<pre>";
-       //print_r($id_string);die;
-        //$id_string=rtrim($id_string,",");
+  
         $this->db->select('*');
         $this->db->from('users');
         if(!empty($id_string))
             $this->db->where_in('id',$id_string);
-        //$this->db->where('user_type','tester');
-        //$this->db->or_where('user_type','agency');
+  
         $this->db->where('status','active');
         $this->db->where('users.is_deleted',0);
         $this->db->where('users.created_by',7);
@@ -1638,10 +1350,9 @@ class Job_model extends CI_Model {
 		$this->db->where($qr);
         $this->db->order_by('users.last_name','ASC');
         $result_user = $this->db->get();
-       // echo $this->db->last_query();die;
+ 
         $user_details=$result_user->result_array();
-        //echo "<pre>";
-        //print_r($user_details);die;
+
         return $user_details;
     }
     function get_taster()
@@ -1657,10 +1368,9 @@ class Job_model extends CI_Model {
        $this->db->where($qr);
         $this->db->order_by('users.last_name','ASC');
         $result_user = $this->db->get();
-       // echo $this->db->last_query();die;
+     
         $user_details=$result_user->result_array();
-        //echo "<pre>";
-        //print_r($user_details);die;
+
         return $user_details;
     }
     function get_sales_rep()
@@ -1676,8 +1386,7 @@ class Job_model extends CI_Model {
         $result_user = $this->db->get();
        // echo $this->db->last_query();die;
         $user_details=$result_user->result_array();
-        // echo "<pre>";
-        // print_r($user_details);die;
+
         return $user_details;
     }
     function get_sales_rep_details($id)
@@ -1694,13 +1403,12 @@ class Job_model extends CI_Model {
         $this->db->from('user_meta');
         $this->db->where('user_id',$id);
         $this->db->where('meta_key','phone');
-        //$this->db->like('meta_value', $zone_id,'before');
+   
         $result3 = $this->db->get();
         $id_array=$result3->result_array();
         
         $user_details['meta']=$id_array;
-        //echo "<pre>";
-      // print_r($user_details);die;
+
         return $user_details;
     }
     function get_question_answers()
@@ -1721,8 +1429,7 @@ class Job_model extends CI_Model {
         $question = $this->db->get()->row();
         $question_id=$question->question_id;
         $question_id_array=explode(",",$question_id);
-        //echo "<pre>";
-        //print_r($question_id_array);die;
+
         $question_id_string=array();
         foreach($question_id_array as $id)
         {
@@ -1777,8 +1484,7 @@ class Job_model extends CI_Model {
         $this->db->from($tablename);
         $this->db->where('store_id',$store_id);
         $this->db->where('is_deleted',0);
-        //$this->db->where('start_time',$start_time);
-        //$this->db->where('end_time',$end_time);
+  
         $qr = " ( (`start_time` <= '".$start_time."' AND `end_time` >= '".$end_time."') OR (`start_time` >= '".$start_time."'  AND `start_time` <= '".$start_time."' AND `end_time` <= '".$end_time."') OR (`end_time` <= '".$end_time."' AND `end_time` >= '".$start_time."'  AND `start_time` <= '".$start_time."' ) OR (start_time >= '".$start_time."'  AND start_time <= '".$start_time."') )";
         $this->db->where($qr);
         $this->db->where('tasting_date',$tasting_date);
@@ -1792,6 +1498,7 @@ class Job_model extends CI_Model {
         return $job->num_rows();
         
     }
+
     function accept_or_reject($tablename,$job_id,$accept,$accepted_or_rejected_by)
     {
         //Get rate per hour of a taster and update the info into job table
@@ -1800,11 +1507,11 @@ class Job_model extends CI_Model {
         $this->db->where('job.id',$job_id);
         $result=$this->db->get()->row();
         
-        if($result->agency_taster_id==0)
+        if($result->agency_taster_id==0){
             $taster_id=$result->taster_id;
-        else
+        }else{
             $taster_id=$result->agency_taster_id;
-       
+        }
         
         //Calculate total amount
         $this->db->select('created_by');
@@ -1812,12 +1519,9 @@ class Job_model extends CI_Model {
         $this->db->where('users.id',$taster_id);
         $value=$this->db->get()->row();
         $created_by=$value->created_by;
-        if($created_by==7)
-        {
+        if($created_by==7) {
             $meta_key='rate_per_hour';
-        }
-        else
-        {
+        } else {
             $meta_key='tasters_rate';
         }
         $this->db->select('meta_value');
@@ -1826,12 +1530,14 @@ class Job_model extends CI_Model {
         $this->db->where('meta_key',$meta_key);
         $this->db->where('user_id',$taster_id);
         $user_meta=$this->db->get()->row();
-        if(!empty($user_meta->meta_value))
-            $rate_per_hr=$user_meta->meta_value;
-        else
-            $rate_per_hr=0;
 
-        $taster_rate_array=array('taster_rate'=>$rate_per_hr);
+        if(!empty($user_meta->meta_value)){
+            $rate_per_hr=$user_meta->meta_value;
+        }else{
+            $rate_per_hr=0;
+        }
+     
+        $taster_rate_array=array('taster_rate'=>$rate_per_hr, 'current_taster_rate'=>$rate_per_hr );
 
         //Update
         $array = array('id' => $job_id);
@@ -1839,29 +1545,26 @@ class Job_model extends CI_Model {
         $this->db->update($tablename, $taster_rate_array);
         //End
         $data=array();
-        if($accept==1)
-        {
+        if($accept==1){
             $data['accept_status']=1;
             //$data['status']='accepted';
             $data['status']='approved';
             $data['job_status']=3;
-        }
-        else
-        {
+        } else {
             $data['accept_status']=0;
         }
+
         $accept_array=array(
             'job_id'=>$job_id,
         );
-        if($accept==1)
-        {
+
+        if($accept==1){
             $accept_array['accepted_by']=$accepted_or_rejected_by;
             $data['taster_id']=$accepted_or_rejected_by;
-        }
-        else
-        {
+        } else {
             $accept_array['rejected_by']=$accepted_or_rejected_by;
         }
+
         $accept_array['date']=date("Y-m-d");
         //$array = array('id' => $job_id);
         $this->db->where($array);
@@ -1875,6 +1578,7 @@ class Job_model extends CI_Model {
             return false;
         }
     }
+
     function accept_reject_status($job_id)
     {
         //Get assigned taster id from job
@@ -1927,7 +1631,6 @@ class Job_model extends CI_Model {
             //$id_string.=$id['user_id'].",";
             array_push($accepted_id_string,$value['accepted_by']);
         }
-        //print_r($accepted_id_string);die;
         
         $this->db->select('id as user_id,first_name,last_name');
         $this->db->from('users');
@@ -2040,7 +1743,7 @@ class Job_model extends CI_Model {
         return $result->special_request;
     }
 
-     function check_tester_availablity_old($tablename,$taster_id,$tasting_date,$start_time,$end_time)
+    function check_tester_availablity_old($tablename,$taster_id,$tasting_date,$start_time,$end_time)
     {
 		
 		$this->db->select('user_type');
@@ -2071,147 +1774,10 @@ class Job_model extends CI_Model {
 		}
     }
 
-    function check_tester_availablity_new1($tablename,$taster_id,$tasting_date,$start_time,$end_time)
-    {
-
-
-        $time_one = date('A', strtotime($start_time));
-        $time_two = date('A', strtotime($end_time));
-
-        if($time_one == 'PM' && $time_two == 'AM'){
-          
-            $first_tasting_date = $tasting_date;
-            $first_start_time = $start_time;
-            $first_end_time = '24:00';
-
-            $second_tasting_date = date('Y-m-d', strtotime('1 day', strtotime($tasting_date)));
-            $second_start_time = '00:00';
-            $second_end_time = $end_time;
-
-            $this->db->select('user_type');
-            $this->db->from('users');
-            $this->db->where('users.id',$taster_id);
-            $user_type=$this->db->get()->row()->user_type;
-
-            if($user_type == 'tester'){
-
-                $this->db->select('COUNT(*) as count');
-
-                $this->db->from($tablename);
-                $this->db->where('tasting_date',$first_tasting_date);
-                $this->db->where('is_deleted',0);
-                $this->db->where('status !=','completed');
-                
-                //First phase of checking
-                $where_1 = " ( (`start_time` <= '".$first_start_time."' AND `end_time` >= '".$first_end_time."')
-                OR (`start_time` >= '".$first_start_time."'  AND `start_time` <= '".$first_end_time."' AND `end_time` <= '".$first_end_time."')  
-                OR (`end_time` <= '".$first_end_time."' AND `end_time` >= '".$first_start_time."'  AND `start_time` <= '".$first_start_time."' )  
-                OR (start_time >= '".$first_start_time."'  AND start_time <= '".$first_end_time."') )";
-                $this->db->where($where_1);
-    
-                $this->db->where('taster_id',$taster_id);
-                $result=$this->db->get()->row();
-                $first_count = $result->count;
-
-
-                $this->db->select('COUNT(*) as count');
-
-                $this->db->from($tablename);
-                $this->db->where('tasting_date',$second_tasting_date);
-                $this->db->where('is_deleted',0);
-                $this->db->where('status !=','completed');
-                
-                //First phase of checking
-                $where_1 = " ( (`start_time` <= '".$second_start_time."' AND `end_time` >= '".$second_end_time."')
-                OR (`start_time` >= '".$second_start_time."'  AND `start_time` <= '".$second_end_time."' AND `end_time` <= '".$second_end_time."')  
-                OR (`end_time` <= '".$second_end_time."' AND `end_time` >= '".$second_start_time."'  AND `start_time` <= '".$second_start_time."' )  
-                OR (start_time >= '".$second_start_time."'  AND start_time <= '".$second_end_time."') )";
-                $this->db->where($where_1);
-    
-                $this->db->where('taster_id',$taster_id);
-                $result=$this->db->get()->row();
-                // echo $this->db->last_query();die;
-                $second_count = $result->count;
-
-                return $second_count + $first_count;
-            }else{
-                return 0;
-            }
-
-        }else{
-
-            // echo $end_time;die;
-            if($start_time < 3){
-
-                $previous_tasting_date = date('Y-m-d', strtotime('-1 day', strtotime($tasting_date)));
-
-                $this->db->select('user_type');
-                $this->db->from('users');
-                $this->db->where('users.id',$taster_id);
-                $user_type=$this->db->get()->row()->user_type;
-    
-                if($user_type == 'tester'){
-    
-                    $this->db->select('COUNT(*) as counta');
-    
-                    $this->db->from($tablename);
-                    $this->db->where('tasting_date',$previous_tasting_date);
-                    $this->db->where('is_deleted',0);
-                    $this->db->where('status !=','completed');
-                    
-                    //First phase of checking
-                    $where_1 = " ( (`start_time` <= '".$start_time."' AND `start_time` >= '03:00')
-                    OR (`end_time` >= '".$start_time."' AND `end_time` <= '03:00') )";
-                    $this->db->where($where_1);
-        
-                    $this->db->where('taster_id',$taster_id);
-                    $result=$this->db->get()->row();
-
-                    // echo $this->db->last_query();die;
-                    $counta = $result->counta;
-
-                    return $counta;
-                }else{
-                    return 0;
-                }
-                
-            }else{ 
-
-                $this->db->select('user_type');
-                $this->db->from('users');
-                $this->db->where('users.id',$taster_id);
-                $user_type=$this->db->get()->row()->user_type;
-                if($user_type == 'tester'){
-                    $this->db->select('COUNT(*) as count');
-                    //$this->db->select('*');
-                    $this->db->from($tablename);
-                    $this->db->where('tasting_date',$tasting_date);
-                    $this->db->where('is_deleted',0);
-                    $this->db->where('status !=','completed');
-                    
-                    //First phase of checking
-                    $where_1 = " ( (`start_time` <= '".$start_time."' AND `end_time` >= '".$end_time."')
-                    OR (`start_time` >= '".$start_time."'  AND `start_time` <= '".$end_time."' AND `end_time` <= '".$end_time."')  
-                    OR (`end_time` <= '".$end_time."' AND `end_time` >= '".$start_time."'  AND `start_time` <= '".$start_time."' )  
-                    OR (start_time >= '".$start_time."'  AND start_time <= '".$end_time."') )";
-                    $this->db->where($where_1);
-        
-                    $this->db->where('taster_id',$taster_id);
-        
-                    $result=$this->db->get()->row();
-                    // echo $this->db->last_query();die;
-                    return $result->count;
-                }else{
-                    return 0;
-                }
-            }
-        }	
-    }
-
     function check_tester_availablity($tablename,$taster_id,$tasting_date,$start_time,$end_time)
     {
 		
-		$this->db->select('user_type');
+        $this->db->select('user_type');
         $this->db->from('users');
         $this->db->where('users.id',$taster_id);
         $user_type=$this->db->get()->row()->user_type;
@@ -2249,7 +1815,10 @@ class Job_model extends CI_Model {
 
             $tasting_nextDay = date('Y-m-d', strtotime('1 day', strtotime($job['tasting_date'])));
 
-            if($job['start_time'] > $job['end_time']) {
+            $existing_start_time_AMPM = date('A', strtotime($job['start_time']));
+            $existing_end_time_AMPM = date('A', strtotime($job['end_time']));
+
+            if($existing_start_time_AMPM == 'PM' && $existing_end_time_AMPM == 'AM') {
                 
                 $existing_start_timestamp = date('Y-m-d H:i', strtotime($job['tasting_date'].' '.$job['start_time']));
                 $existing_end_timestamp = date('Y-m-d H:i', strtotime($tasting_nextDay.' '.$job['end_time']));
@@ -2273,76 +1842,9 @@ class Job_model extends CI_Model {
 		}
     }
 
-    function check_agency_tester_availablity($tablename,$taster_id,$tasting_date,$start_time,$end_time)
-    {
-		
-		$this->db->select('user_type');
-        $this->db->from('users');
-        $this->db->where('users.id',$taster_id);
-        $user_type=$this->db->get()->row()->user_type;
-
-        $start_time_AMPM = date('A', strtotime($start_time));
-        $end_time_AMPM = date('A', strtotime($end_time));
-     
-		if($user_type == 'tester'){
-            $this->db->select('job.tasting_date,job.start_time,job.end_time,job.status');
-            $this->db->from('job');
-            $this->db->where('job.agency_taster_id',$taster_id);
-            $this->db->where('is_deleted',0);
-			// $this->db->where('status !=','completed');
-            $this->db->where('status !=','cancelled');
-            $this->db->where('status !=','rejected');
-
-            $result=$this->db->get();
-            $all_job = $result->result_array();
-
-            $nextDay = date('Y-m-d', strtotime('1 day', strtotime($tasting_date)));
-
-            if($start_time_AMPM == 'PM' && $end_time_AMPM == 'AM'){
-                $given_start_timestamp = date('Y-m-d H:i', strtotime($tasting_date.' '.$start_time));
-                $given_end_timestamp = date('Y-m-d H:i', strtotime($nextDay.' '.$end_time));
-                // echo $start_timestamp.' '.$end_timestamp;
-            }else{
-                $given_start_timestamp = date('Y-m-d H:i', strtotime($tasting_date.' '.$start_time));
-                $given_end_timestamp = date('Y-m-d H:i', strtotime($tasting_date.' '.$end_time));
-            }
-    
-
-            $count = 0;
-
-           foreach($all_job as $job) {
-
-            $tasting_nextDay = date('Y-m-d', strtotime('1 day', strtotime($job['tasting_date'])));
-
-            if($job['start_time'] > $job['end_time']) {
-                
-                $existing_start_timestamp = date('Y-m-d H:i', strtotime($job['tasting_date'].' '.$job['start_time']));
-                $existing_end_timestamp = date('Y-m-d H:i', strtotime($tasting_nextDay.' '.$job['end_time']));
-            }else{
-                $existing_start_timestamp = date('Y-m-d H:i', strtotime($job['tasting_date'].' '.$job['start_time']));
-                $existing_end_timestamp = date('Y-m-d H:i', strtotime($job['tasting_date'].' '.$job['end_time']));
-            }
-
-
-            if(($existing_start_timestamp <= $given_start_timestamp && $existing_end_timestamp >= $given_end_timestamp) || ($existing_start_timestamp >= $given_start_timestamp  && $existing_start_timestamp <= $given_end_timestamp && $existing_end_timestamp <= $given_end_timestamp) || ($existing_end_timestamp <= $given_end_timestamp && $existing_end_timestamp >= $given_start_timestamp  && $existing_start_timestamp <= $given_start_timestamp) || ($existing_start_timestamp >= $given_start_timestamp  && $existing_start_timestamp <= $given_end_timestamp)){
-
-                $count++;
-            }
-
-        }
-        // print_r($count);die;
-            return $count;
-
-		}
-        else{
-			return 0;
-		}
-    }
-
-
     function check_tester_availablity_with_jobid($jobid,$tablename,$taster_id,$tasting_date,$start_time,$end_time)
     {
-		$this->db->select('user_type');
+        $this->db->select('user_type');
         $this->db->from('users');
         $this->db->where('users.id',$taster_id);
         $user_type=$this->db->get()->row()->user_type;
@@ -2403,8 +1905,6 @@ class Job_model extends CI_Model {
 
         }
 
-			// $result=$this->db->get()->row();
-			//return $result;
 			if($count ==0){
 				return 0;
 			}else if($count ==1 && $existing_jobId == $jobid){
@@ -2417,7 +1917,7 @@ class Job_model extends CI_Model {
 		}
     }
 
-    function check_tester_availablity_with_jobid_old($jobid,$tablename,$taster_id,$tasting_date,$start_time,$end_time)
+	function check_tester_availablity_with_jobid_old($jobid,$tablename,$taster_id,$tasting_date,$start_time,$end_time)
     {
 		$this->db->select('user_type');
         $this->db->from('users');
@@ -2451,7 +1951,6 @@ class Job_model extends CI_Model {
 			return 0;
 		}
     }
-
     function get_tester_details($tester_id)
     {
         $this->db->select('users.first_name,users.email');
@@ -2460,18 +1959,15 @@ class Job_model extends CI_Model {
         $result=$this->db->get()->row();
         return $result;
     }
-
     function get_accepted_joblist($tester_id,$todays_job,$serverTime=NULL)
     {
-        // print_r($tester_id);die;
         $previous_date=date('Y-m-d', strtotime('-2 months'));
         $todays_date=date("Y-m-d");
-        $this->db->select("job.id as job_id,job.status,job.previous_taster_id,job.job_state,job.ready_for_billing, DATE_FORMAT(job.tasting_date, '%d-%m-%Y') as job_date,TIME_FORMAT(start_time, '%h:%i%p') as start_time,TIME_FORMAT(end_time, '%h:%i%p') as end_time,store.name as store_name,store.adress as address,store.suite_number  as suite_and_apt");
+        $this->db->select("job.id as job_id,job.status,job.previous_taster_id,job.job_state,job.is_deleted,job.ready_for_billing, DATE_FORMAT(job.tasting_date, '%d-%m-%Y') as job_date,TIME_FORMAT(start_time, '%h:%i%p') as start_time,TIME_FORMAT(end_time, '%h:%i%p') as end_time,store.name as store_name,store.adress as address,store.suite_number  as suite_and_apt");
         $this->db->from('job');
         $this->db->group_by('job_accept_reject.job_id');
         $this->db->join('store','job.store_id=store.id');
         $this->db->join('job_accept_reject','job.id=job_accept_reject.job_id');
-
         if(isset($todays_job) && $todays_job==1)
         {
             $this->db->where('job_accept_reject.date',$todays_date);
@@ -2480,7 +1976,7 @@ class Job_model extends CI_Model {
         //$this->db->where("(job.taster_id LIKE $tester_id)");
         $this->db->where("(job.taster_id = $tester_id OR job.agency_taster_id = $tester_id OR job.previous_taster_id = $tester_id)");
         $this->db->where('job.accept_status',1);
-        $this->db->where('job.is_deleted',0);
+        // $this->db->where('job.is_deleted',0);
         $this->db->where('job.tasting_date >=', $previous_date);
         
         $qr="(job.status='accepted' OR job.status='approved' OR job.status='completed' OR job.status='problems')";
@@ -2499,14 +1995,12 @@ class Job_model extends CI_Model {
         {
             $job_id=$value[$i]['job_id'];
             $jobDetails = $this->get_jobdetails($tester_id, $job_id);
-
             $value[$i]['job_details'] = $jobDetails;
            
         }
 
        // echo $this->db->last_query();die;
         return $value;
-
     }
 
     function cancel_job($tester_id,$job_id,$reason,$cancel_date)
@@ -2602,16 +2096,18 @@ class Job_model extends CI_Model {
         $this->db->join('store','job.store_id=store.id');
         $this->db->join('job_rating', 'job_rating.job_id = job.id', 'left');
         // $this->db->where('job.user_id',$sales_rep_id);
-        $this->db->where("FIND_IN_SET(".$sales_rep_id.",job.user_id) !=", 0);
+        // $this->db->where("FIND_IN_SET(".$sales_rep_id.",job.user_id) !=", 0);
+        $qr = "CONCAT(',', job.user_id, ',') LIKE '%,".(int)$sales_rep_id.",%'";
+        $this->db->where($qr);
+
         //$this->db->where('job.confirm_status',1);
         $this->db->where('job.status','completed');
         $this->db->where('job.is_deleted',0);
         $result=$this->db->get();
         //echo $this->db->last_query();die;
-        //return $result->result_array();
+      
         $final_result=$result->result_array();
-        //echo "<pre>";
-        //print_r($final_result);die;
+    
         for($i=0;$i<count($final_result);$i++)
         {
             //$taster_id=$final_result[$i]['taster_id'];
@@ -2621,8 +2117,7 @@ class Job_model extends CI_Model {
                 $taster_id=$final_result[$i]['taster_id'];
             }
             $taster_id_array=explode(",",$taster_id);
-            //echo "<pre>";
-            //print_r($question_id_array);die;
+        
             $taster_id_string=array();
             foreach($taster_id_array as $id)
             {
@@ -2693,22 +2188,22 @@ class Job_model extends CI_Model {
         $this->db->from('manager_verification_details');
         $this->db->where('manager_verification_details.job_id',$job_id);
         $result=$this->db->get()->result_array();
-
-        // echo "<pre>";
-        
         if(!empty($result))
         {
             $signature_img=$result[0]['signature_img'];
-            $result[0]['signature_img']=BASE_URL.DIR_SIGNATURE_IMAGE.$signature_img;
-            // $result[0]['signature_img']="https://img253.managed.center/".$signature_img;
-            // print_r($result);die;
+            if(!empty($signature_img)){
+                $result[0]['signature_img']=BASE_URL.DIR_SIGNATURE_IMAGE.$signature_img;
+                // $result[0]['signature_img']="https://img253.managed.center/".$signature_img;
+            }else{
+                $result[0]['signature_img'] = '';
+            }
+            
             return $result;
         }
         else{
                return false;
            }   
     }
-
     function submit_expense_details($expense_array)
     {
         if ($this->db->insert('expense_details', $expense_array)) {
@@ -2777,14 +2272,12 @@ class Job_model extends CI_Model {
 
         $result=$value->result_array();
         
-        if(!empty($result)){
+        if(!empty($result))
             $expense_id=$result[0]['exp_id'];
-        }else{
+        else
             $expense_id='';
-        }
-       
         //get expense images
-        // $img=array();
+        $img=array();
         if($expense_id!='')
         {
             $this->db->select('images');
@@ -2792,26 +2285,22 @@ class Job_model extends CI_Model {
             $this->db->where('expense_id',$expense_id);
             $value_image=$this->db->get();
             $result_image=$value_image->result_array();
-           
+
             $img=array();
             //BASE_URL.DIR_EXPENSE_IMAGE.
-            if(count($result_image)>0){
-                $index=-1;
-                foreach($result_image as $single_img)
-                {
-                    $img[++$index]=$single_img['images'];
-                }
-                //$img=rtrim($img,",");
-                $result[0]['support_imgs']=$img;
-            }else{
-                $result[0]['support_imgs']=$img;
+            $index=-1;
+            foreach($result_image as $single_img)
+            {
+                $img[++$index]=$single_img['images'];
             }
-           
+            //$img=rtrim($img,",");
+            $result[0]['support_imgs']=$img;
         }
-      
+        // else
+        // {
+        //     $result[0]['support_imgs']=$img;
 
-        // echo "<pre>";
-        // print_r($result);die;
+        // }
         
         unset($result[0]['id']);
         return $result;
@@ -2868,24 +2357,24 @@ class Job_model extends CI_Model {
         }
     }
     
-    function insert_tasting_setup_images($insert_id, $uploaded_pics, $tasting_type, $pic_time)
+    function insert_tasting_setup_images($insert_id, $uploaded_pics, $tasting_type,$pic_time)
     {
-    //    echo $tasting_type;die;if (empty($var))
-       if (!empty($tasting_type)){
-        $question_images_array=array(
-            'tasting_setup_id'=>$insert_id,
-            'image'=>$uploaded_pics,
-            'tasting_type'=>$tasting_type,
-            'tasting_pic_time'=>$pic_time
-        );
-       }else{
-        $question_images_array=array(
-            'tasting_setup_id'=>$insert_id,
-            'image'=>$uploaded_pics,
-            'tasting_pic_time'=>$pic_time
-        );
-       }
-        
+   
+        if(!empty($tasting_type)){
+            $question_images_array=array(
+                'tasting_setup_id'=>$insert_id,
+                'image'=>$uploaded_pics,
+                'tasting_type'=>$tasting_type,
+                'tasting_pic_time'=>$pic_time
+            );
+           }else{
+            $question_images_array=array(
+                'tasting_setup_id'=>$insert_id,
+                'image'=>$uploaded_pics,
+                'tasting_pic_time'=>$pic_time
+            );
+           }
+
         if ($this->db->insert('tasting_setup_images', $question_images_array)) {
             return $this->db->insert_id();
         } else {
@@ -2951,7 +2440,7 @@ class Job_model extends CI_Model {
                 $this->db->from('users');
                 $this->db->where('id',$taster_id);
                 $getresult=$this->db->get()->row_array();
-                //print_r($result);die;
+             
                 $result[$i]['taster_name']= $getresult['last_name'].' '.$getresult['first_name'];
                 //echo $taster_id;die;
 
@@ -2977,16 +2466,14 @@ class Job_model extends CI_Model {
             $this->db->where('wine_id',$result_wine[$i]['id']);
             $query_image=$this->db->get();
             $wine_image_array=$query_image->result_array();
-            //echo "<pre>";
-            //print_r($wine_image_array);die;
+    
             $image_name='';
             for($j=0;$j<count($wine_image_array);$j++)
             {
                 $image_name.=$wine_image_array[$j]['image'].",";
             }
             $image_name=rtrim($image_name,",");
-            //echo "<pre>";
-            //print_r($wine_image_array);die;
+     
             $result_wine[$i]['images']=$image_name;
             $image_name='';
         }
@@ -3061,9 +2548,7 @@ class Job_model extends CI_Model {
             //$id_string.=$id['user_id'].",";
             array_push($id_string,$id);
         }
-        //echo "<pre>";
-       //print_r($id_string);die;
-        //$id_string=rtrim($id_string,",");
+
         $this->db->select('*');
         $this->db->from('users');
         if(!empty($id_string))
@@ -3091,7 +2576,7 @@ class Job_model extends CI_Model {
     }
     function setInvoiceNumber($job_id){
         $job=$this->get_job_details($job_id);
-        // print_r($job);die;
+       
         if(!$job->invoice_number || ($job->invoice_number == 1)){
                 $invoice_date = date('Y-m-d H:i:s');
             //generate invoice id using tasting date
@@ -3104,21 +2589,16 @@ class Job_model extends CI_Model {
                 $this->db->where('id',$job_id);
                 $this->db->update('job',$data);
 
-                // $job=$this->get_job_details($job_id);
-                // print_r($job);die;
-            // $result=$this->db->get_where('job', array('job.tasting_date' => $job->tasting_date, 'is_deleted' => 0, 'ready_for_billing' =>1))->result_array();
-
             $this->db->select('tasting_date, is_deleted, ready_for_billing, invoice_number');
             $this->db->from('job');
             $this->db->where('job.tasting_date', $job->tasting_date);
-            //$this->db->where('job.is_deleted', 0);
+           
             $this->db->where('job.ready_for_billing = 1 OR job.invoice_number = 1');
             $value=$this->db->get();
             $result=$value->result_array();
           
             $no_of_jobs= count($result);
 
-            //echo "current job id: ".$job_id." ";
             $invoice_number='';
             $array=explode("-",$job->tasting_date);
             $invoice_id=$array[0].$array[1].$array[2];
@@ -3152,7 +2632,7 @@ class Job_model extends CI_Model {
     }
     function job_info($job_id)
     {
-        $this->db->select('tasting_date, start_time, end_time, taster_id, agency_taster_id, store_id,status, accept_status, job_state, job_status, job_start_time');
+        $this->db->select('tasting_date, start_time, end_time, taster_id, agency_taster_id, store_id,status, accept_status, job_state, job_status, job_start_time, user_id, admin_note, taster_note, wine_id');
         $this->db->from('job');
         $this->db->where('id',$job_id);
         $result=$this->db->get()->row();
@@ -3240,7 +2720,7 @@ class Job_model extends CI_Model {
     function get_more_job_info($job_id)
     {
         //echo $job_id;die;
-        $this->db->select("DATE(job.tasting_date) as sampling_date,CONCAT_WS(' ',ua.last_name,ua.first_name) as taster_name,store.name as store_name,store.zipcode as store_zipcode,store.adress as store_adress,job.start_time,job.end_time,job.job_start_time,job.finish_time,job.working_hour,job.taster_id,job.agency_taster_id,job.taster_rate,job.taster_id,CONCAT_WS(' ',ub.last_name,ub.first_name) as sales_rep_name,user_meta.meta_value as phone, job.user_id");
+        $this->db->select("DATE(job.tasting_date) as sampling_date,CONCAT_WS(' ',ua.last_name,ua.first_name) as taster_name,store.name as store_name,store.zipcode as store_zipcode,store.adress as store_adress,job.start_time,job.end_time,job.job_start_time,job.finish_time,job.working_hour,job.taster_id,job.agency_taster_id,job.taster_rate,job.taster_id,CONCAT_WS(' ',ub.last_name,ub.first_name) as sales_rep_name,user_meta.meta_value as phone, job.user_id, job.current_taster_rate, job.is_archived");
         $this->db->from('job');
         $this->db->join('users ua','job.taster_id=ua.id','left');
         $this->db->join('store','job.store_id=store.id','left');
@@ -3251,7 +2731,7 @@ class Job_model extends CI_Model {
         $result=$this->db->get()->row();
         $salesRepName = $this->get_salesrep_name($result->user_id);
         $result->sales_rep_name = $salesRepName;
-     
+        
         //Get sampling details
         $this->db->select('wine.name, wine.size ,wine.brand, completed_job_wine_details.bottles_sampled,completed_job_wine_details.open_bottles_sampled, completed_job_wine_details.bottles_sold, UOM');
         $this->db->from('completed_job_wine_details');
@@ -3269,15 +2749,14 @@ class Job_model extends CI_Model {
                 $this->db->from('users');
                 $this->db->where('users.id',$agency_taster_id);
                 $fullName=$this->db->get()->row();
-                //print_r($value);die;
+ 
                 $result->actual_taster_name=$fullName->last_name.' '.$fullName->first_name;
                // echo $result->actual_taster_name;die;
             }
-       //echo $result->taster_id;die;
+  
         //Get taster or agency name
         $user_info=$this->get_user_type('users',$result->taster_id);
-        /*echo "<pre>";
-        print_r($user_info);die;*/
+
         $user_type_1=$user_info[0]->user_type;
         //echo $user_type_1;die;
         if($user_type_1=='agency')
@@ -3286,32 +2765,13 @@ class Job_model extends CI_Model {
             //echo $agency_name;die;
             $result->taster_name=$agency_name;
         }
-        
-/*        //Calculate total amount
-        $this->db->select('created_by');
-        $this->db->from('users');
-        $this->db->where('users.id',$taster_id);
-        $value=$this->db->get()->row();
-        $created_by=$value->created_by;
-        if($created_by==7)
-        {
-            $meta_key='rate_per_hour';
+ 
+        if ($result->is_archived == '1'){
+            $rate_per_hr=$result->taster_rate;
+        }else{
+            $rate_per_hr=$result->current_taster_rate;
         }
-        else
-        {
-            $meta_key='tasters_rate';
-        }
-        $this->db->select('meta_value');
-        $this->db->from('user_meta');
-       // $this->db->where('meta_key','rate_per_hour');
-        $this->db->where('meta_key',$meta_key);
-        $this->db->where('user_id',$taster_id);
-        $user_meta=$this->db->get()->row();
-        if($user_meta)
-            $rate_per_hr=$user_meta->meta_value;
-        else
-            $rate_per_hr=0;*/
-        $rate_per_hr=$result->taster_rate;
+
         $result->rate_per_hr=$rate_per_hr;
         //Calculate job actual time difference
         $difference=strtotime($result->end_time)-strtotime($result->start_time);
@@ -3341,7 +2801,7 @@ class Job_model extends CI_Model {
             $result->expense_reason=$expense_reason;
         }
         
-    
+
         $result->expense_images = array();
         //Get expense images
         if(!empty($expense_details->exp_id)) {
@@ -3351,7 +2811,7 @@ class Job_model extends CI_Model {
             $v=$this->db->get()->result_array();
             $result->expense_images=$v;
         }
-        
+
         //Get general note
         $general_note=$this->get_general_note($job_id);
         $result->general_note=$general_note;
@@ -3359,8 +2819,7 @@ class Job_model extends CI_Model {
         //Get admin note
         $admin_note=$this->get_admin_note($job_id);
         $result->admin_note=$admin_note;
-        //echo "<pre>";
-        //print_r($result);die;
+  
         
         return $result;
     }
@@ -3401,7 +2860,6 @@ class Job_model extends CI_Model {
     }
     function get_store_for_sales_rep($sales)
     {
-        // print_r($sales);die;
         $this->db->select('*');
         $this->db->from('store');
         $qr="(store.sales_rep LIKE '%$sales%')";
@@ -3417,7 +2875,6 @@ class Job_model extends CI_Model {
 
     function get_store_for_wine_tpye($sales, $wineIds)
     {
-  
         $wineIdsarray = explode(',', $wineIds);
 
         $this->db->select('flavour');
@@ -3519,7 +2976,7 @@ class Job_model extends CI_Model {
         $this->db->from('expense_details');
         $this->db->where('job_id',$job_id);
         $expense_details=$this->db->get()->row();
-       // echo "<pre>";print_r($expense_details);die;
+       
         return $expense_details;
     }
     function get_brand()
@@ -3567,6 +3024,7 @@ class Job_model extends CI_Model {
     function get_brandwise_expense($brand, $from_date, $to_date, $taster, $agency, $store, $sales_rep, $wine_type, $size, $month, $brand_array)
     {
 
+
         //Get wine according to brand
         $this->db->select('wine.id as wine_id, wine.brand, wine.type, wine.name, wine.UOM');
         $this->db->from('wine');
@@ -3591,13 +3049,12 @@ class Job_model extends CI_Model {
         //End
         $from_date=date('Y-m-d',strtotime($from_date));
         $to_date=date('Y-m-d',strtotime($to_date));
-        // $this->db->select("job.id as job_id, job.wine_id as job_wine_id, job.tasting_date, job.working_hour, job.taster_rate, store.name as store_name, job.taster_id, job.agency_taster_id, job.user_id");
         $this->db->select("job.id as job_id, job.wine_id as job_wine_id, job.tasting_date, job.working_hour, job.taster_rate, store.name as store_name, CONCAT(users.last_name,' ',users.first_name) as sales_rep_name, job.taster_id, job.agency_taster_id, job.user_id");
         $this->db->from('job');
         $this->db->join('store','job.store_id=store.id','left');
-        // $this->db->join('users','job.user_id=users.id','left');
-        $this->db->join("users","find_in_set(job.user_id,users.id)<> 0","left",false);
-      
+        // $this->db->join('users ub','job.user_id=ub.id','left');
+        // $this->db->join("users","find_in_set(job.user_id,users.id)<> 0","left",false);
+        $this->db->join("users","job.user_id IN(users.id)<> 0","left",false);
         $this->db->where('job.tasting_date >=',$from_date);
         $this->db->where('job.tasting_date <=',$to_date);
        
@@ -3606,6 +3063,7 @@ class Job_model extends CI_Model {
         }
 
         if(count($taster)>0){
+
             $selected_tasters = implode(',', $taster);
             $this->db->where("(job.taster_id in($selected_tasters) OR job.agency_taster_id in($selected_tasters))");
         }
@@ -3614,35 +3072,15 @@ class Job_model extends CI_Model {
             $this->db->where_in('job.taster_id',$agency);
         }
 
-    //    $salesRepIds = implode(",", $sales_rep);
-    //    $salesID = array('salesID' => $salesRepId);
-    //    print_r($salesID['salesID']);die;
         if(count($sales_rep)>0){
-            
-            // FIND_IN_SET('12', category_id) OR FIND_IN_SET('13', category_id) OR FIND_IN_SET('15', category_id)
-
-            // $this->db->where("(job.taster_id = $tester_id OR job.agency_taster_id = $tester_id OR job.previous_taster_id = $tester_id)");
-  
-            // $qr="(job.status='accepted' OR job.status='approved' OR job.status='completed' OR job.status='problems')";
-           
-            // $this->db->group_start();
-            // foreach ($sales_rep as $sal){
-            //     $this->db->where("FIND_IN_SET('$sal',job.user_id) !=", 0);
-            // }
             // $this->db->where_in('job.user_id',$sales_rep);
-            // $this->db->where("FIND_IN_SET('".$salesID['salesID']."', 'job.user_id')")->findAll();;
-            // $this->db->where("FIND_IN_SET('job.user_id',".$salesID['salesID'].")",null,false);
-            // $this->db->where("FIND_IN_SET('2606',job.user_id) OR FIND_IN_SET('2832',job.user_id) !=", 0);
-            // $this->db->group_end();
-
             $sales_raw_query='';
             foreach($sales_rep as $sal){
-                $sales_raw_query.="FIND_IN_SET('$sal', job.user_id) OR ";
+                // $sales_raw_query.="FIND_IN_SET('$sal', job.user_id) OR ";
+                $sales_raw_query.="CONCAT(',', job.user_id, ',') LIKE '%,".(int)$sal.",%' OR ";
             }
             $raw_query_trim = rtrim($sales_raw_query,' OR');
             $this->db->where($raw_query_trim." !=", 0);
-            // print_r($queryTrim." !=");die;
-            // $salesQueryString = $queryTrim.')';
         }
 
         if(count($month)>0){
@@ -3652,15 +3090,14 @@ class Job_model extends CI_Model {
         $this->db->where('job.ready_for_billing',1);
         $this->db->where('job.is_deleted',0);
         $this->db->order_by('job.tasting_date','DESC');
-        
         $result=$this->db->get()->result_array();
-        
-        // echo "<pre>";
-        // print_r($result);die;
 
         $result_wine = array();
+    
         for($i=0;$i<count($result);$i++)
         {
+
+
             $job_id=$result[$i]['job_id'];
             
             $total_expense_bottles=array();
@@ -3671,6 +3108,7 @@ class Job_model extends CI_Model {
             $this->db->where('completed_job_wine_details.job_id=',$job_id);
             $total_expense_bottles=$this->db->get()->result_array();
 
+
             // From and To Date Job Result Brand Wise Toatal Sampled and Sold Bottles Details..
             $this->db->select('completed_job_wine_details.bottles_sampled, completed_job_wine_details.bottles_sold, completed_job_wine_details.open_bottles_sampled, completed_job_wine_details.wine_id,wine.brand, wine.name as wine_type, wine.UOM as wine_uom, wine.size as wine_size');
             $this->db->from('completed_job_wine_details');
@@ -3679,8 +3117,8 @@ class Job_model extends CI_Model {
             if ($this->session->userdata('role')=='brand_wise_users'){ 
                 $this->db->where_in('wine.brand',$brand_array);
             }
-
             $this->db->where('completed_job_wine_details.job_id=',$job_id);
+          
             $expense_bottles=$this->db->get()->result_array();
 
             // Toatal Expense Ammount Calculate...
@@ -3762,6 +3200,7 @@ class Job_model extends CI_Model {
               $expense_bottles[$a]['has_wine']='yes';
             
               $expense_bottles[$a]['expense_amount'] = '$'.$individual_amount;
+
 
               if(count($selected_wine_id_array)>0 && $expense_bottles[$a]['has_wine'] !='no'){
 
@@ -4068,8 +3507,7 @@ class Job_model extends CI_Model {
         $store = $this->db->get();
         $sales_rep= $store->result();
         $sales_rep_array=explode('#', $sales_rep[0]->sales_rep);
-        //print_r($sales_rep_array);die;
-        //$salesRepDetails=array();
+
         $sales_rep_details_array=array();
         foreach($sales_rep_array as $slsrp){
             $salesRepDetails=$this->get_sales_rep_details_by_id($slsrp);
@@ -4108,13 +3546,11 @@ class Job_model extends CI_Model {
         return $value;
     }
     function get_wines_sampled_sold_details($job_id){
-        // print_r($job_id);die;
         $this->db->select('wine.name,wine.id,wine.size,wine.brand, completed_job_wine_details.bottles_sampled,completed_job_wine_details.open_bottles_sampled, completed_job_wine_details.bottles_sold, wine.UOM');
         $this->db->from('completed_job_wine_details');
         $this->db->join('wine','completed_job_wine_details.wine_id=wine.id');
         $this->db->where('completed_job_wine_details.job_id',$job_id);
         $result_wine=$this->db->get()->result_array();
-
         return $result_wine;
     }
     function delete_jobs($tablename,$job_id)
@@ -4150,70 +3586,66 @@ class Job_model extends CI_Model {
     $result=$this->db->get();
     $result= $result->result_array();
     
+    $wine_id_array=array();
     $index=-1;
     for($indx=0;$indx< count($result);$indx++){
         $wine_id_array[++$index]=$result[$indx]['wine_id'];
     }
 
-    $this->db->select("wine.name,wine.id");
-    $this->db->from('wine');
-    $this->db->where_in('wine.id',$wine_id_array);
-    $this->db->order_by('wine.id','ASC');
-    $result=$this->db->get();
-    $data=$result->result_array();
-    //print_r($data);die;
-
-    $this->db->select('image,wine_id');
-    $this->db->from('wine_images');
-    $this->db->where('is_deleted',0);
-    $this->db->where_in('wine_id',$wine_id_array);
-    $this->db->order_by('wine_id','ASC');
-    $query_image=$this->db->get();
-    $query_image = $query_image->result_array();
-
-    $this->db->select('bottles_sold');
-    $this->db->select('bottles_sold,bottles_sampled,open_bottles_sampled');
-    $this->db->from('completed_job_wine_details');
-    // $this->db->where('is_deleted',0);
-    $this->db->order_by('wine_id','ASC');
-    $this->db->where('job_id',$job_id);
-    $sold_wine=$this->db->get();
-    $sold_wine=($sold_wine->result_array());
-
-    $wine_name_array=array();
-    $index=-1;
-    for($indx=0;$indx< count($data);$indx++){
-        ++$index;
-        $wine_name_array[$index]['name']=$data[$indx]['name'];
-        $wine_name_array[$index]['soldwine']=$sold_wine[$indx]['bottles_sold'];
-        $wine_name_array[$index]['usedwine']=$sold_wine[$indx]['bottles_sampled'];
-        $wine_name_array[$index]['open_bottles_sampled']=$sold_wine[$indx]['open_bottles_sampled'];
-        $wine_name_id=$data[$indx]['id'];
-
-        $wine_img_url=BASE_URL('assets/images/dummy-wine.jpg');
-        for($idx=0;$idx< count($query_image);$idx++){
-            if($wine_name_id==$query_image[$idx]['wine_id'])
-            {
-                $wine_img_url=BASE_URL.DIR_WINE_PICTURE.$query_image[$idx]['image'];
-               break;
+    if (!empty($wine_id_array)){
+        $this->db->select("wine.name,wine.id");
+        $this->db->from('wine');
+        $this->db->where_in('wine.id',$wine_id_array);
+        $this->db->order_by('wine.id','ASC');
+        $result=$this->db->get();
+        $data=$result->result_array();
+    
+        $this->db->select('image,wine_id');
+        $this->db->from('wine_images');
+        $this->db->where('is_deleted',0);
+        $this->db->where_in('wine_id',$wine_id_array);
+        $this->db->order_by('wine_id','ASC');
+        $query_image=$this->db->get();
+        $query_image = $query_image->result_array();
+    
+        $this->db->select('bottles_sold');
+        $this->db->select('bottles_sold,bottles_sampled,open_bottles_sampled');
+        $this->db->from('completed_job_wine_details');
+       
+        $this->db->order_by('wine_id','ASC');
+        $this->db->where('job_id',$job_id);
+        $sold_wine=$this->db->get();
+        $sold_wine=($sold_wine->result_array());
+    
+        $wine_name_array=array();
+        $index=-1;
+        for($indx=0;$indx< count($data);$indx++){
+            ++$index;
+            $wine_name_array[$index]['name']=$data[$indx]['name'];
+            $wine_name_array[$index]['soldwine']=$sold_wine[$indx]['bottles_sold'];
+            $wine_name_array[$index]['usedwine']=$sold_wine[$indx]['bottles_sampled'];
+            $wine_name_array[$index]['open_bottles_sampled']=$sold_wine[$indx]['open_bottles_sampled'];
+            $wine_name_id=$data[$indx]['id'];
+    
+            $wine_img_url=BASE_URL('assets/images/dummy-wine.jpg');
+            for($idx=0;$idx< count($query_image);$idx++){
+                if($wine_name_id==$query_image[$idx]['wine_id'])
+                {
+                    $wine_img_url=BASE_URL.DIR_WINE_PICTURE_THUMB.$query_image[$idx]['image'];
+                   break;
+                }
+    
             }
-
+            $wine_name_array[$index]['image']=$wine_img_url;
+    
         }
-        $wine_name_array[$index]['image']=$wine_img_url;
-        // if(count($query_image)>$indx){
-        //     $wine_name_array[$index]['image']=BASE_URL.DIR_WINE_PICTURE.$query_image[$indx]['image'];
-        //     //$wine_name_array[$index]['image']=BASE_URL.DIR_WINE_PICTURE.'expense-5122902520190124023236.jpg';
-        // }else{
-        //     $wine_name_array[$index]['image']=BASE_URL('assets/images/dummy-wine.jpg');
-        // }
+    
+        return ($wine_name_array);
+    }else{
+        return false;
     }
-    // $index=-1;C:\xampp\htdocs\wine\assets\wine\expense-5122902520190124023236.jpg
-    // for($indx=0;$indx< count($query_image);$indx++){
-    //     $wine_image_array[++$index]=BASE_URL.DIR_WINE_PICTURE.$query_image[$indx]['image'];
-    // }
-    //base_url(DIR_WINE_PICTURE.$product->image);
-    return ($wine_name_array);
-        //print_r($wine_name_array);die;
+    
+        
     }
 
 
@@ -4246,7 +3678,7 @@ class Job_model extends CI_Model {
         $this->db->join('users ub','job.user_id=ub.id','left');
         $this->db->where('job.id',$job_id);
         $result=$this->db->get()->row();
-        // print_r($result);die;
+   
         return $result;
   }
 
@@ -4260,7 +3692,6 @@ class Job_model extends CI_Model {
   $this->db->order_by('wine.id','ASC');
   $result=$this->db->get();
   $data=$result->result_array();
-  //print_r($data);die;
 
   $this->db->select('image,wine_id');
   $this->db->from('wine_images');
@@ -4290,41 +3721,12 @@ class Job_model extends CI_Model {
       $wine_name_array[$index]['image']=$wine_img_url;
      
   }
-//   echo "<pre>";
-//   print_r($wine_name_array);die;
+
   return ($wine_name_array);
       
   }
 
- 
-
-  function open_invoice($job_id){
-
-        if ($job_id) {
-            $data = array(
-               'status' => 1,
-               'job_id' => $job_id
-            );
-             $this->db->where('id',1);
-            $this->db->update('open_invoice',$data);
-            return $this->db->affected_rows();;
-        } else {
-            return false;
-        }
-}
-
-function get_invoice_status_forBilling(){
-
-
-    $this->db->select('*');
-    $this->db->from('open_invoice');
-    $this->db->where('id',1);
-    $result=$this->db->get()->row();
-    return $result;
-}
-
-
-function get_salesrep_phone($job_id){
+  function get_salesrep_phone($job_id){
     $this->db->select("job.taster_id,CONCAT_WS(' ',ub.last_name,ub.first_name) as sales_rep_name,user_meta.meta_value as phone");
     $this->db->from('job');
     $this->db->join('users ub','job.user_id=ub.id','left');
@@ -4338,6 +3740,92 @@ function get_salesrep_phone($job_id){
   
     return $result;
     
+}
+
+function job_details_for_problem($id)
+{
+ 
+    $this->db->select("job.*,store.name as store_name, store.adress as store_address, general_notes.general_note, manager_verification_details.first_name, manager_verification_details.last_name, manager_verification_details.comment, manager_verification_details.signature_img");
+    $this->db->from('job');
+    $this->db->join('store','job.store_id=store.id','left');
+    $this->db->join('general_notes','job.id=general_notes.job_id','left');
+    $this->db->join('manager_verification_details','job.id=manager_verification_details.job_id','left');
+    $this->db->where('job.id',$id);
+    $result=$this->db->get()->row();
+    
+    $expenseDetails = $this->get_expense_details($id);
+    $result->expense_details = $expenseDetails; 
+    $result->manager_details = $this->get_manager_verification_details($id);
+ 
+    $result->completed_wine_details = $this->get_wines_sampled_sold_details($id);
+
+    return $result;
+}
+
+function check_agency_tester_availablity($tablename,$taster_id,$tasting_date,$start_time,$end_time)
+{
+    
+    $this->db->select('user_type');
+    $this->db->from('users');
+    $this->db->where('users.id',$taster_id);
+    $user_type=$this->db->get()->row()->user_type;
+
+    $start_time_AMPM = date('A', strtotime($start_time));
+    $end_time_AMPM = date('A', strtotime($end_time));
+ 
+    if($user_type == 'tester'){
+        $this->db->select('job.tasting_date,job.start_time,job.end_time,job.status');
+        $this->db->from('job');
+        $this->db->where('job.agency_taster_id',$taster_id);
+        $this->db->where('is_deleted',0);
+        // $this->db->where('status !=','completed');
+        $this->db->where('status !=','cancelled');
+        $this->db->where('status !=','rejected');
+
+        $result=$this->db->get();
+        $all_job = $result->result_array();
+
+        $nextDay = date('Y-m-d', strtotime('1 day', strtotime($tasting_date)));
+
+        if($start_time_AMPM == 'PM' && $end_time_AMPM == 'AM'){
+            $given_start_timestamp = date('Y-m-d H:i', strtotime($tasting_date.' '.$start_time));
+            $given_end_timestamp = date('Y-m-d H:i', strtotime($nextDay.' '.$end_time));
+            // echo $start_timestamp.' '.$end_timestamp;
+        }else{
+            $given_start_timestamp = date('Y-m-d H:i', strtotime($tasting_date.' '.$start_time));
+            $given_end_timestamp = date('Y-m-d H:i', strtotime($tasting_date.' '.$end_time));
+        }
+
+
+        $count = 0;
+
+       foreach($all_job as $job) {
+
+        $tasting_nextDay = date('Y-m-d', strtotime('1 day', strtotime($job['tasting_date'])));
+
+        if($job['start_time'] > $job['end_time']) {
+            
+            $existing_start_timestamp = date('Y-m-d H:i', strtotime($job['tasting_date'].' '.$job['start_time']));
+            $existing_end_timestamp = date('Y-m-d H:i', strtotime($tasting_nextDay.' '.$job['end_time']));
+        }else{
+            $existing_start_timestamp = date('Y-m-d H:i', strtotime($job['tasting_date'].' '.$job['start_time']));
+            $existing_end_timestamp = date('Y-m-d H:i', strtotime($job['tasting_date'].' '.$job['end_time']));
+        }
+
+
+        if(($existing_start_timestamp <= $given_start_timestamp && $existing_end_timestamp >= $given_end_timestamp) || ($existing_start_timestamp >= $given_start_timestamp  && $existing_start_timestamp <= $given_end_timestamp && $existing_end_timestamp <= $given_end_timestamp) || ($existing_end_timestamp <= $given_end_timestamp && $existing_end_timestamp >= $given_start_timestamp  && $existing_start_timestamp <= $given_start_timestamp) || ($existing_start_timestamp >= $given_start_timestamp  && $existing_start_timestamp <= $given_end_timestamp)){
+
+            $count++;
+        }
+
+    }
+    // print_r($count);die;
+        return $count;
+
+    }
+    else{
+        return 0;
+    }
 }
 
 function get_tester($user_id)
@@ -4381,17 +3869,6 @@ function get_taster_rate($taster_id)
     }
    
     return $rate_per_hr;
-
-}
-
-function job_log_update($job_id, $log_info)
-{
-    $this->db->select('*');
-    $this->db->from('log_info');
-    $this->db->where('job_id',$job_id);
-    $value=$this->db->get();
-    
-    return $value->result_array();
 }
 
 function get_sales_rep_from_store($storeId)
@@ -4475,10 +3952,177 @@ function get_multiple_selsrep_name_email($user_id){
     $result=$this->db->get();
     $sales_rep_result=$result->result_array();
 
-       return $sales_rep_result;
+    $sales_rep_name='';
+    $sales_rep_email='';
+    foreach ($sales_rep_result as $sales){
+        $sales_rep_name.=$sales['sales_rep_name'].", ";
+        $sales_rep_email.=$sales['email'].", ";
+        
+    }
+    $sales_rep_name=rtrim($sales_rep_name,", ");
+    $sales_rep_email=rtrim($sales_rep_email,", ");
+
+    $data['sales_rep_name'] = $sales_rep_name;
+    $data['sales_rep_email'] = $sales_rep_email;
+    return $data;
     
 }
 
+function get_multiple_salesrep_phone($sales_id){
+   
+    $sales_array = explode(',', $sales_id);
+    $this->db->select('user_id,meta_key,meta_value');
+    $this->db->from('user_meta');
+    $this->db->where('user_meta.meta_key','phone');
+    $this->db->where_in('user_meta.user_id',$sales_array);
+    $query = $this->db->get();
+    $result=$query->result_array();
+    
+    if (count($result)>0){
+        $sales_rep_phone='';
+        foreach ($result as $res){
+            $sales_rep_phone.=$res['meta_value'].", ";
+        }
+        $sales_rep_phone=rtrim($sales_rep_phone,", ");
+    }
+    $data['phone'] = $sales_rep_phone;
+    
+    return $data;
+
+}
+
+function get_joblist_for_salesrep($user_id,$serverTime=NULL)
+{
+    //check user type
+    $user_info=$this->get_user_type('users',$user_id);
+    $user_type=$user_info[0]->user_type;
+    $user_created_by=$user_info[0]->created_by;
+    $this->db->select("job.id as job_id,job.status,job.previous_taster_id,job.job_state, job.is_deleted,job.ready_for_billing, DATE_FORMAT(job.tasting_date, '%d-%m-%Y') as job_date,TIME_FORMAT(start_time, '%h:%i%p') as start_time,TIME_FORMAT(end_time, '%h:%i%p') as end_time,store.name as store_name,store.adress as address,store.suite_number as suite_number,store.appartment_number as appartment_number");
+    $this->db->from('job');
+    $this->db->join('store','job.store_id=store.id');
+    if($user_type=='sales_rep')
+    {
+        // $this->db->where("FIND_IN_SET(".$user_id.",job.user_id) !=", 0);
+        $qr = "CONCAT(',', job.user_id, ',') LIKE '%,".(int)$user_id.",%'";
+        $this->db->where($qr);
+    }else {
+        if($user_created_by==7)
+        {
+            $this->db->where("(job.taster_id = $user_id OR job.previous_taster_id = $user_id)");
+            if ($serverTime !=''){
+                $this->db->where('job.updated_on >=', $serverTime);
+            }
+        }
+        else 
+        {
+            $this->db->where("(job.agency_taster_id = $user_id OR job.previous_taster_id = $user_id)");
+            if ($serverTime !=''){
+                $this->db->where('job.updated_on >=', $serverTime);
+            }
+        }
+        
+    }
+
+    $this->db->where('job.is_deleted',0);
+    $this->db->where('job.is_archived',0);
+
+    $result=$this->db->get();
+    //  echo $this->db->last_query();die;
+    $value=$result->result_array();
+
+    for($i=0;$i<count($value);$i++)
+    {
+
+        $job_id=$value[$i]['job_id'];
+        if($user_type=='sales_rep')
+        {
+            $value[$i]['rejected_by_taster']='no';
+        }
+        else
+        {
+            $job_id=$value[$i]['job_id'];
+
+            //check the job is rejected by tsater or not
+            $this->db->select('*');
+            $this->db->from('job_accept_reject');
+            $this->db->where('job_id',$job_id);
+            $this->db->where('rejected_by',$user_id);
+            $v=$this->db->get();
+            $number=$v->num_rows();
+            if($number > 0)
+            {
+                $value[$i]['rejected_by_taster']='yes';
+            }
+            else
+            {
+                $value[$i]['rejected_by_taster']='no';
+            }
+
+            $jobDetails = $this->get_jobdetails($user_id, $job_id);
+            $value[$i]['job_details'] = $jobDetails;
+        }
+    }
+    return $value;
+}
+
+function submit_feedback_answer_details($answer_details_array,$job_id)
+{
+    foreach($answer_details_array as $array)
+    {
+        $array['job_id']=$job_id;
+        $this->db->insert('feedback_answer_for_job',$array);
+    }
+    return $this->db->insert_id();
+}
+
+function get_feedback_question_answer($job_id)
+{
+
+    $this->db->select('*');
+    $this->db->from('feedback_answer_for_job');
+    $this->db->where('job_id',$job_id);
+    $result=$this->db->get();
+    $answer_array = $result->result_array();
+
+    return $answer_array;
+}
+
+function job_data_update($update_array,$job_id)
+{
+    $array=array(
+        'id'=>$job_id
+    );
+    $this->db->where($array);
+   if($this->db->update('job', $update_array)){
+       return 1;
+   }else{
+    return 0;
+   }
+}
+
+function archive_to_billing_job_update($job_ids){
+
+    $this->db->select("job.id, job.taster_id, job.agency_taster_id, job.user_id, job.current_taster_rate, job.taster_rate, job.is_archived, job.current_taster_rate");
+    $this->db->from('job');
+    $this->db->where_in('job.id',$job_ids);
+    $query=$this->db->get();
+    $result = $query->result_array();
+  
+    foreach($result as $rest){
+        if ($rest['agency_taster_id'] != 0){
+            $taster_rate = $this->get_taster_rate($rest['agency_taster_id']);
+        }else{
+            $taster_rate = $this->get_taster_rate($rest['taster_id']);
+        }
+        $job_data['current_taster_rate'] = $taster_rate;
+        $job_data['taster_rate'] = $taster_rate;
+        $this->update_job('job', 'id', $rest['id'], $job_data);
+
+    }
+
+    return 1;
+
+ } 
 
 }
 /* End of file user_model.php */

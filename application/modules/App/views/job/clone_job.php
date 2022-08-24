@@ -276,12 +276,7 @@
 			  		<div class="help-block with-errors"></div>
 			  	</div>
 		  	</div>-->
-		  	<?php
-		  		$wine_id=$job->wine_id;
-                
-                //echo $wine_id;die;
-		  		$wine_id_array=explode(",",$wine_id);
-		  	?>
+		  
 		  	<!--<div class="form-group">
 		  		<label for="inputPhone" class="col-sm-3 control-label">Select wine</label>
 		  		<div class="col-sm-7" id="wines">
@@ -296,7 +291,11 @@
 			  		<div class="help-block with-errors"></div>
 			  	</div>
 		  	</div>-->
-            
+			  
+			  <?php
+		  		$wine_id=$job->wine_id;
+		  		$wine_id_array=explode(",",$wine_id);
+		  	?>
 			<div class="form-group">
 				<label for="inputPhone" class="col-sm-3 control-label">Select Wine(s)*</label>
 				<div class="col-sm-8">
@@ -384,6 +383,9 @@ $(document).ready(function(){
 			var curYear = new Date().getFullYear();
 			var todate = curMon+'/'+curDate+'/'+curYear;
 
+			// var salesrep = $('#sales_Rep').val();
+			// alert(salesrep);
+
 			if(job_date == ''){
 				swal("Oops!", "Select a job date.", "warning");
 				return false;
@@ -418,6 +420,10 @@ $(document).ready(function(){
 			}else if(time_one == 'am' && time_two == 'am' && time1.getTime()>time2.getTime()){
 				$('#start_time_hour').focus();
 				swal("Oops!", "End time should be greater than start time.", "warning");
+				return false;
+			}else if($('#sales_Rep').val()==''){
+				$('#sales_Rep').trigger('chosen:activate');
+				swal("Oops!", "Please select a sales representative!", "warning");
 				return false;
 			}else if($('#store').val()==''){
 				$('#store').focus();

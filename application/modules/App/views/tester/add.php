@@ -133,7 +133,7 @@ input[type=submit] {
 		  	<div class="form-group">
 		  		<label for="inputEmail" class="col-sm-3 control-label">Email Address *</label>
 		  		<div class="col-sm-7">
-			  		<input type="email" name="email" class="form-control" id="inputEmail" placeholder="Enter email address" value="<?php if(isset($allinput['email'])){echo $allinput['email'];} ?>" required autocomplete="off">
+			  		<input type="email" name="email" class="form-control" id="inputEmail" placeholder="Enter email address" value="<?php if(isset($allinput['email'])){echo $allinput['email'];} ?>" autocomplete="off">
 			  		<div class="help-block with-errors"></div>
 			  	</div>
 		  	</div>
@@ -141,14 +141,16 @@ input[type=submit] {
 		  	<div class="form-group">
 		  		<label for="inputPassword" class="col-sm-3 control-label">Password *</label>
 		  		<div class="col-sm-7">
-			  		<!-- <input type="password" name="password" data-minlength="3"  class="form-control" id="inputPassword" placeholder="Enter password" required autocomplete="new-password"> -->
-					<input class="form-control" type="password" id="inputPassword" name="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" placeholder="Enter password" required>
+			  		<input type="password" name="password" data-minlength="3"  class="form-control" id="inputPassword" placeholder="Enter password" autocomplete="new-password">
+					<!-- <input class="form-control" type="password" id="inputPassword" name="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" placeholder="Enter password"> -->
 			  		<!-- <div class="help-block with-errors"></div> -->
 
-					  <div id="message">
+					<!-- <div id="message">
 					  <p >Password must contain the following:</p>
-					<div><p id="letter" class="invalid">A lowercase letter</p><p id="capital" class="invalid">A capital (uppercase) letter</p><p id="number" class="invalid">A number</p><p id="length" class="invalid">Minimum 8 characters</p></div>
-                 </div>
+						<div>
+							<p id="letter" class="invalid">A lowercase letter</p><p id="capital" class="invalid">A capital (uppercase) letter</p><p id="number" class="invalid">A number</p><p id="length" class="invalid">Minimum 8 characters</p>
+						</div>
+                 	</div> -->
 
 			  	</div>
 		  	</div>
@@ -156,7 +158,7 @@ input[type=submit] {
 		  	<div class="form-group">
 		  		<label for="inputConfirmPassword" class="col-sm-3 control-label">Confirm Password*</label>
 		  		<div class="col-sm-7">
-		  			<input type="password" name="c_password" class="form-control" id="inputConfirmPassword" data-match="#inputPassword" data-match-error="Whoops, these don't match" placeholder="Confirm password" required autocomplete="new-password">
+		  			<input type="password" name="c_password" class="form-control" id="inputConfirmPassword" data-match="#inputPassword" data-match-error="Whoops, these don't match" placeholder="Confirm password" autocomplete="new-password">
 		  			<div class="help-block with-errors"></div>
 		  		</div>
 		  	</div>
@@ -282,6 +284,7 @@ input[type=submit] {
 			  		<div class="help-block with-errors">Zone</div>
 			  	</div>
 		  	</div>
+			  
 		  	<div class="form-group">
 		  		<label for="inputPhone" class="col-sm-3 control-label">Vendor Number *</label>
 		  		<div class="col-sm-7">
@@ -289,6 +292,7 @@ input[type=submit] {
 			  		<div class="help-block with-errors">Vendor number</div>
 			  	</div>
 		  	</div>
+
 		  	<!--Set tester under any agency or not-->
 		  	<div class="form-group">
 		  		<label for="inputPhone" class="col-sm-6 control-label">Want to create a taster under agency? </label>
@@ -357,10 +361,7 @@ input[type=submit] {
     
 </script>
 <script>
-/*$('.nf').bind('keyup blur',function(){ 
-    var node = $(this);
-    node.val(node.val().replace(/[^a-z]/g,'') ); }
-);*/
+
 $("#phone").keypress(function (e) {
      //if the letter is not digit then display error and don't type anything
      if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {

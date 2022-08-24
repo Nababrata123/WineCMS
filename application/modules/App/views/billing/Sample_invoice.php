@@ -282,6 +282,30 @@
  <tr>
    <td>&nbsp;</td>
  </tr>
+  <tr>
+     <td><h2>Additional Info:</h2></td>
+  </tr>
+  <tr>
+   <td>&nbsp;</td>
+ </tr>
+  <tr>
+     <!-- <td><strong>Number of Tasters:</strong>&nbsp; <?php if($number_of_tasters == ''){ echo 'N/A'; }else{ echo $number_of_tasters;} ?></td> -->
+     <td><div class="row"><strong>Number of Tasters: </strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php if($number_of_tasters == ''){ echo 'N/A'; }else{ echo $number_of_tasters;} ?></div></td>
+   
+  </tr>
+  <tr>
+     <td><strong>Weather: </strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php if($weather == ''){ echo 'N/A'; }else{ echo $weather;} ?></td>
+  </tr>
+  <tr>
+     <td><strong>Traffic: </strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php if($traffic == ''){ echo 'N/A'; }else{ echo $traffic;} ?></td>
+  </tr>
+  <tr>
+     <td><strong>Store Environment: </strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php if($store_environment == ''){ echo 'N/A'; }else{ echo $store_environment;} ?></td>
+  </tr>
+
+ <tr>
+   <td>&nbsp;</td>
+ </tr>
 
 </table>
 </body>

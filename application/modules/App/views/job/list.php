@@ -18,18 +18,6 @@
 		<li align="pull-right">Server Time:&nbsp;<?php echo date("h.i a", time());?></li>
 	</ol>
 
-    <?php
-        $seg=$this->uri->segment(6);
-		if($seg == 'billing_success')
-		{?>
-    <div class="alert alert-success alert-dismissable">
-		<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-        <strong>Well done!</strong>
-        Job has been moved to billing successfully.
-	</div>
-    <?php } ?>
-   
-
 	<?php
 		if($this->session->flashdata('message_type')) {
 			if($this->session->flashdata('message')) {
@@ -47,17 +35,18 @@
 		$attributes = array('class' => 'form-inline search-form', 'id' => 'product-search-form', 'role' => 'form');
 		echo form_open(base_url('App/job/search_submit'), $attributes);
 	?>
+
+
 	<?php
 		if($this->uri->segment(5))
 		{
 			$seg=$this->uri->segment(5);
 	?>
-	<input type="hidden" name="status" value="<?php echo $seg;?>">
+	<input type="hidden" name="status" id="status" value="<?php echo $seg;?>">
+
 	<?php
 		}
 	?>
-
-    <!-- <div>"Succes"</div> -->
 
 <fieldset>
 	<legend><span class="glyphicon glyphicon-filter"></span> Filters</legend>
@@ -65,18 +54,35 @@
         <div class="row">
 
             <!-- For Tasting Date -->
-                <div  class="col-md-2" >
+                <!-- <div  class="col-md-2" >
                     <div class="form-group" style="width:100%;">
                         <label for="inputName">Tasting date </label><br />
                         <input type="text" class="form-control datepicker" autocomplete="off" id="inputName" name="sampling_date" placeholder="Search here" style="width:100%;" value="<?php if (isset($filters['tasting_date']) && $filters['tasting_date']!="~") {echo $filters['tasting_date'];}?>" >
                     </div>
+                </div> -->
+
+        <!-- Tasting From Date -->
+            <div class="col-sm-2">
+                <div class="form-group" style="width:100%;">
+                    <label for="inputType">Tasting date</label><br/>
+                    <input type="text" class="form-control datepicker" id="from_date" name="from_date" placeholder="Date from" autocomplete="off" style="width:100%;" value="<?php if (isset($filters['from_date']) && $filters['from_date'] != '~') {echo $filters['from_date'];}?>" >
                 </div>
+            </div> 
+
+            <!-- Tasting To Date -->
+            <div class="col-md-2">
+                <div class="form-group" style="width:100%;">
+                    <label for="inputType">&nbsp;</label><br/>
+                    <input type="text" class="form-control datepicker" id="to_date" name="to_date" placeholder="Date to" autocomplete="off" style="width:100%;" value="<?php if (isset($filters['to_date']) && $filters['to_date'] != '~') {echo $filters['to_date'];}?>" >
+                </div>
+            </div>
+
 
             <!-- For Entry Date -->
                 <div class="col-md-2">
                    <div class="form-group" style="width:100%;">
                         <label for="inputName">Entry date </label><br />
-                        <input type="text" class="form-control datepicker" id="entrydate" autocomplete="off" name="entry_date" placeholder="Search here" style="width:100%;" value="<?php if (isset($filters['entry_date']) && $filters['entry_date']!="~") {echo $filters['entry_date'];}?>" >
+                        <input type="text" class="form-control datepicker" id="entry_date" autocomplete="off" name="entry_date" placeholder="Search here" style="width:100%;" value="<?php if (isset($filters['entry_date']) && $filters['entry_date']!="~") {echo $filters['entry_date'];}?>" >
                     </div>
                 </div>
 
@@ -84,7 +90,7 @@
                 <div class="col-md-3">
                     <div class="form-group" style="width:100%;">
                         <label for="inputName">Store name </label><br />
-                        <select name="search_by_store" class="form-control"  style="width:100%">
+                        <select name="search_by_store" class="form-control"  style="width:100%" id="search_by_store">
                             <option value="">Choose store</option>
                             <?php 
                                 foreach($store as $val)
@@ -101,7 +107,7 @@
             <div class="col-sm-3">
                 <div class="form-group" style="width:100%;">
                         <label for="inputName">Sales rep </label><br />
-                        <select name="sales_rep" class="form-control"  style="width:100%">
+                        <select name="sales_rep" class="form-control"  style="width:100%" id="sales_rep">
                             <option value="">Choose sales rep</option>
                             <?php 
                                 foreach($sales_rep as $val)
@@ -113,39 +119,6 @@
                         </select>
                 </div>
             </div>
-
-                <!-- For Status Filter -->
-            <?php if( $filters['status'] == "problems"){ ?>
-                <div class="col-md-2">
-                    <div class="form-group" style="width:100%;">
-                        <label for="inputName" style="">Status</label><br />
-                        <select name="search_by_status" class="form-control"  style="width:100%">
-                        <option value="">Choose status</option>
-                        <option value="accepted" <?php if($filters['search_by_status']=="accepted"){echo "selected";}?> >Accepted</option>
-                        <option value="outOfRangeStart" <?php if($filters['search_by_status']=='outOfRangeStart'){echo "selected";}?> >Out of range start</option>
-                        <option value="outOfRangeEnd" <?php if($filters['search_by_status']=='outOfRangeEnd'){echo "selected";}?> >Out of range end</option>
-                        <!-- <option value="notCompleted" <?php if($filters['search_by_status']=='notCompleted'){echo "selected";}?> >Not completed</option>   -->
-                        <option value="notSubmitted" <?php if($filters['search_by_status']=='notSubmitted'){echo "selected";}?> >Not submitted</option>               
-                        </select>
-                    </div>
-                 </div>
-                <?php }else{ ?> 
-                    <div class="col-md-2">
-                        <div class="form-group" style="width:100%;">
-                            <label for="inputName" style="">Status</label><br />
-                            <select name="search_by_status" class="form-control"  style="width:100%">
-                            <option value="">Choose status</option>
-                            <option value="pre_assigned" <?php if($filters['search_by_status']=='pre_assigned'){echo "selected";}?> >Pre-assigned</option>
-                            <option value="assigned" <?php if($filters['search_by_status']=="assigned"){echo "selected";}?> >Assigned</option>
-                            <option value="accepted" <?php if($filters['search_by_status']=="accepted"){echo "selected";}?> >Accepted</option>
-                            <option value="completed" <?php if($filters['search_by_status']=='completed'){echo "selected";}?> >Completed</option>
-                            <option value="canceled" <?php if($filters['search_by_status']=='canceled'){echo "selected";}?> >Canceled</option>
-                            <option value="rejected" <?php if($filters['search_by_status']=='rejected'){echo "selected";}?> >Rejected</option>
-                            </select>
-                        </div>
-                    
-                    </div>
-                    <?php } ?>
              
              <!-- End First Row div -->
             </div>
@@ -160,7 +133,7 @@
             <div class="col-md-2">
                 <div class="form-group" style="width:100%;">
                     <label for="inputName" style="">Sort by date</label><br/>
-                    <select name="sort_by_date" class="form-control"  style="width:100%">
+                    <select name="sort_by_date" class="form-control"  style="width:100%" id="sort_by_date">
                     <option value="">Choose Date</option>
                     <option value="entryDate" <?php if($filters['sort_by_date']=='entryDate'){echo "selected";}?> >Entry date</option>
                     <option value="jobDate" <?php if($filters['sort_by_date']=='jobDate'){echo "selected";}?> >Job date</option>
@@ -173,7 +146,7 @@
              <div class="col-md-2">
                 <div class="form-group" style="width:100%;">
                     <label for="inputName">Rating</label><br/>
-                    <select name="search_by_rating" class="form-control"  style="width:100%">
+                    <select name="search_by_rating" class="form-control"  style="width:100%" id="search_by_rating">
                     <option value="">Choose Rating</option>
                     <option value="1" <?php if($filters['search_by_rating']==1){echo "selected";}?> >1☆</option>
                     <option value="2" <?php if($filters['search_by_rating']==2){echo "selected";}?> >2☆</option>
@@ -184,13 +157,46 @@
                 </div>
              </div>
 
+                <!-- For Status Filter -->
+             <?php if( $filters['status'] == "problems"){ ?>
+                <div class="col-md-2">
+                    <div class="form-group" style="width:100%;">
+                        <label for="inputName" style="">Status</label><br />
+                        <select name="search_by_status" class="form-control"  style="width:100%" id="search_by_status">
+                        <option value="">Choose status</option>
+                        <option value="accepted" <?php if($filters['search_by_status']=="accepted"){echo "selected";}?> >Accepted</option>
+                        <option value="outOfRangeStart" <?php if($filters['search_by_status']=='outOfRangeStart'){echo "selected";}?> >Out of range start</option>
+                        <option value="outOfRangeEnd" <?php if($filters['search_by_status']=='outOfRangeEnd'){echo "selected";}?> >Out of range end</option>
+                        <!-- <option value="notCompleted" <?php if($filters['search_by_status']=='notCompleted'){echo "selected";}?> >Not completed</option>   -->
+                        <option value="notSubmitted" <?php if($filters['search_by_status']=='notSubmitted'){echo "selected";}?> >Not submitted</option>               
+                        </select>
+                    </div>
+                 </div>
+                <?php }else{ ?> 
+                    <div class="col-md-2">
+                        <div class="form-group" style="width:100%;">
+                            <label for="inputName" style="">Status</label><br />
+                            <select name="search_by_status" class="form-control"  style="width:100%" id="search_by_status">
+                            <option value="">Choose status</option>
+                            <option value="pre_assigned" <?php if($filters['search_by_status']=='pre_assigned'){echo "selected";}?> >Pre-assigned</option>
+                            <option value="assigned" <?php if($filters['search_by_status']=="assigned"){echo "selected";}?> >Assigned</option>
+                            <option value="accepted" <?php if($filters['search_by_status']=="accepted"){echo "selected";}?> >Accepted</option>
+                            <option value="completed" <?php if($filters['search_by_status']=='completed'){echo "selected";}?> >Completed</option>
+                            <option value="canceled" <?php if($filters['search_by_status']=='canceled'){echo "selected";}?> >Canceled</option>
+                            <option value="rejected" <?php if($filters['search_by_status']=='rejected'){echo "selected";}?> >Rejected</option>
+                            </select>
+                        </div>
+                    
+                    </div>
+                    <?php } ?>
 
             <!-- For Taster -->
              <div class="col-md-3">
                 <div class="form-group" style="width:100%;">
                     <label for="inputName">Taster/Agency </label><br/>
-                    <select name="search_by_taster[]" class="form-control" multiple="multiple" style="width:100%">
-                        
+                    <select name="search_by_taster[]" class="form-control" multiple="multiple" style="width:100%" id="search_by_taster">
+                    <!-- <select name="search_by_taster[]" class="form-control" style="width:100%"> -->
+                        <!-- <option value="">Choose Rating</option> -->
                         <?php 
                         
                             $taster_id=$filters['taster'];
@@ -213,22 +219,30 @@
                     </select>
                 </div>
             </div>
-           
 
-            <div class="col-sm-3">
-                <div class="form-group" style="width:100%;">
-                </div>
-            </div> 
-         
 
-            <!-- For Search and Reset Button -->
-            <div class="col-md-2">
-                <div class="form-group" style="width:200px;">
-                    <label>&nbsp;</label><br/>
-                    <button type="submit" id="submitBtn" style="width:90px;" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span> Search</button>&nbsp;
-                    <button type="button" class="btn btn-default" style="width:89px;" onclick="window.location='<?php echo base_url('App/job');?>'"><span class="glyphicon glyphicon-refresh"></span> Reset</button>
-                </div>
+         <div class="col-md-2">
+            <div class="form-group" style="width:200px;">
+                <label>&nbsp;</label><br/>
+                <button type="submit" id="submitBtn" style="width:90px;" class="btn btn-primary" onclick="return checkValidation();"><span class="glyphicon glyphicon-search"></span> Search</button>&nbsp;
+                <button type="button" class="btn btn-default" style="width:89px;" onclick="window.location='<?php echo base_url('App/job');?>'"><span class="glyphicon glyphicon-refresh"></span> Reset</button>
             </div>
+        </div>
+
+        <div class="col-md-1">
+
+            <label>&nbsp;</label><br/>
+            <div class="form-group">
+            <select name="view" id="view" style="min-height:31px; margin:0 0 0 0; float:right; margin-left: 5px;" class="form-control">
+            <option value="10" <?php echo (isset($filters['view']) && ($filters['view'] == '10') ? 'selected' : ''); ?>>10</option>
+            <option value="20" <?php echo (isset($filters['view']) && ($filters['view'] == '20') ? 'selected' : ''); ?>>20</option>
+            <option value="50" <?php echo (isset($filters['view']) && ($filters['view'] == '50') ? 'selected' : ''); ?>>50</option>
+            <option value="100" <?php echo (isset($filters['view']) && ($filters['view'] == '100') ? 'selected' : ''); ?>>100</option>
+            <option value="500" <?php echo (isset($filters['view']) && ($filters['view'] == '500') ? 'selected' : ''); ?>>500</option>
+            </select>
+            </div>
+        </div>
+
 
            <!-- End Second Row div -->
          </div>
@@ -243,7 +257,7 @@
     <ul class="nav nav-tabs">
 		<li <?php if ($filters['status'] == "jobs" || $filters['status'] == "") {echo 'class="active"'; $filters['status'] = "";}?>><a href="<?php echo base_url('App/Job/index/status/jobs');?>">Jobs (<?php echo $jobs_count;?>)</a></li>
 	    <li <?php if ($filters['status'] == "problems") {echo 'class="active"';}?>><a href="<?php echo base_url('App/Job/index/status/problems');?>">Problem Jobs (<?php echo $count_problems;?>)</a></li>
-		<li style="float: right;">  <div class="row">
+		<li style="float: right;">  <div class="row" style="margin-right: -50px;">
                         <div class="col-md-2" style="width: 15%;">
                             <label for="inputName" style="margin-top:10px; margin-right:50px;">Search:</label><br />
                         </div>
@@ -369,24 +383,22 @@
 
                 <?php
 				
-					$ag_name;
-					$ts_name;
+					$ag_name = 'N/A';
+					$ts_name = 'N/A';
 					if($item->taster_id!=''){
+
                         $user_type=get_user_type('users',$item->taster_id);
+                        // $user_info=$this->Job_model->get_user_type('users',$item->taster_id);
+                        // $user_type=$user_info[0]->user_type;
+
 						if($user_type=='agency'){
 							$ag_name=get_agency_name('user_meta',$item->taster_id);
 							if($item->agency_taster_id != 0){
 								$ts_name = $this->Job_model->get_user_name($item->agency_taster_id);
-							}else{
-								$ts_name = 'N/A';
 							}
 						}else{
-							$ag_name = 'N/A';
 							$ts_name = $this->Job_model->get_user_name($item->taster_id);
 						}
-					}else{
-						$ag_name = 'N/A';
-						$ts_name = 'N/A';
 					}
                 ?>
                 
@@ -432,7 +444,7 @@
                     {   
                     if(($item->is_out_of_range == 1 && $item->endtime_state != 1) || ($item->is_out_of_range == 2 && $item->endtime_state != 1) || ($item->is_out_of_range == 3 && $item->endtime_state != 1)){ ?>
                    <?php if($item->is_out_of_range == 2){ ?>
-                        <a class="btn btn-warning btn-xs" style="margin:2px; width: 105px;" href="javascript:void(0)" title="map" onclick="openMap(<?php echo $item->latitude; ?>,<?php echo $item->longitude; ?>, <?php echo $item->store_id; ?> );">
+                        <a class="btn btn-warning btn-xs" style="margin:2px; width: 105px;" href="javascript:void(0)" title="map" onclick="openMap(<?php if($item->latitude != 0){ echo $item->latitude; }else{ echo $item->latitude_end;} ?>,<?php if( $item->longitude != 0){ echo $item->longitude;}else{ echo $item->longitude_end; }?>, <?php echo $item->store_id; ?> );">
                         <span style="font-size: 10px;font-weight: 600;" class=""><?php echo " Out of Range - End ";?></span></a>
                    <?php }else if($item->is_out_of_range == 1){ ?>
                         <a class="btn btn-warning btn-xs" style="margin:2px; width: 105px;" href="javascript:void(0)" title="map" onclick="openMap(<?php echo $item->latitude; ?>,<?php echo $item->longitude; ?>, <?php echo $item->store_id; ?> );">
@@ -507,8 +519,6 @@
                           <?php }?>
 	            			
 
-
-                        <!-- Problem tab hambuger button -->
                         <!-- Problem tab hambuger button  -->
                         <?php $date_now = date("Y-m-d"); ?>
                         <?php if (($filters['status'] != "problems" && $item->job_state != 2) || ($filters['status'] != "problems" && $item->endtime_state==1 && $date_now > $item->tasting_date)) { ?>
@@ -608,15 +618,13 @@
 							
                          </script>
                     </td>
-
-
                 <?php }?>
                 </tbody>
 			<tfoot>
                 <tr>
                 
                     <?php if(count($jobs) != 0){ ?> 
-                    <td colspan="8">
+                    <td colspan="12">
                         With selected
                         <button type="submit" id="dltBtn" name="operation" value="delete" class="btn btn-sm btn-danger" style="margin-top:2px; width: 75px;" onclick="return confirm('Are you sure you want to delete the job(s)?')"><span class="glyphicon glyphicon-trash"></span> Delete</button>
                     </td>
@@ -627,43 +635,9 @@
 	    </table></div>
 	<?php echo form_close();?>
 
-                <?php echo $this->pagination->create_links(); ?>
+        <?php echo $this->pagination->create_links(); ?>
 
 </div>
-
-
-<!-- Modal -->
-<!-- <div class="modal fade" id="thankyouModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                <div style="text-align: center;"><strong>JOB</strong></div>
-            </div>
-            <div class="alert alert-dismissable" style="text-align: center;     background-color: #3c763d">
-            <strong>Well done!</strong>
-            Job has been moved to billing successfully.
-	        </div>   
-        </div>
-    </div>
-</div> -->
-
-<div class="modal fade" id="thankyouModal" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Edit Data</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="fetched-data"><?php $message ?></div> 
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>	
 
 
 <!-- Modal -->
@@ -685,6 +659,7 @@
   <div class="modal-dialog modal-lg" id="mapResult"></div>
 </div>
 
+
 <!-- For loader -->
 <div class="loader_img" style="display:none;"> </div>
 <style type="text/css">
@@ -695,32 +670,59 @@
     width: 100%;
     height: 100%;
     z-index: 9999;
-    background: url(<?php echo base_url('assets/images/loader.gif'); ?>) center no-repeat #fff;
+    background: url(<?php echo base_url('assets/images/loading.gif'); ?>) center no-repeat #fff;
     opacity: .6;
   }
 </style>
 
-    <script src="<?php echo base_url();?>assets/js/sweetalert.min.js"></script> 
+<script src="<?php echo base_url();?>assets/js/sweetalert.min.js"></script> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
     <script src="<?php echo base_url()?>assets/js/chosen.jquery.js" type="text/javascript"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script> -->
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> -->
 
-    <?php if($this->session->flashdata('billing') != "") { ?>
-    <script type="text/javascript">
-        $(document).ready(function(){
-            swal("Well done!", "Job has been moved to billing successfully.", "success");
-        });
-    </script>
+    <?php
+        $seg=$this->uri->segment(6);
+		if($seg == 'billing_success')
+		{?>
+
+<script type="text/javascript">
+            $(document).ready(function(){
+                // swal("Well done!", "Job has been moved to billing successfully.", "success");
+                swal({
+                        title: "Well done!",
+                        text: "Job has been moved to billing successfully.!",
+                        type: "success",
+                        timer: 1500
+                }, function() {
+                    window.location.href = base_url+"App/Job/index/status/problems";
+                    tr.hide();
+                }); 
+            });
+            </script>
     <?php } ?>
 
-    <?php if($this->session->flashdata('job_create') != "") { ?>
+
+       <?php
+        $seg=$this->uri->segment(4);
+		if($seg == 'job_create_success') {?>
     <script type="text/javascript">
         $(document).ready(function(){
-            swal("Well done!", "Job has been created successfully.", "success");
+            swal({
+                    title: "Well done!",
+                    text: "Job has been created successfully.",
+                    type: "success",
+                    timer: 1500
+                }, function() {
+                    window.location.href = base_url+"App/job";
+                    tr.hide();
+                });
         });
     </script>
-    <?php } ?>
-
+    <?php }?>
+    
+    
     <?php if($this->session->flashdata('job_create_complete') != "") { ?>
     <script type="text/javascript">
         $(document).ready(function(){
@@ -744,11 +746,12 @@
         });
     </script>
     <?php } ?>
-    
+
     <?php if($this->session->flashdata('job_publish_success') != "") { ?>
     <script type="text/javascript">
         $(document).ready(function(){
-            swal("Oh snap!", "Job successfully published.", "success");
+            // swal("Oh snap!", "Job successfully published.", "success");
+            swal("Well done!", "Job has been created successfully.", "success");
         });
     </script>
     <?php } ?>
@@ -764,6 +767,7 @@
 <script type="text/javascript">
 
 	function openMap(latitude, longitude, store_id){
+        alert(latitude);
         if (typeof latitude === 'number' && latitude !=0 && typeof longitude === 'number' && longitude !=0 ){
             $.ajax({
                 type:'POST',
@@ -781,7 +785,7 @@
         }
 
     }
-/*	function open_modal(job_id,accepted_tester_id,pre_tester_id)
+	function open_modal(job_id,accepted_tester_id,pre_tester_id)
 	{
 		$.ajax({
 		   type:'POST',
@@ -796,7 +800,7 @@
 		    $('#myModal').modal('show');
 		   }
 		}); 
-	}*/
+	}
 	function open_activity_modal(job_id)
 	{
 		$.ajax({
@@ -840,22 +844,21 @@
         } 
         else
         {
+
           return false;
         }
     } 
-    
     function problem_one_modal(job_id,taster_id)
     {
     	// alert(job_id);
     	// alert(taster_id);
-        
     	$.ajax({
 		   type:'POST',
 		   url:"<?php echo base_url(); ?>App/job/open_problem_one_modal/",
 		   data: {job_id:job_id,taster_id:taster_id},
            beforeSend:function(){
-          jQuery('.loader_img').show();
-        },
+           jQuery('.loader_img').show();
+            },
 		   success:function(data){
 		    $("#div_result").html(data);
 		    $('#myModal').modal('show');
@@ -866,7 +869,6 @@
 		   }
 		});
     }
-
     function problem_two_modal(job_id)
     {
     	$.ajax({
@@ -888,48 +890,55 @@
 		   type:'POST',
 		   url:"<?php echo base_url(); ?>App/job/completed_job_details_view_modal/",
 		   data: {job_id:job_id},
-		   
+           beforeSend:function(){
+           jQuery('.loader_img').show();
+            },
 		   success:function(data){
 		    $("#div_result").html(data);
 		    $('#myModal').modal('show');
+            $('.loader_img').hide();
+
 		   }
 		});
     }
 
-    function open_details_modal(job_id)
-	{
-		//alert(job_id);
-		$.ajax({
-		   type:'POST',
-		   url:"<?php echo base_url(); ?>App/job/more_info/",
-		   data: {job_id:job_id},
-		   success:function(data){
-		    $("#div_result").html(data);
-		    
-		    $('#myModal').modal('show');
-		   }
-		}); 
-
-	}
-
     function edit_modal(job_id)
     {
-        
     	//alert(job_id);
     	$.ajax({
 		   type:'POST',
 		   url:"<?php echo base_url(); ?>App/job/open_edit_job_modal/",
 		   data: {job_id:job_id},
-		   
+           beforeSend:function(){
+           jQuery('.loader_img').show();
+            },
 		   success:function(data){
 		   	//alert(data);
 			//$("[data-toggle=popover]").popover('hide');
 		    $("#div_result").html(data);
 		    $('#myModal').modal('show');
+            $('.loader_img').hide();
 
 		   }
 		});
     }
+
+    // function open_details_modal(job_id)
+	// {
+	// 	//alert(job_id);
+	// 	$.ajax({
+	// 	   type:'POST',
+	// 	   url:"<?php echo base_url(); ?>App/job/more_info/",
+	// 	   data: {job_id:job_id},
+	// 	   success:function(data){
+	// 	    $("#div_result").html(data);
+		    
+	// 	    $('#myModal').modal('show');
+	// 	   }
+	// 	}); 
+
+	// }
+
     function open_sales_rep_details_modal(id)
     {
         //alert(id);
@@ -968,12 +977,14 @@
 		   type:'POST',
 		   url:"<?php echo base_url(); ?>App/job/view_setup_modal/",
 		   data: {job_id:id},
-		   
+           beforeSend:function(){
+           jQuery('.loader_img').show();
+            },
 		   success:function(data){
 		   	//alert(data);
 		    $("#div_result").html(data);
 		    $('#myModal').modal('show');
-
+            $('.loader_img').hide();
 		   }
 		});
     }
@@ -1013,7 +1024,16 @@
 				});
 				
 			} else {
-				swal("Cancelled", "Your Job is safe", "error");
+				// swal("Cancelled", "Your Job is safe", "error");
+                swal({
+                    title: "Cancelled",
+                    text: "Your Job is safe",
+                    type: "error",
+                    timer: 1500
+                }, function() {
+                    location.reload();
+                    tr.hide();
+                });
 			}
 		});
 	}
@@ -1021,13 +1041,14 @@
 
     function problem_three_modal(job_id,taster_id)
      {
-
+        // alert(job_id);
+        // alert(taster_id);
          $.ajax({
             type:'POST',
            url:"<?php echo base_url(); ?>App/job/open_problem_three_modal/",
            data: {job_id:job_id,taster_id:taster_id},
            beforeSend:function(){
-          jQuery('.loader_img').show();
+           jQuery('.loader_img').show();
             },
             success:function(data){
              $("#div_result").html(data);
@@ -1041,13 +1062,12 @@
      }
 
 </script>
+
 <link rel="stylesheet" type="text/css" href="<?php echo base_url();?>assets/css/sweetalert.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css">
 <script src="<?php echo base_url();?>assets/js/sweetalert.min.js"></script> 
 <script type="text/javascript">
-
-
 $('.datepicker').datepicker({
 
     format: 'yyyy-mm-dd',
@@ -1061,10 +1081,112 @@ function truncateDate(date) {
 </script>
 <script>
 // View page record by limit
-	$('#view').on('change', function() {
-		var view = $(this).val();
-		window.location.href = base_url+"App/job/index/view/"+view;
-	});
+$('#view').on('change', function() {
+        var view = $(this).val();
+        var search_text = $('#search_text');
+        var search_text_val = search_text.val().trim();
+        var taster = $('#search_by_taster').val();
+        var sales_rep = $('#sales_rep').val();
+        
+        var store = $('#search_by_store').val();
+        var search_by_rating = $('#search_by_rating').val();
+        var search_by_status = $('#search_by_status').val();
+        var entry_date = $('#entry_date').val();
+
+        var status = $('#status').val();
+        var from_date = $('#from_date').val();
+        var to_date = $('#to_date').val();
+        var tasting_date = $('#sort_by_date').val();
+
+        if (status == 'problems'){
+            if(search_text_val != '' || taster != null || sales_rep != '' || store != '' || search_by_rating != '' || search_by_status != '' || entry_date != '' || to_date != '' || from_date != '' || tasting_date != ''){
+                var urlParam = getQueryVariable();
+                if (urlParam == 1){
+                    var vars = window.location.href;
+                    var arrVars = vars.split("/");
+                    arrVars.splice(-4,4)
+                    var restVar = arrVars.join("/");
+                    window.location.href = restVar+"/view/"+view+"/"+"page/";
+                }else if (urlParam == 2){
+                    var vars = window.location.href;
+                    var arrVars = vars.split("/");
+                    arrVars.splice(-1,1)
+                    var restVar = arrVars.join("/");
+                    window.location.href = restVar+"/view/"+view+"/"+"page/";
+                }else{
+                    var lastSeg = window.location.href.split("/").pop();
+                    if (lastSeg == 'problems'){
+                        window.location.href = base_url+"App/job/index/status/problems/view/"+view+"/"+"page/";
+                    }else{
+                        window.location.href = window.location.href+"view/"+view+"/"+"page/";
+                    }
+                }
+                
+            }else{
+                window.location.href = base_url+"App/job/index/status/problems/view/"+view+"/"+"page/";
+            }
+        }else{
+            // alert('jobs');
+            if(search_text_val != '' || taster != null || sales_rep != '' || store != '' || search_by_rating != '' || search_by_status != '' || entry_date != '' || to_date != '' || from_date != '' || tasting_date != ''){
+                var urlParam = getQueryVariable();
+
+                if (urlParam == 1){
+                    var vars = window.location.href;
+                    var arrVars = vars.split("/");
+                    arrVars.splice(-4,4)
+                    var restVar = arrVars.join("/");
+                    alert(restVar);
+                    window.location.href = restVar+"/view/"+view+"/"+"page/";
+                    // window.location.href = window.location.href+"view/"+view
+                }else if (urlParam == 2){
+                    var vars = window.location.href;
+                    var arrVars = vars.split("/");
+                    arrVars.splice(-1,1)
+                    var restVar = arrVars.join("/");
+                    alert(restVar);
+                    window.location.href = restVar+"/view/"+view+"/"+"page/";
+                }else{
+                    alert(window.location.href.split("/").pop());
+                    var lastSeg = window.location.href.split("/").pop();
+                    if (lastSeg == 'job'){
+                        window.location.href = base_url+"App/Job/index/status/jobs/view/"+view+"/"+"page/";
+                    }else{
+                        window.location.href = window.location.href+"view/"+view+"/"+"page/";
+                    }
+                    
+                }
+            }else{
+                window.location.href = base_url+"App/Job/index/status/jobs/view/"+view+"/"+"page/";
+            }
+        }
+    });
+
+    function getQueryVariable() {
+        var query = window.location.href;
+        var vars = query.split("/");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i];
+            if (vars[i] == "view"){
+                return 1;
+            }else if (vars[i] == "page"){
+                return 2;
+            }
+        } 
+        return 0;
+    }
+
+   function checkValidation() {
+        var from_date = $('#from_date').val();
+        var to_date = $('#to_date').val();
+        if (to_date != '' && from_date == ''){
+            $('#from_date').focus();
+            return false;
+        }else{
+            return true;
+        }
+   }
+
+    
 </script>
 <script type="text/javascript" >
 
@@ -1085,4 +1207,5 @@ $(document).ready(function() {
     });
 });
 </script>
-			
+
+				

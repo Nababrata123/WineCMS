@@ -270,11 +270,13 @@ class Tester extends REST_Controller {
         $user_id = $this->get('user_id');
         $user_type = $this->get('user_type');
         
-
-
         // get the Customer details
 
         $details = $this->Tester_model->get_user_details($user_id);
+        
+        if($details->is_empty_email == 1){
+            $details->email = 'N/A';
+        }
         $created_by=$details->created_by;
         if($created_by==7)
         {

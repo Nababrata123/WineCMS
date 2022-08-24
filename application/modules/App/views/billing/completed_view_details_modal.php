@@ -273,15 +273,24 @@ select::-ms-expand {
                 <?php
 	            		$time = explode(':', $job->working_hour);
 				        $total_minutes= ($time[0]*60) + ($time[1]) + ($time[2]/60);
-				        if($job->agency_taster_id==0)
-				            $taster_id=$job->taster_id;
-				        else
-                    $taster_id=$job->agency_taster_id;
-                         $rate_per_hr=$job->taster_rate;
-                if(isset($expense_details[0]['exp_amount']))
+				        if($job->agency_taster_id==0){
+                  $taster_id=$job->taster_id;
+                } else {
+                  $taster_id=$job->agency_taster_id;
+                }
+                   
+                if ($job->is_archived == '1'){
+                  $rate_per_hr=$job->taster_rate;
+                }else{
+                  $rate_per_hr=$job->current_taster_rate;
+                }
+      
+                if(isset($expense_details[0]['exp_amount'])){
                   $exp_amount=ltrim($expense_details[0]['exp_amount'], '$');
-                  else
+                }else{
                   $exp_amount=0;
+                }
+                 
 				        $total_amount=number_format((($rate_per_hr / 60)*$total_minutes),2)+$exp_amount;
 				        
 	            	?>

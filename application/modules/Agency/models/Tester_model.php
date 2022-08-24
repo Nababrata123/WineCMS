@@ -36,6 +36,7 @@ class Tester_model extends CI_Model {
         foreach($meta as $meta_key => $meta_value) {
             if($meta_key=='zone')
             {
+                $string = '';
                 foreach($meta_value as $val)
                 {
                     $string.=$val.",";
@@ -111,7 +112,7 @@ class Tester_model extends CI_Model {
 	public function get_tester_list($filter = array(), $order = null, $dir = null, $count = false) {
 
 
-		$this->db->select('users.id, users.first_name, users.last_name, users.email, users.last_login, users.created_on, users.status');
+		$this->db->select('users.id, users.first_name, users.last_name, users.email, users.last_login, users.created_on, users.status, users.is_empty_email');
         $this->db->from('users');
         $this->db->where('users.user_type','tester');
         $this->db->where('users.is_deleted',0);
@@ -211,7 +212,7 @@ class Tester_model extends CI_Model {
     function get_tester_details($id) {
     	$id = (int) $id;
 
-        $this->db->select('users.id,  users.first_name, users.last_name, users.email, users.last_login, users.created_on, users.updated_on, users.status,  CONCAT(users_created.first_name, " ", users_created.last_name) as created_by_name, CONCAT(users_updated.first_name, " ", users_updated.last_name) as updated_by_name');
+        $this->db->select('users.id,  users.first_name, users.last_name, users.email, users.last_login, users.created_on, users.updated_on, users.status,  CONCAT(users_created.first_name, " ", users_created.last_name) as created_by_name, CONCAT(users_updated.first_name, " ", users_updated.last_name) as updated_by_name, users.is_empty_email');
         $this->db->from('users');
         
         $this->db->join('users AS users_created', 'users.created_by = users_created.id', 'left');
@@ -219,24 +220,11 @@ class Tester_model extends CI_Model {
         $this->db->where('users.id', $id);
 
         $query = $this->db->get();
-        //echo $this->db->last_query()."<br>";die;
         $result = $query->row();
-
         $result->meta = $this->get_user_meta($id);
 
         return $result;
     }
-
-    function check_assigned_job($tablename,$id)
-    {
-        $this->db->select('id');
-        $this->db->from($tablename);
-        $this->db->like('taster_id',$id,'both');
-        $result=$this->db->get();
-        $record=$result->num_rows();
-        return $record;
-    }
-
     function get_user_details($id)
     {
         $id = (int) $id;
@@ -331,6 +319,17 @@ class Tester_model extends CI_Model {
         return $val->num_rows();
     }
 
+    function check_assigned_job($tablename,$id)
+    {
+        $this->db->select('id');
+        $this->db->from($tablename);
+        $this->db->like('agency_taster_id',$id,'both');
+        $result=$this->db->get();
+        $record=$result->num_rows();
+        // print_r($record);die;
+        return $record;
+    }
+
     function delete_user_meta($tablename, $id)
     {
         $id = (int) $id;
@@ -345,24 +344,42 @@ class Tester_model extends CI_Model {
     		return false;
     	}
     }
-
-	/**
-     * Get the list of orders
-	 * 
-     * @param $filter
-     */
     
+    public function get_users_table_lastId(){
+        $this->db->select("users.id, users.email");
+        $this->db->from("users");
+        $this->db->limit(1);
+        $this->db->order_by('id',"DESC");
+        $query = $this->db->get();
+        $result = $query->row();
+        return $result;
+    }
 
-	/**
-     * Get order details
-	 * 
-     * @param $filter
-     */
-	
-	/**
-     *
-     * @param $order_id
-     */
+    public function get_users_table_lastId_for_edit(){
+        $this->db->select("users.id, users.email");
+        $this->db->from("users");
+        $this->db->limit(2);
+        $this->db->order_by('id',"DESC");
+        $query = $this->db->get();
+        $result = $query->result();
+        $res = $result[1];
+
+        return $res;
+    }
+
+    public function job_info($id)
+    {
+
+        $this->db->select('job.id, job.current_taster_rate, job.taster_rate, job.taster_id,job.agency_taster_id');
+        $this->db->from('job');
+        $this->db->where('agency_taster_id',$id);
+        $this->db->where('is_archived','0');
+        $this->db->where('is_deleted','0');
+        $query = $this->db->get();
+        $result = $query->result();
+
+        return $result;
+    }
 	
 }
 
